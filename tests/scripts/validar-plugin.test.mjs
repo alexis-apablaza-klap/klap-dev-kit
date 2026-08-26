@@ -33,6 +33,58 @@ function escribirStandard(root, { clave, obligatoriedadIndex, estadoIndex, oblig
   );
 }
 
+function escribirConfigYContrato(root, { versionContrato, versionRegistrada }) {
+  mkdirSync(path.join(root, "schemas", "knowledge-mcp"), { recursive: true });
+  writeFileSync(
+    path.join(root, "schemas", "knowledge-mcp", "tools.json"),
+    JSON.stringify({ contractVersion: versionContrato, no_lectura: [], tools: [] })
+  );
+  writeYaml(path.join(root, "config", "klap.yaml"), {
+    version: 1,
+    mcp: {
+      knowledge: { server: "klap-knowledge-local-mock", modo: "mock" },
+      atlassian: { server: "claude_ai_Atlassian" },
+    },
+    stack_soportado: {},
+    rutas: {
+      standards_index: "standards/index.yaml",
+      quality_gates: "config/quality-gates.yaml",
+      component_schema: "schemas/component.schema.json",
+      context_index_schema: "schemas/context-index.schema.json",
+      knowledge_mcp_contract: "schemas/knowledge-mcp/tools.json",
+    },
+    contratos: { knowledge_mcp: versionRegistrada },
+  });
+}
+
+test("detecta contractVersion desalineado entre tools.json y config/klap.yaml", () => {
+  const root = crearRootTemporal();
+  try {
+    mkdirSync(path.join(root, "config"), { recursive: true });
+    copyFileSync(resolveFromRoot("schemas", "klap-config.schema.json"), path.join(root, "schemas", "klap-config.schema.json"));
+    escribirConfigYContrato(root, { versionContrato: "1.0.0", versionRegistrada: "2.0.0" });
+
+    const { problemas } = validarPlugin(root);
+    assert.ok(problemas.some((p) => p.includes("contractVersion desalineado")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("no reporta problema de contractVersion cuando tools.json y config/klap.yaml coinciden", () => {
+  const root = crearRootTemporal();
+  try {
+    mkdirSync(path.join(root, "config"), { recursive: true });
+    copyFileSync(resolveFromRoot("schemas", "klap-config.schema.json"), path.join(root, "schemas", "klap-config.schema.json"));
+    escribirConfigYContrato(root, { versionContrato: "1.0.0", versionRegistrada: "1.0.0" });
+
+    const { problemas } = validarPlugin(root);
+    assert.ok(!problemas.some((p) => p.includes("contractVersion")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("detecta obligatoriedad/estado que no coinciden entre standards/index.yaml y el frontmatter del doc", () => {
   const root = crearRootTemporal();
   try {

@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolveFromRoot } from "../../scripts/lib/paths.mjs";
+import { readYaml } from "../../scripts/lib/yaml-io.mjs";
 
 const contrato = JSON.parse(readFileSync(resolveFromRoot("schemas", "knowledge-mcp", "tools.json"), "utf8"));
 
@@ -23,4 +24,13 @@ test("cada tool tiene name, description, inputSchema y outputSchema", () => {
 
 test("targeted_sync es la única operación declarada como no-lectura", () => {
   assert.deepEqual(contrato.no_lectura, ["targeted_sync"]);
+});
+
+test("contractVersion está presente y es semver", () => {
+  assert.match(contrato.contractVersion, /^\d+\.\d+\.\d+$/);
+});
+
+test("contractVersion coincide con config/klap.yaml → contratos.knowledge_mcp", () => {
+  const config = readYaml(resolveFromRoot("config", "klap.yaml"));
+  assert.equal(contrato.contractVersion, config.contratos.knowledge_mcp);
 });

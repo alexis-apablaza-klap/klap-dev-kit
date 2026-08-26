@@ -20,6 +20,9 @@ const configMinima = {
     context_index_schema: "schemas/context-index.schema.json",
     knowledge_mcp_contract: "schemas/knowledge-mcp/tools.json",
   },
+  contratos: {
+    knowledge_mcp: "1.0.0",
+  },
 };
 
 test("config mínima válida pasa el schema", () => {
@@ -36,6 +39,18 @@ test("modo fuera del enum (mock|produccion) falla", () => {
 test("falta mcp.atlassian (requerido) falla", () => {
   const { atlassian, ...sinAtlassian } = configMinima.mcp;
   const invalido = { ...configMinima, mcp: sinAtlassian };
+  const { valido } = validar(schemaPath, invalido);
+  assert.equal(valido, false);
+});
+
+test("falta contratos (requerido) falla", () => {
+  const { contratos, ...sinContratos } = configMinima;
+  const { valido } = validar(schemaPath, sinContratos);
+  assert.equal(valido, false);
+});
+
+test("contratos.knowledge_mcp fuera de formato semver falla", () => {
+  const invalido = { ...configMinima, contratos: { knowledge_mcp: "v1" } };
   const { valido } = validar(schemaPath, invalido);
   assert.equal(valido, false);
 });

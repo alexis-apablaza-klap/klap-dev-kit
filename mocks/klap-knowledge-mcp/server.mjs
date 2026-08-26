@@ -20,9 +20,10 @@ const productos = fixture("productos");
 const componentes = fixture("componentes");
 const documentos = fixture("documentos");
 const busqueda = fixture("busqueda");
-const toolsContrato = JSON.parse(
+const contrato = JSON.parse(
   readFileSync(path.join(aqui, "..", "..", "schemas", "knowledge-mcp", "tools.json"), "utf8")
-).tools;
+);
+const toolsContrato = contrato.tools;
 const inputSchemaPorTool = new Map(toolsContrato.map((t) => [t.name, t.inputSchema]));
 
 function normalizar(texto) {
@@ -117,6 +118,9 @@ process.stdin.on("data", (chunk) => {
           protocolVersion: "2024-11-05",
           serverInfo: { name: "klap-knowledge-local-mock", version: "0.1.0" },
           capabilities: { tools: {} },
+          // contractVersion se lee de schemas/knowledge-mcp/tools.json — nunca duplicar el
+          // literal aquí, es la misma fuente que valida scripts/validar-plugin.mjs.
+          contractVersion: contrato.contractVersion,
         });
       } else if (method === "tools/list") {
         responder(id, { tools: toolsContrato.map(({ name, description, inputSchema }) => ({ name, description, inputSchema })) });

@@ -3,7 +3,7 @@
   "$id": "https://klap.cl/schemas/klap-config.schema.json",
   "title": "config/klap.yaml",
   "type": "object",
-  "required": ["version", "mcp", "stack_soportado", "rutas"],
+  "required": ["version", "mcp", "stack_soportado", "rutas", "contratos"],
   "additionalProperties": true,
   "properties": {
     "version": { "type": "integer", "minimum": 1 },
@@ -38,6 +38,17 @@
       "required": ["standards_index", "quality_gates", "component_schema", "context_index_schema", "knowledge_mcp_contract"],
       "additionalProperties": { "type": "string" }
     },
-    "hosting": { "type": "object" }
+    "hosting": { "type": "object" },
+    "contratos": {
+      "type": "object",
+      "required": ["knowledge_mcp"],
+      "properties": {
+        "knowledge_mcp": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "description": "Versión de schemas/knowledge-mcp/tools.json contra la que el kit fue validado (debe coincidir con tools.json → contractVersion)."
+        }
+      }
+    }
   }
 }

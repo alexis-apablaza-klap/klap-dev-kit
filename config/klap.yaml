@@ -53,3 +53,10 @@ hosting:
   proveedor_actual: github
   cuenta: alexis.apablaza@klap.cl
   migracion_planificada: bitbucket # informativo — el CI debe mantenerse portable
+
+contratos:
+  # Versión de schemas/knowledge-mcp/tools.json contra la que este kit fue validado.
+  # Un mismatch con el contractVersion del schema falla npm run validate — es la señal
+  # explícita de "el contrato avanzó, revisa antes de asumir compatibilidad" en vez de
+  # una ruptura silenciosa cuando Etapa 3 reemplace el mock por el servicio real.
+  knowledge_mcp: "1.0.0"

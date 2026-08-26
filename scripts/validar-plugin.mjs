@@ -44,6 +44,30 @@ export function validarPlugin(root = resolveFromRoot()) {
     if (!valido) problemas.push(...errores.map((e) => `config/klap.yaml: ${e}`));
   }
 
+  // 3b. contractVersion de schemas/knowledge-mcp/tools.json debe coincidir con
+  // config/klap.yaml → contratos.knowledge_mcp — evita una ruptura silenciosa del contrato
+  // cuando el servicio real de Klap Knowledge reemplace al mock (ver Etapa 3).
+  const toolsJsonPath = path.join(root, "schemas", "knowledge-mcp", "tools.json");
+  if (config && existsSync(toolsJsonPath)) {
+    let contrato;
+    try {
+      contrato = JSON.parse(readFileSync(toolsJsonPath, "utf8"));
+    } catch {
+      contrato = null;
+    }
+    const versionContrato = contrato?.contractVersion;
+    const versionRegistrada = config.contratos?.knowledge_mcp;
+    if (!versionContrato) {
+      problemas.push("schemas/knowledge-mcp/tools.json: falta contractVersion");
+    } else if (!versionRegistrada) {
+      problemas.push("config/klap.yaml: falta contratos.knowledge_mcp");
+    } else if (versionContrato !== versionRegistrada) {
+      problemas.push(
+        `contractVersion desalineado: schemas/knowledge-mcp/tools.json=${versionContrato}, config/klap.yaml→contratos.knowledge_mcp=${versionRegistrada}`
+      );
+    }
+  }
+
   // 4. Todos los .json bajo schemas/ deben parsear
   const schemasDir = path.join(root, "schemas");
   const recorrerJson = (dir) => {
