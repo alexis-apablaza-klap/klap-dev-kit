@@ -38,3 +38,9 @@ test("expone si se permite excepción explícita según el gate", () => {
   const veredicto = evaluarHallazgos([], gates);
   assert.equal(veredicto.requiere_excepcion_si_se_ignora, true);
 });
+
+test("bloquear_severidad_minima mal configurado lanza error en vez de aprobar todo en silencio", () => {
+  const gatesInvalidos = { dependencias: { bloquear_severidad_minima: "high", permitir_excepcion_explicita: true } };
+  const hallazgos = [{ herramienta: "trivy", severidad: "CRITICAL", paquete: "x", id: "CVE-9" }];
+  assert.throws(() => evaluarHallazgos(hallazgos, gatesInvalidos), /no es una severidad válida/);
+});

@@ -32,8 +32,9 @@ inevitablemente se desincronizan. Léelo si necesitas la versión exacta; lo que
 
 ## Frontend — Angular / TypeScript
 
-Ver `standards/stack/angular-typescript.md` (heredado, pendiente de revisión) para el detalle.
-Aquí sólo la regla de alto nivel: la versión de Angular activa determina qué patrones de
+Klap sólo fija el piso de versión (`config/klap.yaml` → `stack_soportado.frontend.angular`);
+el detalle de qué es idiomático hoy se consulta en vivo, no en un standard estático — ver
+`standards/stack/angular-typescript.md`. La versión de Angular activa determina qué patrones de
 reactividad son correctos (Signals vs RxJS clásico) — el `arquitecto` debe verificar la
 versión real del proyecto antes de recomendar un patrón, no asumir la última disponible.
 

@@ -16,7 +16,7 @@ scanner no puede hacer: leer el diff con criterio de seguridad real.
 ## Qué revisar en el diff (según aplique al cambio)
 
 Validación de entrada, autenticación, autorización, manejo de secretos, inyección SQL, SSRF,
-XSS, deserialización insegura, criptografía, logging seguro (sin PII/PAN en claro — ver
+XSS, deserialización insegura, criptografía, logging seguro (sin PAN en claro — ver
 `standards/seguridad`), exposición de información en respuestas/errores, uso de dependencias
 con vulnerabilidades conocidas (contrastar con la salida de `deps-scan.mjs`, no repetir el
 escaneo).

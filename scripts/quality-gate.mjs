@@ -32,10 +32,16 @@ export function evaluarGate(reporte, gates = readYaml(resolveFromRoot("config", 
   if (gates.sonarqube.quality_gate_debe_pasar && s.quality_gate_status && s.quality_gate_status !== "OK") {
     motivos.push(`Sonar Quality Gate: ${s.quality_gate_status}.`);
   }
+  // Los 3 chequeos ">0" de gates.sonarqube.bloquear_si no tienen umbral configurable (siempre
+  // ">0" en el YAML) — no hay nada que leer dinámicamente ahí. Sólo rating_mantenibilidad_peor_que
+  // tiene un valor real que puede cambiar, por eso es el único que se lee de `gates` abajo.
   if ((s.bugs_nuevos ?? 0) > 0) motivos.push(`${s.bugs_nuevos} bug(s) nuevo(s) en Sonar.`);
   if ((s.vulnerabilities_nuevas ?? 0) > 0) motivos.push(`${s.vulnerabilities_nuevas} vulnerabilidad(es) nueva(s) en Sonar.`);
   if ((s.security_hotspots_sin_revisar ?? 0) > 0) motivos.push(`${s.security_hotspots_sin_revisar} security hotspot(s) sin revisar.`);
-  const ratingMinimo = "A";
+  const entradaRating = (gates.sonarqube.bloquear_si ?? []).find(
+    (e) => typeof e === "object" && e !== null && "rating_mantenibilidad_peor_que" in e
+  );
+  const ratingMinimo = entradaRating?.rating_mantenibilidad_peor_que ?? "A";
   if (s.rating_mantenibilidad && RATING_ORDEN.indexOf(s.rating_mantenibilidad) > RATING_ORDEN.indexOf(ratingMinimo)) {
     motivos.push(`Rating de mantenibilidad ${s.rating_mantenibilidad}, peor que ${ratingMinimo}.`);
   }

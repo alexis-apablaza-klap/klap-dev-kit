@@ -52,11 +52,18 @@ try {
 Captura el tipo específico que puede ocurrir, no `Exception` genérico. Propaga con contexto,
 no silencia.
 
+Nunca interpolar un PAN completo en el mensaje de una excepción o log — si es necesario
+referenciarlo, usar sólo los últimos 4 dígitos (ver `standards/seguridad/owasp-y-secretos.md`).
+El resto de los datos de dominio (ids, montos, etc.) se asume ya tratado antes de llegar a
+este punto — este documento no exige masking general de PII.
+
 ## Evitar null cuando se puede (RECOMMENDED)
 
 Preferir `Optional<T>` en retornos donde la ausencia es un caso válido y esperado; reservar
 `null` para lo que realmente nunca debería pasar (y ahí, fallar rápido con una excepción, no
-propagar el `null`).
+propagar el `null`). `Optional` es sólo para tipos de retorno — nunca como parámetro de método
+ni como campo de una clase: ahí no evita el null-check (el caller igual debe desenvolverlo) y
+además no es `Serializable`.
 
 ## Inmutabilidad (RECOMMENDED)
 
@@ -64,11 +71,25 @@ DTOs y Value Objects como `record` (Java 21) o clases con campos `final` — evi
 compartida entre capas y hace el objeto seguro de pasar entre threads (relevante con virtual
 threads).
 
-## Inyección de dependencias vs `new()` (MANDATORY)
+## Inyección de dependencias: constructor, nunca field injection ni `new()` (MANDATORY)
 
-**Mal**: `new AnticipoCalculadora()` dentro de un servicio Spring.
-**Bien**: inyectar `AnticipoCalculadora` por constructor. `new` directo en código gestionado
-por Spring rompe testabilidad (no se puede mockear) y viola D de SOLID.
+**Mal** (el antipatrón real más común, no `new()`):
+```java
+@Autowired
+private AnticipoCalculadora calculadora;
+```
+**Bien**:
+```java
+private final AnticipoCalculadora calculadora;
+
+public ServicioAnticipo(AnticipoCalculadora calculadora) {
+    this.calculadora = calculadora;
+}
+```
+Field injection es más frecuente en código real que `new AnticipoCalculadora()` a mano, y el
+daño es mayor: impide `final`, oculta dependencias circulares hasta runtime, y sigue rompiendo
+testabilidad igual que `new()` directo. Constructor injection con campos `final` es la única
+forma aceptada.
 
 ## Alcance del cambio
 

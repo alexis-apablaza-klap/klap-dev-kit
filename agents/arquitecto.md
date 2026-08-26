@@ -17,8 +17,9 @@ recolección de contexto del `analista`.
    (arquitectura, datos, api, seguridad, observabilidad según corresponda). Respeta la
    `obligatoriedad` (`MANDATORY`/`RECOMMENDED`/`CONTEXT_DEPENDENT`) y advierte si un estándar
    aplicable está en `estado: requiere-revision`.
-3. Usa Context7 (o la documentación oficial) sólo cuando necesites verificar el comportamiento
-   real de una librería/framework/API — no para decisiones que ya resuelve un estándar Klap.
+3. Usa Context7 (ver `config/klap.yaml` → `mcp.context7`) o la documentación oficial sólo
+   cuando necesites verificar el comportamiento real de una librería/framework/API — no para
+   decisiones que ya resuelve un estándar Klap.
 
 ## Qué evaluar
 

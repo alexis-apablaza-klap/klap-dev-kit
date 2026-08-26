@@ -4,6 +4,10 @@
  * No reemplaza una herramienta dedicada (gitleaks/trufflehog) si Klap decide adoptar una;
  * cubre los patrones más comunes con cero dependencias mientras tanto.
  *
+ * También incluye una heurística de PAN sin enmascarar dentro de una llamada de logging
+ * (ver standards/seguridad/owasp-y-secretos.md) — no cubre PII en general, sólo el caso de
+ * mayor riesgo regulatorio (PCI-DSS).
+ *
  * Uso: node scripts/escanear-secretos.mjs [archivo]   (default: git diff --cached, stdin si no hay git)
  */
 import { execSync } from "node:child_process";
@@ -19,9 +23,17 @@ const PATRONES = [
   { tipo: "API key genérica", regex: /(api[_-]?key|apikey)\s*[:=]\s*['"][a-zA-Z0-9_-]{16,}['"]/gi },
   { tipo: "Secreto/token genérico", regex: /(secret|token)\s*[:=]\s*['"][a-zA-Z0-9_/+=]{16,}['"]/gi },
   { tipo: "Password en texto plano", regex: /(password|pwd)\s*[:=]\s*['"][^'"${}\s]{6,}['"]/gi },
+  {
+    tipo: "Posible PAN sin enmascarar en logging (heurística)",
+    regex: /(?:log(?:ger)?\.(?:info|warn|error|debug|trace)|console\.log|system\.out\.print(?:ln)?)[^\n]{0,200}?\b\d{13,19}\b/gi,
+  },
 ];
 
-const IGNORAR_LINEA = /\$\{|CHANGEME|changeme|example|placeholder|dummy|xxxx|\bAKIAEXAMPLE\b/i;
+// No se incluye \$\{ aquí: los regex de PATRONES ya excluyen $/{/} de sus clases de
+// caracteres, así que "${VAR:fallback}" nunca matchea por sí solo. Eximir la línea completa
+// por contener "${" en cualquier parte (p.ej. un comentario) ocultaría un secreto real
+// hardcodeado en la misma línea — verificado con "AKIA... // fallback for ${VAR}".
+const IGNORAR_LINEA = /CHANGEME|changeme|example|placeholder|dummy|xxxx|\bAKIAEXAMPLE\b/i;
 
 export function detectarSecretos(texto) {
   const hallazgos = [];

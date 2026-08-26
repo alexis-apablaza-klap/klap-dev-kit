@@ -1,9 +1,9 @@
 {
   "name": "klap-dev-kit",
   "owner": {
-    "name": "Klap - Equipo de Ingeniería",
+    "name": "Alexis Apablaza",
     "email": "alexis.apablaza@klap.cl",
-    "url": "https://github.com/klap-cl/klap-dev-kit"
+    "url": "https://github.com/alexis-apablaza-klap/klap-dev-kit"
   },
   "plugins": [
     {

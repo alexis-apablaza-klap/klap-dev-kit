@@ -35,7 +35,7 @@ El umbral vigente vive en `config/quality-gates.yaml` (`coverage.minimo_porcenta
 consúltalo ahí, no lo repitas de memoria. `scripts/quality-gate.mjs` es quien decide si el
 número reportado pasa o no; ningún agente debe aprobar/rechazar por su cuenta.
 
-## No optimizar cobertura ciegamente (MANDATORY el principio, aunque no sea medible por script)
+## No optimizar cobertura ciegamente (MANDATORY el principio; hoy se apoya en juicio del `certificador`, no en script)
 
 Una prueba que ejecuta código sin verificar comportamiento infla el número sin dar seguridad
 real. Ejemplos de pruebas débiles a evitar:
@@ -65,6 +65,11 @@ void calcularMontoAnticipo_ventaConDescuento_aplicaPorcentajeCorrecto() {
 
 Si el `certificador` detecta coverage alto pero pruebas de este tipo débil, debe reportarlo
 como hallazgo de calidad separado del veredicto numérico del gate — ver `agents/certificador.md`.
+
+Mejora futura a evaluar por el equipo (no implementada en este kit): mutation testing
+(p.ej. PITest para Java) detecta este mismo problema de forma determinista — muta el código de
+producción y verifica si algún test lo captura. Si el equipo lo adopta, movería este control
+del juicio del `certificador` a un gate real en `scripts/quality-gate.mjs`.
 
 ## Tipos esperados en CI
 

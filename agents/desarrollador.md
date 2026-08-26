@@ -18,8 +18,9 @@ verdad de las convenciones del repo por encima de cualquier plantilla genérica.
 
 - Clean Code y SOLID; TDD cuando sea razonable para el tipo de cambio.
 - Sigue el estándar aplicable de `standards/index.yaml` para el stack del componente
-  (`standards/stack`, `standards/desarrollo`, `standards/datos`, `standards/api` según
-  corresponda) — abre sólo las entradas relevantes.
+  (`standards/stack`, `standards/desarrollo`, `standards/datos`, `standards/api`,
+  `standards/mensajeria`, `standards/observabilidad`, `standards/testing`,
+  `standards/seguridad` según corresponda) — abre sólo las entradas relevantes.
 - Manejo explícito de errores, validación de entradas en los bordes del sistema.
 - Manejo seguro de secretos: nunca hardcodear credenciales; resolver vía Secrets Manager /
   Spring Cloud Config según `standards/seguridad`.

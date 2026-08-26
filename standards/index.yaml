@@ -2,7 +2,7 @@
 # individuales se abren sólo bajo demanda. Valida contra schemas/standards-index.schema.json.
 
 stack-tecnologico:
-  resumen: "Cómo se usa el stack oficial Klap (Java 21, Spring Boot 4.x, Gradle, Angular 20+, PostgreSQL 16, Kafka, AWS Lambda). Las versiones viven en config/klap.yaml, no aquí."
+  resumen: "Cómo se usa el stack oficial Klap (Java 21, Spring Boot 4.x, Gradle, Angular 21+, PostgreSQL 16, Kafka, AWS Lambda). Las versiones viven en config/klap.yaml, no aquí."
   path: standards/stack/tecnologico.md
   obligatoriedad: MANDATORY
   estado: vigente
@@ -30,21 +30,21 @@ testing-estrategia-coverage:
   tags: [testing, tdd, coverage, jacoco]
 
 seguridad-owasp-secretos:
-  resumen: "Controles OWASP Top 10 aplicables y gestión de secretos (Secrets Manager/Spring Cloud Config), PII/PAN masking obligatorio en logs."
+  resumen: "Controles OWASP Top 10 aplicables y gestión de secretos (Secrets Manager/Spring Cloud Config), masking de PAN obligatorio en logs (últimos 4 dígitos; PII general se asume ya tratada)."
   path: standards/seguridad/owasp-y-secretos.md
   obligatoriedad: MANDATORY
   estado: vigente
   tags: [seguridad, owasp, secretos, pii, pan]
 
 datos-postgresql:
-  resumen: "Indexación, EXPLAIN ANALYZE, cero N+1, límites de @Transactional, convenciones de naming de esquema/tabla y manejo de migraciones."
+  resumen: "Indexación, EXPLAIN ANALYZE, cero N+1, límites de @Transactional (incl. readOnly), acceso a datos (JdbcTemplate por default), naming de esquema/tabla y manejo de migraciones."
   path: standards/datos/postgresql.md
   obligatoriedad: MANDATORY
   estado: vigente
   tags: [postgresql, datos, performance]
 
 api-diseno:
-  resumen: "Diseño REST (versionado, códigos de estado, paginación, idempotencia), compatibilidad hacia atrás obligatoria para REST y Kafka, OpenAPI como contrato fuente de verdad."
+  resumen: "Diseño REST (versionado, códigos de estado, paginación), idempotencia con persistencia real, formato de error estándar (code/message/date/time), compatibilidad hacia atrás obligatoria para REST y Kafka, OpenAPI como contrato fuente de verdad."
   path: standards/api/diseno-apis.md
   obligatoriedad: MANDATORY
   estado: vigente
@@ -58,18 +58,18 @@ git-cicd-flujo-pipeline:
   tags: [git, ci-cd, pipeline]
 
 documentacion-adr-memoria:
-  resumen: "Cuándo escribir un ADR, relación entre memoria del repo (component.yaml/docs/context) y documentación de producto en Confluence."
+  resumen: "Cuándo escribir un ADR (incl. cuándo reemplazar uno previo, nunca editarlo), relación entre memoria del repo (component.yaml/docs/context) y documentación de producto en Confluence."
   path: standards/documentacion/adr-y-memoria.md
   obligatoriedad: RECOMMENDED
   estado: vigente
   tags: [documentacion, adr, memoria]
 
 stack-angular-typescript:
-  resumen: "[Heredado, requiere revisión] Convenciones Angular 20+/TypeScript: signals, signal forms, inject(), control flow moderno, CLI-first."
+  resumen: "Klap fija sólo el piso de versión de Angular (config/klap.yaml); patrones idiomáticos vigentes se consultan en vivo vía Context7, no en una guía estática que caduca con cada release."
   path: standards/stack/angular-typescript.md
   obligatoriedad: RECOMMENDED
-  estado: requiere-revision
-  tags: [angular, typescript, frontend]
+  estado: vigente
+  tags: [angular, typescript, frontend, context7]
 
 infraestructura-aws-serverless:
   resumen: "[Esqueleto, requiere revisión] Prácticas AWS Lambda/Serverless en Klap — no hay contenido confirmado aún, pendiente de completar por el equipo."
@@ -79,10 +79,10 @@ infraestructura-aws-serverless:
   tags: [aws, lambda, serverless]
 
 observabilidad-logging-metricas-trazas:
-  resumen: "[Heredado, requiere revisión] Convenciones de logging (niveles, contexto idProceso/codigoSucursal); métricas y trazas pendientes de definir."
+  resumen: "Niveles de logging (DEBUG/INFO/WARN/ERROR) confirmados; métricas y trazas pendientes de definir por el equipo (backend, qué se traza distribuidamente)."
   path: standards/observabilidad/logging-metricas-trazas.md
   obligatoriedad: RECOMMENDED
-  estado: requiere-revision
+  estado: vigente
   tags: [observabilidad, logging, metricas, trazas]
 
 arquitectura-ddd-avanzado:
@@ -92,16 +92,16 @@ arquitectura-ddd-avanzado:
   estado: requiere-revision
   tags: [ddd, arquitectura]
 
-desarrollo-convenciones-klap-legacy:
-  resumen: "[Heredado, requiere revisión] Naming de clases/DTOs/excepciones, JavaDoc obligatorio y uso de Lombok/JdbcTemplate del squad BYSF — alcance transversal sin confirmar."
-  path: standards/desarrollo/convenciones-klap-legacy.md
+desarrollo-convenciones-naming-javadoc-lombok:
+  resumen: "Naming de clases/DTOs/excepciones (RECOMMENDED), JavaDoc obligatorio en API pública para autogeneración de docs (MANDATORY, reconciliado con clean-code-solid.md), y qué anotaciones Lombok usar/evitar según inmutabilidad."
+  path: standards/desarrollo/convenciones-naming-javadoc-lombok.md
   obligatoriedad: RECOMMENDED
-  estado: requiere-revision
-  tags: [naming, javadoc, lombok, convenciones, legacy]
+  estado: vigente
+  tags: [naming, javadoc, lombok, convenciones]
 
 mensajeria-kafka-avanzado:
-  resumen: "[Heredado, requiere revisión] Estándar Kafka detallado: KafkaConfig base, DLQ, AckMode MANUAL, tuning de consumer/producer, properties por ambiente, tests."
+  resumen: "Estándar Kafka detallado: KafkaConfig base, DLQ, AckMode MANUAL, tuning de consumer/producer (incl. gotcha de MSK/Confluent Cloud), properties por ambiente, tests."
   path: standards/mensajeria/kafka-avanzado.md
   obligatoriedad: RECOMMENDED
-  estado: requiere-revision
+  estado: vigente
   tags: [kafka, mensajeria, eventos]

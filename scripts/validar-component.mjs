@@ -31,7 +31,7 @@ export function validarComponente(repoPath) {
     const { valido, errores } = validar(resolveFromRoot("schemas", "context-index.schema.json"), indexData);
     if (!valido) problemas.push(...errores.map((e) => `docs/context/index.yaml: ${e}`));
     for (const [clave, entrada] of Object.entries(indexData)) {
-      if (!entrada?.path) continue;
+      if (!entrada?.path || entrada.obsoleto) continue;
       const docPath = path.join(repoPath, entrada.path);
       if (!existsSync(docPath)) {
         problemas.push(`docs/context/index.yaml: la entrada "${clave}" apunta a ${entrada.path}, que no existe`);

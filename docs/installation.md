@@ -6,7 +6,7 @@ que clonar ni compilar nada manualmente para usarlo dentro de Claude Code.
 ## 1. Agregar el marketplace (una vez por máquina)
 
 ```
-/plugin marketplace add https://github.com/klap-cl/klap-dev-kit.git
+/plugin marketplace add https://github.com/alexis-apablaza-klap/klap-dev-kit.git
 ```
 
 ## 2. Instalar el plugin
@@ -43,18 +43,15 @@ publica una nueva versión — no en cada push al repo.
 
 ## Bootstrap (opcional)
 
-`bootstrap/install.ps1` (Windows) e `install.sh` (Linux/Mac) automatizan la verificación de
-prerequisitos (Node, Java, Git) y la instalación de Trivy/OWASP Dependency-Check cuando falten.
-No reemplazan el paso 1-2 de arriba — el plugin en sí se instala siempre por el mecanismo
-nativo de Claude Code, nunca por un CLI propio.
+`bootstrap/install.ps1` (Windows) e `install.sh` (Linux/Mac) verifican prerequisitos (Node,
+Git, Trivy, OWASP Dependency-Check) y, si falta alguno de los dos últimos, indican dónde
+instalarlo — no lo instalan automáticamente. No reemplazan el paso 1-2 de arriba — el plugin en
+sí se instala siempre por el mecanismo nativo de Claude Code, nunca por un CLI propio.
 
 ## Verificar la instalación
 
-Después de instalar, confirma que el plugin quedó coherente:
+Escribe `/klap:` en el prompt y deberían listarse los 8 skills (ver `docs/commands.md`).
 
-```
-claude plugin validate --strict
-```
-
-Y que los comandos aparecen: escribe `/klap:` en el prompt y deberían listarse los 8 skills
-(ver `docs/commands.md`).
+Si además tienes el repo del kit clonado localmente (desarrollo/contribución, no instalación
+normal vía marketplace), `claude plugin validate --strict <ruta-al-repo>` valida el manifest y
+`npm run validate` (desde la raíz del repo) verifica coherencia estructural completa.

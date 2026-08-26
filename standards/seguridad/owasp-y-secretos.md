@@ -5,7 +5,7 @@ estado: vigente
 origen: null
 revisado_por: null
 revisado_en: null
-tags: [seguridad, owasp, secretos, pii, pan]
+tags: [seguridad, owasp, secretos, pan]
 ---
 
 # Seguridad
@@ -32,7 +32,7 @@ no como sustituto de leer el diff.
   abiertos desde una fuente no confiable.
 - **Criptografía**: nunca implementar cifrado propio; usar las librerías estándar del stack y
   algoritmos vigentes (no MD5/SHA1 para nada sensible).
-- **Logging seguro**: ver sección PII/PAN abajo.
+- **Logging seguro**: ver sección PAN abajo.
 - **Exposición de información**: mensajes de error hacia el cliente no deben incluir stack
   traces, rutas internas ni detalles de infraestructura — loguearlos internamente, devolver un
   mensaje genérico con un id de correlación.
@@ -47,12 +47,13 @@ no como sustituto de leer el diff.
 - `scripts/escanear-secretos.mjs` bloquea el commit si detecta un patrón de secreto; el hook
   `pre-commit-secret-scan.mjs` lo aplica automáticamente.
 
-## PII/PAN masking (MANDATORY)
+## PAN masking (MANDATORY)
 
-Ningún log, traza o mensaje de error puede exponer datos personales o de tarjeta en claro.
-Antes de loguear un objeto de dominio, verificar qué campos contiene — enmascarar
-explícitamente (`****1234` para PAN, por ejemplo) en vez de loguear el objeto completo por
-comodidad.
+Ningún log, traza o mensaje de error puede exponer un PAN (número de tarjeta) completo en
+claro — sólo los últimos 4 dígitos (`****1234`). El resto de los datos de dominio (ids, montos,
+etc.) se asume ya tratado antes de llegar a este punto — este documento no exige masking
+general de PII. Antes de loguear un objeto de dominio, verificar si contiene un PAN explícito y
+enmascararlo, en vez de loguear el objeto completo por comodidad.
 
 **Mal**: `log.info("Procesando venta: {}", venta);` (si `venta` tiene el PAN sin enmascarar en
 su `toString()`).

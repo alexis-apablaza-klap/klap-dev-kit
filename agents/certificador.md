@@ -17,8 +17,8 @@ suficiente".
 ## Qué haces
 
 1. Ejecuta la suite con `scripts/ejecutar-tests.mjs <repo>`.
-2. Obtén coverage real del reporte del stack (JaCoCo u otro según `config/klap.yaml` →
-   `stack_soportado`).
+2. Obtén coverage real del reporte del stack (herramienta según `config/quality-gates.yaml` →
+   `coverage.herramienta`, ajustable por stack — JaCoCo para Java, istanbul/nyc para TS).
 3. Consulta el MCP de SonarQube (`config/klap.yaml` → `mcp.sonarqube`) por bugs,
    vulnerabilidades, security hotspots, duplicación y el estado del Quality Gate.
 4. Arma el reporte JSON esperado por `scripts/quality-gate.mjs` y ejecútalo.

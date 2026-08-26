@@ -20,9 +20,8 @@ function jsonValido(rutaAbsoluta) {
   }
 }
 
-export function validarPlugin() {
+export function validarPlugin(root = resolveFromRoot()) {
   const problemas = [];
-  const root = resolveFromRoot();
 
   // 1. plugin.json y marketplace.json
   for (const rel of ["plugin.json", "marketplace.json"]) {
@@ -65,8 +64,24 @@ export function validarPlugin() {
     const { valido, errores } = validar(path.join(root, "schemas", "standards-index.schema.json"), standardsIndex);
     if (!valido) problemas.push(...errores.map((e) => `standards/index.yaml: ${e}`));
     for (const [clave, entrada] of Object.entries(standardsIndex)) {
-      if (entrada?.path && !existsSync(path.join(root, entrada.path))) {
+      if (!entrada?.path) continue;
+      const docPath = path.join(root, entrada.path);
+      if (!existsSync(docPath)) {
         problemas.push(`standards/index.yaml: "${clave}" apunta a ${entrada.path}, que no existe`);
+        continue;
+      }
+      const fm = leerFrontmatter(readFileSync(docPath, "utf8"));
+      if (!fm?.obligatoriedad || !fm?.estado) {
+        problemas.push(`${entrada.path}: falta obligatoriedad/estado en el frontmatter`);
+      } else {
+        if (fm.obligatoriedad !== entrada.obligatoriedad) {
+          problemas.push(
+            `"${clave}": obligatoriedad no coincide (index=${entrada.obligatoriedad}, doc=${fm.obligatoriedad})`
+          );
+        }
+        if (fm.estado !== entrada.estado) {
+          problemas.push(`"${clave}": estado no coincide (index=${entrada.estado}, doc=${fm.estado})`);
+        }
       }
     }
   }
@@ -119,6 +134,26 @@ export function validarPlugin() {
         }
       }
     }
+  }
+
+  // 9. templates/*.yaml deben parsear y validar contra su schema — son el primer ejemplo que
+  // ve un equipo adoptando el kit; un YAML roto ahí no lo detecta ningún otro chequeo.
+  const plantillasConSchema = [
+    ["component.yaml", "component.schema.json"],
+    ["context-index.yaml", "context-index.schema.json"],
+  ];
+  for (const [archivoTemplate, archivoSchema] of plantillasConSchema) {
+    const templatePath = path.join(root, "templates", archivoTemplate);
+    if (!existsSync(templatePath)) continue;
+    let data;
+    try {
+      data = readYaml(templatePath);
+    } catch (err) {
+      problemas.push(`templates/${archivoTemplate}: YAML inválido — ${err.message}`);
+      continue;
+    }
+    const { valido, errores } = validar(path.join(root, "schemas", archivoSchema), data);
+    if (!valido) problemas.push(...errores.map((e) => `templates/${archivoTemplate}: ${e}`));
   }
 
   return { valido: problemas.length === 0, problemas };

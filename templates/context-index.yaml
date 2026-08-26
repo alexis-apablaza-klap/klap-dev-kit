@@ -6,7 +6,7 @@
 # sólo lo que realmente ayude a decidir sin abrir el archivo.
 
 architecture:
-  resumen: Arquitectura general del componente: capas, principales flujos y decisiones vigentes.
+  resumen: "Arquitectura general del componente: capas, principales flujos y decisiones vigentes."
   path: docs/architecture/overview.md
   tags: [architecture]
 
@@ -16,9 +16,9 @@ integraciones-datos:
   tags: [database, postgresql, integrations]
 
 adr-014:
-  resumen: Cambio de estrategia de liquidación de batch nocturno a cálculo incremental por venta.
+  resumen: Cambio de estrategia de cálculo de un proceso batch nocturno a un cálculo incremental por evento, para reducir la latencia.
   path: docs/decisions/ADR-014.md
-  tags: [architecture, liquidacion]
+  tags: [architecture]
 
 deployment:
   resumen: Pipeline de despliegue, variables de entorno esperadas y procedimiento de rollback.

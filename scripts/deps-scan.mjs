@@ -64,8 +64,14 @@ export function parsearDependencyCheckReport(reportePath) {
 }
 
 export function evaluarHallazgos(hallazgos, gates = readYaml(resolveFromRoot("config", "quality-gates.yaml"))) {
-  const umbralIdx = ORDEN_SEVERIDAD.indexOf(gates.dependencias.bloquear_severidad_minima);
-  const bloqueantes = hallazgos.filter((h) => ORDEN_SEVERIDAD.indexOf(h.severidad) >= umbralIdx && umbralIdx !== -1);
+  const umbralConfigurado = gates.dependencias.bloquear_severidad_minima;
+  const umbralIdx = ORDEN_SEVERIDAD.indexOf(umbralConfigurado);
+  if (umbralIdx === -1) {
+    throw new Error(
+      `config/quality-gates.yaml: dependencias.bloquear_severidad_minima="${umbralConfigurado}" no es una severidad válida (${ORDEN_SEVERIDAD.join("/")}). No se puede evaluar el gate de dependencias.`
+    );
+  }
+  const bloqueantes = hallazgos.filter((h) => ORDEN_SEVERIDAD.indexOf(h.severidad) >= umbralIdx);
   return {
     aprobado: bloqueantes.length === 0,
     total_hallazgos: hallazgos.length,

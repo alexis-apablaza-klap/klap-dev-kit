@@ -30,3 +30,11 @@ Temas que este documento debería cubrir una vez que el equipo aporte el conteni
 Hasta que se complete, el `arquitecto` debe tratar cualquier decisión de diseño sobre AWS
 Lambda como `CONTEXT_DEPENDENT` sin un estándar Klap que la respalde, y señalarlo como
 pregunta pendiente si es relevante para la HU.
+
+Distinción importante: para prácticas **genéricas** de AWS Lambda con Java (cold start,
+SnapStart, tuning de memoria/timeout) el `arquitecto` puede consultar Context7
+(`config/klap.yaml` → `mcp.context7.server`) o la documentación oficial de AWS como
+conocimiento general — eso no requiere que el equipo lo decida primero. Lo que sigue
+genuinamente pendiente de equipo son las decisiones **propias de Klap** (qué herramienta de
+despliegue, convención de IAM, naming de funciones) — eso Context7 no lo puede resolver por
+tratarse de una decisión interna, no de comportamiento del framework/servicio.

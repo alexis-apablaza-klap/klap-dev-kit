@@ -23,6 +23,13 @@ test("una línea con placeholder Spring (${...}) no se reporta", () => {
   assert.equal(hallazgos.length, 0);
 });
 
+test("un secreto real hardcodeado en la misma línea que una referencia ${...} sí se reporta", () => {
+  const hallazgos = detectarSecretos(
+    'awsSecretKey = "AKIAABCDEFGHIJKLMNOP"; // fallback for ${AWS_KEY} env var'
+  );
+  assert.ok(hallazgos.some((h) => h.tipo === "AWS Access Key ID"));
+});
+
 test("una password de ejemplo con 'changeme' no se reporta", () => {
   const hallazgos = detectarSecretos('password: "changeme123"');
   assert.equal(hallazgos.length, 0);
@@ -30,5 +37,20 @@ test("una password de ejemplo con 'changeme' no se reporta", () => {
 
 test("texto sin secretos no genera hallazgos", () => {
   const hallazgos = detectarSecretos("const saludo = 'hola mundo';\nconst x = 1 + 1;");
+  assert.equal(hallazgos.length, 0);
+});
+
+test("detecta un PAN sin enmascarar dentro de un log.info", () => {
+  const hallazgos = detectarSecretos('log.info("Procesando pago con tarjeta {}", 4111111111111111);');
+  assert.ok(hallazgos.some((h) => h.tipo === "Posible PAN sin enmascarar en logging (heurística)"));
+});
+
+test("un PAN enmascarado (sólo últimos 4 dígitos) en logging no se reporta", () => {
+  const hallazgos = detectarSecretos('log.info("Procesando pago con tarjeta ****1111");');
+  assert.equal(hallazgos.length, 0);
+});
+
+test("un número largo fuera de una llamada de logging no se reporta como PAN", () => {
+  const hallazgos = detectarSecretos("const referencia = 1234567890123456;");
   assert.equal(hallazgos.length, 0);
 });

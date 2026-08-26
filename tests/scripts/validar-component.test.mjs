@@ -54,6 +54,26 @@ test("índice de contexto que apunta a un path inexistente es inválido", () => 
   }
 });
 
+test("entrada marcada obsoleto: true no se reporta aunque su path no exista", () => {
+  const repo = crearRepoTemporal();
+  try {
+    writeYaml(path.join(repo, "component.yaml"), componenteValido);
+    mkdirSync(path.join(repo, "docs", "context"), { recursive: true });
+    writeYaml(path.join(repo, "docs", "context", "index.yaml"), {
+      "diseno-legacy": {
+        resumen: "Diseño reemplazado, doc ya borrado.",
+        path: "docs/history/diseno-legacy.md",
+        obsoleto: true,
+      },
+    });
+
+    const { valido, problemas } = validarComponente(repo);
+    assert.equal(valido, true, JSON.stringify(problemas));
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
 test("repo sin component.yaml es inválido", () => {
   const repo = crearRepoTemporal();
   try {

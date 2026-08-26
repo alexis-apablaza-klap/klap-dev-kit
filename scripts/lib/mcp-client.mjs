@@ -7,6 +7,8 @@ import { encodeMensaje, LectorMcp } from "./mcp-stdio.mjs";
  * `llamarTool(nombre, argumentos)`. Pensado para hablar con mocks/klap-knowledge-mcp
  * u otro servidor MCP stdio que respete el mismo framing.
  */
+const TIMEOUT_MS = 10_000;
+
 export class ClienteMcpStdio {
   #proceso;
   #lector = new LectorMcp();
@@ -19,20 +21,34 @@ export class ClienteMcpStdio {
     this.#proceso.stdout.on("data", (chunk) => {
       for (const msg of this.#lector.alimentar(chunk)) this.#recibir(msg);
     });
+    this.#proceso.on("error", (err) => this.#rechazarTodas(err));
   }
 
   #recibir(msg) {
     const pendiente = this.#pendientes.get(msg.id);
     if (!pendiente) return;
     this.#pendientes.delete(msg.id);
+    clearTimeout(pendiente.timeout);
     if (msg.error) pendiente.reject(new Error(msg.error.message ?? "Error MCP"));
     else pendiente.resolve(msg.result);
+  }
+
+  #rechazarTodas(err) {
+    for (const [id, pendiente] of this.#pendientes) {
+      clearTimeout(pendiente.timeout);
+      pendiente.reject(err);
+    }
+    this.#pendientes.clear();
   }
 
   #enviar(method, params) {
     const id = this.#siguienteId++;
     return new Promise((resolve, reject) => {
-      this.#pendientes.set(id, { resolve, reject });
+      const timeout = setTimeout(() => {
+        this.#pendientes.delete(id);
+        reject(new Error(`Timeout de ${TIMEOUT_MS}ms esperando respuesta MCP a "${method}" (id=${id}).`));
+      }, TIMEOUT_MS);
+      this.#pendientes.set(id, { resolve, reject, timeout });
       this.#proceso.stdin.write(encodeMensaje({ jsonrpc: "2.0", id, method, params }));
     });
   }

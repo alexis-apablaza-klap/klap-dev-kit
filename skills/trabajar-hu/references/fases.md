@@ -6,8 +6,9 @@ fase que estás ejecutando.
 ## Fase 1 — Contexto
 
 Invoca `analista` con el `<ISSUE-KEY>`. El agente sigue el orden estricto documentado en
-`agents/analista.md` (Jira → producto → Klap Knowledge → component.yaml/índice → Confluence
-sólo si falta algo). Guarda su salida en `.klap/hu/<ISSUE-KEY>/contexto.md`. Sin pausa.
+`agents/analista.md` (Jira → producto → Klap Knowledge → component.yaml/índice →
+`documentos_relevantes`/`buscar` → Confluence sólo si falta algo). Guarda su salida en
+`.klap/hu/<ISSUE-KEY>/contexto.md`. Sin pausa.
 
 ## Fase 2 — Análisis
 

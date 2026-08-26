@@ -37,8 +37,11 @@ El hook intercepta la llamada a la herramienta `Bash` en sí, así que `git comm
 Code). Opciones reales:
 
 1. Si es un valor de ejemplo, marca la línea de forma que el escáner la reconozca como tal:
-   agrega uno de los marcadores que el escáner ya ignora (`${...}`, `CHANGEME`, `example`,
-   `placeholder`, `dummy`, `xxxx`) en vez de un valor con forma de secreto real.
+   agrega uno de los marcadores que el escáner ya ignora (`CHANGEME`, `example`, `placeholder`,
+   `dummy`, `xxxx`) en vez de un valor con forma de secreto real. Nota: una referencia
+   `${VAR:fallback}` real ya no hace falta marcarla — los patrones de secreto no matchean
+   dentro de `${...}` por diseño, pero un secreto real en la misma línea (p.ej. en un
+   comentario junto a la referencia) sí se sigue detectando, como corresponde.
 2. Si el patrón genera falsos positivos de forma sistemática para tu stack, es un problema del
    propio kit — ajusta `PATRONES` en `scripts/escanear-secretos.mjs` vía PR, no lo rodees caso
    a caso.
@@ -55,6 +58,7 @@ archivo y qué campo está mal.
 
 ## `/klap:trabajar-hu` no muestra los 8 comandos tras instalar
 
-Confirma que el plugin quedó instalado y coherente: `claude plugin validate --strict`, y que
-`/plugin list` muestra `klap` como instalado. Si el marketplace no se actualizó, `/plugin
-marketplace add` de nuevo sobre la misma URL refresca el catálogo.
+Confirma que `/plugin list` muestra `klap` como instalado. Si tienes el repo clonado
+localmente, `claude plugin validate --strict <ruta-al-repo>` valida el manifest. Si el
+marketplace no se actualizó, `/plugin marketplace add` de nuevo sobre la misma URL refresca el
+catálogo.

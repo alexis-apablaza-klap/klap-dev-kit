@@ -33,7 +33,12 @@ if (!existsSync(certPath)) {
   denegar("PreToolUse", `Push bloqueado: no existe certificación para ${issue} (${certPath}). Ejecuta /klap:certificar antes de hacer push.`);
 }
 
-const cert = JSON.parse(readFileSync(certPath, "utf8"));
+let cert;
+try {
+  cert = JSON.parse(readFileSync(certPath, "utf8"));
+} catch {
+  denegar("PreToolUse", `Push bloqueado: ${certPath} existe pero no es JSON válido. Vuelve a ejecutar /klap:certificar.`);
+}
 if (!cert.aprobado) {
   denegar("PreToolUse", `Push bloqueado: la certificación de ${issue} no está aprobada. Motivos: ${(cert.motivos ?? []).join("; ") || "ver certificacion.json"}.`);
 }

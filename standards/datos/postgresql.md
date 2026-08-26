@@ -30,6 +30,26 @@ No envolver un método completo en `@Transactional` "por si acaso" — una trans
 retiene locks más tiempo del necesario. Separar la parte transaccional (escritura) de la
 no-transaccional (llamadas externas, cálculos) cuando sea posible.
 
+Marcar `@Transactional(readOnly = true)` en todo método que sólo lea: evita el dirty-checking
+de Hibernate/JPA sobre las entidades cargadas en la sesión y permite que el driver JDBC (o la
+infraestructura de réplicas, si existe) trate la conexión como sólo lectura. Usarlo únicamente
+cuando el método no contiene ningún `UPDATE`/`INSERT`/`UPSERT` — si existe una sola escritura
+dentro de esa transacción, `readOnly` no debe usarse.
+
+## Acceso a datos: JdbcTemplate como default (RECOMMENDED)
+
+Preferir `JdbcTemplate` puro sobre JPA/Hibernate como default para el acceso a datos — da
+control explícito del SQL generado y evita el riesgo de N+1 implícito que un ORM puede esconder
+detrás de lazy-loading. Usar JPA/Hibernate es una excepción justificada, no el default, cuando
+el dominio del componente lo requiera explícitamente (p.ej. grafos de entidades complejos donde
+el mapeo manual aportaría poco frente al costo de mantenerlo).
+
+- **RowMappers**: para queries de 20+ columnas, extraer el mapeo de fila a un `RowMapper`
+  dedicado en un paquete `mapper/` — no inline en el repositorio.
+- **SQL centralizado**: todo SQL crudo vive en una clase de constantes (p.ej. `ConstantsQuery`),
+  nunca hardcodeado inline en el método del repositorio — facilita auditar y versionar las
+  queries igual que se versiona el resto del código.
+
 ## Naming de esquema/tabla (RECOMMENDED)
 
 Consistente con lo que ya existe en `contable` y `mc_tlog` (repos transversales) — antes de
@@ -49,15 +69,3 @@ retroactivamente una vez aplicadas en un ambiente compartido.
 Para tablas grandes, preferir paginación por cursor (basada en clave) sobre `OFFSET/LIMIT`,
 que degrada linealmente con el offset. Confirmar el tamaño real de la tabla antes de decidir —
 no es necesario para tablas pequeñas de configuración.
-
----
-
-## Convención heredada de eco-team-brain (pendiente de confirmación — no vigente)
-
-`eco-team-brain` documentaba, para el dominio de liquidación BYSF, una preferencia por
-`JdbcTemplate` puro sobre JPA/Hibernate, `RowMappers` en un paquete `mapper/` para queries de
-20+ columnas, SQL centralizado en una clase `ConstantsQuery` (nunca hardcodeado inline), un
-repositorio `AuditoriaXxxRepository` para trazabilidad de operaciones, y envolver
-`DataAccessException` en una excepción de persistencia propia del dominio. No está confirmado
-que esto aplique a todos los componentes Klap actuales — tratarlo como referencia de un
-proyecto específico, no como estándar general, hasta que el equipo lo confirme o generalice.

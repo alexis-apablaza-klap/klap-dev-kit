@@ -18,16 +18,21 @@ mcp:
     server: claude_ai_Atlassian # Rovo MCP conectado en sesión (Jira + Confluence)
   sonarqube:
     server: sonarqube # nombre esperado del MCP de SonarQube cuando esté disponible
+  context7:
+    server: claude_ai_Context7 # documentación oficial de librerías/frameworks en vivo — nunca hardcodear guías estáticas de contenido que caduca con cada release
 
 stack_soportado:
   # origen: C:\klap-workspace\CLAUDE.md (2026-08-26). Confirmar con el equipo antes de v1.0.0.
   backend:
     java: "21"
     spring_boot: "4.x"
+    spring_cloud_config: "4.x"
     gradle: "8.x"
   frontend:
-    angular: "20.x"
+    angular: "21.x" # piso — cualquier proyecto puede estar en una versión mayor, nunca menor
     typescript: "5.x"
+    rxjs: "7.x"
+    scss: "1.x" # Dart Sass
   datos:
     postgresql: "16"
   mensajeria:

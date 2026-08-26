@@ -31,6 +31,10 @@ tiene contenido humano, propón el cambio como diff delimitado y explícito — 
 claramente una sección que tú generas, dilo y deja que la persona decida. Todo cambio queda
 revisable por PR antes de mezclarse.
 
+Si corresponde un ADR nuevo, nunca edites uno ya aceptado — sigue
+`standards/documentacion/adr-y-memoria.md` (un ADR que cambia se reemplaza con uno nuevo que lo
+supersede).
+
 ## Salida
 
 Diff de `docs/` y `component.yaml` propuesto, más — si aplica — el cambio de Confluence y la

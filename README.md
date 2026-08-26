@@ -13,7 +13,7 @@ separación.
 ## Instalación
 
 ```
-/plugin marketplace add https://github.com/klap-cl/klap-dev-kit.git
+/plugin marketplace add https://github.com/alexis-apablaza-klap/klap-dev-kit.git
 /plugin install klap@klap-dev-kit
 ```
 
@@ -78,9 +78,12 @@ una sola fase o capacidad (`analizar`, `disenar`, `desarrollar`, `certificar`, `
 ## Estado del contenido heredado
 
 Parte de `standards/` se migró desde `eco-team-brain` (primera aproximación interna a este
-mismo problema). Cada documento migrado queda marcado `estado: requiere-revision` en
-`standards/index.yaml` hasta que el equipo lo valide explícitamente — el kit lo advierte cada
-vez que lo usa; no lo trates como un estándar confirmado hasta que ese estado cambie.
+mismo problema); todo ese contenido ya fue revisado y separado en principio generalizable
+(promovido a `estado: vigente`) vs. detalle específico de un squad (eliminado). Quedan 2
+estándares en `estado: requiere-revision` en `standards/index.yaml`, pero no son migraciones
+pendientes de validar — son esqueletos propios de Klap (infraestructura AWS, DDD avanzado) que
+esperan insumo del equipo, no contenido heredado. El kit advierte el estado de cada standard
+cada vez que lo usa; no lo trates como confirmado mientras diga `requiere-revision`.
 
 ## Para contribuir
 

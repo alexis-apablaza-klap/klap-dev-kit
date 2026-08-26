@@ -1,20 +1,14 @@
 ---
-titulo: "Kafka avanzado — estándar heredado (requiere revisión)"
+titulo: "Kafka avanzado — configuración, DLQ y testing"
 obligatoriedad: RECOMMENDED
-estado: requiere-revision
-origen: "eco-team-brain/scripts/windows/vault/Kafka Config Standard.md, Kafka Topics Standard.md; eco-team-brain/commands/kafka-implement/SKILL.md, kafka-audit/SKILL.md"
+estado: vigente
+origen: null
 revisado_por: null
 revisado_en: null
 tags: [kafka, mensajeria, eventos]
 ---
 
-> **Contenido heredado de eco-team-brain, no confirmado como estándar Klap general.**
-> Documentado originalmente para el dominio de liquidación BYSF sobre AWS MSK/Confluent Cloud
-> con Spring Kafka. Es detallado, específico y operacionalmente valioso — se condensa aquí
-> completo en vez de descartarlo, pero cada punto debe confirmarse contra el componente Kafka
-> real que se esté auditando/implementando antes de tratarlo como obligatorio.
-
-# Kafka — patrón heredado
+# Kafka
 
 ## Patrón general
 
@@ -24,7 +18,7 @@ factory reutilizables (`getConsumerProperties`, `getProducerProperties`,
 concreta (con `@Configuration` + `@EnableKafka`) por cada dominio/topic. Nunca duplicar
 configuración Kafka copiando la clase base — siempre extenderla.
 
-## Configuración de consumer (heredado)
+## Configuración de consumer
 
 - `ackMode = MANUAL` — control explícito de commit, at-least-once real.
 - `max.poll.records = 1` — procesa de a uno, evita timeouts por lotes grandes.
@@ -36,7 +30,7 @@ configuración Kafka copiando la clase base — siempre extenderla.
 - `enable.metrics.push = false` — **crítico** en MSK/Confluent Cloud: sin esto, el reporter de
   telemetría (KIP-714) puede provocar OOM progresivo bajo presión de heap.
 
-## Configuración de producer (heredado)
+## Configuración de producer
 
 - `acks = all` — sin esto se pueden perder mensajes ante fallo de broker.
 - `enable.idempotence = true` — evita duplicados en reintentos.
@@ -47,7 +41,7 @@ configuración Kafka copiando la clase base — siempre extenderla.
 - `linger.ms = 0` cuando el envío es síncrono — con `.get()` no hay batching real, `linger > 0`
   sólo agrega latencia.
 
-## Manejo de errores y DLQ (heredado)
+## Manejo de errores y DLQ
 
 - Reintentos con backoff fijo (patrón: 3 intentos, 5s) antes de enviar a DLQ.
 - `NonRetryableClientDataException` para errores deterministas de negocio → DLQ inmediato, sin
@@ -62,7 +56,7 @@ configuración Kafka copiando la clase base — siempre extenderla.
 - El `catch` del listener debe **relanzar** la excepción (`throw e`) — si la captura sin
   relanzar, el mensaje nunca llega al error handler ni al DLQ.
 
-## Topics y consumer groups (heredado)
+## Topics y consumer groups
 
 - Naming: `{dominio}-input-topic`, `{dominio}-output-topic`, `dlq-{topic-entrada}` para la DLQ,
   `{dominio}-consumer-group` (sufijo `-local` en el perfil local).
@@ -70,17 +64,17 @@ configuración Kafka copiando la clase base — siempre extenderla.
   resetean y el consumer reprocesa desde el inicio.
 - No crear múltiples consumer groups para el mismo topic sin justificación documentada — cada
   grupo adicional reprocesa el topic completo desde su propio offset.
-- Clave de partición: el identificador de negocio que garantiza orden (p.ej. código de
-  sucursal, RUT del comercio) — una clave incorrecta rompe el orden garantizado entre mensajes
+- Clave de partición: el identificador de negocio que garantiza orden para ese dominio (p.ej.
+  RUT del comercio) — una clave incorrecta rompe el orden garantizado entre mensajes
   relacionados.
 
-## Seguridad por ambiente (heredado)
+## Seguridad por ambiente
 
 - Local: `PLAINTEXT`, sin credenciales.
 - Develop/QA/Master: `SASL_SSL` con credenciales vía variables de entorno
   (`${VAR:fallback}`), nunca en texto plano en el repositorio.
 
-## Testing (heredado — casos mínimos esperados)
+## Testing — casos mínimos esperados
 
 Para el listener: caso éxito (servicio invocado + ack), caso mensaje `null` (ack sin invocar
 servicio), caso excepción (ack **no** invocado, excepción propagada), y caso de orden
@@ -88,9 +82,8 @@ servicio), caso excepción (ack **no** invocado, excepción propagada), y caso d
 correcta, y error de envío que resulta en la excepción de dominio esperada (no la excepción
 cruda del cliente Kafka).
 
-## Auditoría de cumplimiento
+## Auditoría de cumplimiento — mejora futura a evaluar
 
-`eco-team-brain` incluía un skill `kafka-audit` que revisa una implementación existente contra
-esta checklist con severidades (Crítica/Alta/Media/Baja). Si Klap decide adoptar este patrón
-como estándar confirmado, vale la pena portar esa auditoría como parte del agente `certificador`
-o `seguridad` de este kit — no está portada en esta v1.
+Una auditoría automatizada que revise una implementación Kafka existente contra este checklist
+con severidades (Crítica/Alta/Media/Baja) sería una extensión natural del agente
+`certificador`/`seguridad` de este kit — no implementada en esta v1.

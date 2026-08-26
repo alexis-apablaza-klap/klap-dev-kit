@@ -21,6 +21,12 @@ documentado en `standards/`, no hace falta repetirlo por componente).
 Plantilla: `templates/adr.md`. No la dupliques aquí — este documento explica el *cuándo*, la
 plantilla resuelve el *cómo*.
 
+Un cuarto disparador, distinto a los anteriores: cuando una decisión ya registrada en un ADR
+previo cambia. En ese caso nunca se edita el ADR histórico — se escribe uno nuevo que lo
+reemplaza explícitamente (referenciándolo por número), preservando el registro de por qué se
+decidió cada cosa en su momento. Ver el ejemplo `adr-014`/`diseno-legacy-batch` en
+`templates/context-index.yaml`.
+
 ## Memoria del repo vs documentación de producto
 
 - **`component.yaml` + `docs/context/`** (en el repo, versionado por Git): memoria técnica del

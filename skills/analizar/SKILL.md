@@ -7,7 +7,8 @@ description: "Ejecuta sólo las fases de Contexto y Análisis sobre una HU o un 
 
 Invoca al agente `analista` (ver `agents/analista.md`) para producir contexto + análisis
 siguiendo el mismo orden estricto de fuentes que usa `/klap:trabajar-hu` (Jira → Klap
-Knowledge → memoria del repo → Confluence sólo si falta información).
+Knowledge → memoria del repo → `documentos_relevantes`/`buscar` → Confluence sólo si falta
+información).
 
 Usa este skill cuando quieras el análisis por sí solo — para estimar, para discutir alcance,
 o como insumo previo a decidir si vale la pena abrir una HU. Si el usuario luego pide avanzar

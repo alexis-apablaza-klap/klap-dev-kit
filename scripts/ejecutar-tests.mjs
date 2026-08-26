@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Detecta el stack de un repositorio y ejecuta su suite de tests con el wrapper del
- * proyecto cuando existe (gradlew/mvnw), sin asumir herramientas instaladas globalmente.
+ * proyecto cuando existe (gradlew/mvnw). Si el wrapper no existe, asume `gradle`/`mvn`
+ * instalados globalmente (para npm siempre se asume `npm`, ya viene con Node).
  *
  * Uso: node scripts/ejecutar-tests.mjs [ruta-del-repo]
  */
