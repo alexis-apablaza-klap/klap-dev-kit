@@ -31,7 +31,15 @@ integración, observabilidad, rendimiento, escalabilidad, despliegue, rollback.
 
 ## Salida
 
-`diseno.md`: propuesta concreta (no exhaustiva de alternativas descartadas — sólo la
-recomendada y por qué), componentes/archivos que cambian, impacto en contratos existentes,
-riesgos identificados y su mitigación, y compatibilidad hacia atrás explícita si aplica.
+`diseno.md`. Encabezados literales — `scripts/validar-artefacto-fase.mjs` los verifica antes de
+la pausa de fase 3, así que deben aparecer tal cual, aunque el contenido de una sección sea
+breve (p.ej. "No aplica: sin cambio de contrato.").
+
+- `## Propuesta` — la solución concreta (no exhaustiva de alternativas descartadas — sólo la
+  recomendada y por qué).
+- `## Archivos y componentes afectados`
+- `## Impacto en contratos` — REST/Kafka existentes; "No aplica" si no hay contrato tocado.
+- `## Riesgos y mitigación`
+- `## Compatibilidad hacia atrás` — explícita si aplica; "No aplica" si no corresponde.
+
 Esta fase pausa para revisión humana antes de pasar a implementación.

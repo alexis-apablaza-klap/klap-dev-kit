@@ -8,19 +8,25 @@ fase que estás ejecutando.
 Invoca `analista` con el `<ISSUE-KEY>`. El agente sigue el orden estricto documentado en
 `agents/analista.md` (Jira → producto → Klap Knowledge → component.yaml/índice →
 `documentos_relevantes`/`buscar` → Confluence sólo si falta algo). Guarda su salida en
-`.klap/hu/<ISSUE-KEY>/contexto.md`. Sin pausa.
+`.klap/hu/<ISSUE-KEY>/contexto.md`. Corre
+`node scripts/validar-artefacto-fase.mjs contexto .klap/hu/<ISSUE-KEY>/contexto.md`; si faltan
+secciones, reinvoca a `analista` con la lista antes de avanzar a fase 2. Sin pausa humana.
 
 ## Fase 2 — Análisis
 
 Invoca `analista` de nuevo, pasándole `contexto.md` (no repitas la recolección de fuentes).
-Guarda `analisis.md` con hechos/supuestos/decisiones/preguntas pendientes. **Pausa:**
-presenta el análisis al humano. Si hay preguntas pendientes bloqueantes, resuélvelas con el
-humano antes de continuar — no asumas respuestas.
+Guarda `analisis.md` con hechos/supuestos/decisiones/preguntas pendientes. Antes de la pausa,
+corre `node scripts/validar-artefacto-fase.mjs analisis .klap/hu/<ISSUE-KEY>/analisis.md`. Si
+reporta secciones faltantes, reinvoca a `analista` con esa lista en vez de presentar al humano
+un artefacto incompleto. **Pausa:** presenta el análisis al humano. Si hay preguntas pendientes
+bloqueantes, resuélvelas con el humano antes de continuar — no asumas respuestas.
 
 ## Fase 3 — Diseño
 
-Invoca `arquitecto` con `analisis.md`. Guarda `diseno.md`. **Pausa:** presenta el diseño y
-espera confirmación explícita antes de tocar código.
+Invoca `arquitecto` con `analisis.md`. Guarda `diseno.md`. Antes de la pausa, corre
+`node scripts/validar-artefacto-fase.mjs diseno .klap/hu/<ISSUE-KEY>/diseno.md`; si faltan
+secciones, reinvoca a `arquitecto` con la lista antes de presentar el diseño. **Pausa:**
+presenta el diseño y espera confirmación explícita antes de tocar código.
 
 ## Fase 4 — Implementación
 

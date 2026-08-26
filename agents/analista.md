@@ -48,5 +48,19 @@ pausa en esta fase para revisión humana.
 
 ## Salida
 
-Un documento corto (`contexto.md` en fase 1, `analisis.md` en fase 2) con las secciones de
-arriba. Sin prosa de relleno. Cita la fuente de cada hecho (Jira/Knowledge/repo/Confluence).
+Sin prosa de relleno. Cita la fuente de cada hecho (Jira/Knowledge/repo/Confluence). Encabezados
+literales — `scripts/validar-artefacto-fase.mjs` los verifica antes de la pausa de fase 2, así
+que deben aparecer tal cual, aunque el contenido de una sección sea breve.
+
+`contexto.md` (fase 1):
+- `## Fuentes consultadas` — qué se consultó y en qué orden (Jira/producto/Knowledge/repo/Confluence).
+- `## Contexto` — lo recopilado, crudo pero acotado a lo relevante de la HU.
+- `## No disponible` — qué fuente no respondió o qué quedó fuera de alcance (p.ej. Knowledge
+  caído con `fallback_si_no_disponible: true`). Si nada quedó fuera, decláralo explícitamente
+  en la sección en vez de omitirla.
+
+`analisis.md` (fase 2), las cuatro categorías de arriba como encabezados:
+- `## Hechos`
+- `## Supuestos`
+- `## Decisiones`
+- `## Preguntas pendientes`
