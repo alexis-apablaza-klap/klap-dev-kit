@@ -2,7 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { evaluarHallazgos } from "../../scripts/deps-scan.mjs";
 
-const gates = { dependencias: { bloquear_severidad_minima: "HIGH", permitir_excepcion_explicita: true } };
+const gates = {
+  escalas: { severidad: ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+  dependencias: {
+    bloquear_si: [{ campo: "severidad", operador: ">=", valor: "HIGH", escala: "severidad" }],
+    permitir_excepcion_explicita: true,
+  },
+};
 
 test("sin hallazgos aprueba", () => {
   const veredicto = evaluarHallazgos([], gates);
@@ -39,8 +45,26 @@ test("expone si se permite excepción explícita según el gate", () => {
   assert.equal(veredicto.requiere_excepcion_si_se_ignora, true);
 });
 
-test("bloquear_severidad_minima mal configurado lanza error en vez de aprobar todo en silencio", () => {
-  const gatesInvalidos = { dependencias: { bloquear_severidad_minima: "high", permitir_excepcion_explicita: true } };
+test("umbral de severidad fuera de la escala configurada lanza error en vez de aprobar todo en silencio", () => {
+  const gatesInvalidos = {
+    escalas: { severidad: ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+    dependencias: {
+      bloquear_si: [{ campo: "severidad", operador: ">=", valor: "high", escala: "severidad" }],
+      permitir_excepcion_explicita: true,
+    },
+  };
   const hallazgos = [{ herramienta: "trivy", severidad: "CRITICAL", paquete: "x", id: "CVE-9" }];
-  assert.throws(() => evaluarHallazgos(hallazgos, gatesInvalidos), /no es una severidad válida/);
+  assert.throws(() => evaluarHallazgos(hallazgos, gatesInvalidos), /no está en la escala/);
+});
+
+test("escala inexistente en config lanza error en vez de aprobar todo en silencio", () => {
+  const gatesInvalidos = {
+    escalas: {},
+    dependencias: {
+      bloquear_si: [{ campo: "severidad", operador: ">=", valor: "HIGH", escala: "severidad" }],
+      permitir_excepcion_explicita: true,
+    },
+  };
+  const hallazgos = [{ herramienta: "trivy", severidad: "CRITICAL", paquete: "x", id: "CVE-9" }];
+  assert.throws(() => evaluarHallazgos(hallazgos, gatesInvalidos), /escala desconocida/);
 });

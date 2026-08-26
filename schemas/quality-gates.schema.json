@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klap.cl/schemas/quality-gates.schema.json",
+  "title": "config/quality-gates.yaml",
+  "description": "Umbrales de certificación (v2): bloquear_si es una lista de condiciones estructuradas evaluadas por scripts/lib/gates.mjs — nunca strings de expresión ni umbrales hardcodeados en scripts.",
+  "type": "object",
+  "required": ["version", "coverage", "escalas", "sonarqube", "dependencias", "secretos", "tests"],
+  "properties": {
+    "version": { "const": 2, "description": "quality-gates.yaml v1 (bloquear_si como strings de expresión) ya no es soportado." },
+    "coverage": {
+      "type": "object",
+      "required": ["minimo_porcentaje"],
+      "properties": {
+        "minimo_porcentaje": { "type": "number", "minimum": 0, "maximum": 100 },
+        "herramienta": { "type": "string" },
+        "no_optimizar_ciegamente": { "type": "boolean" }
+      }
+    },
+    "escalas": {
+      "type": "object",
+      "description": "Escalas ordinales nombradas, reutilizables por cualquier condición con `escala:` (comparación por índice en la lista).",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" },
+        "minItems": 1
+      }
+    },
+    "sonarqube": {
+      "type": "object",
+      "required": ["quality_gate_debe_pasar", "bloquear_si"],
+      "properties": {
+        "quality_gate_debe_pasar": { "type": "boolean" },
+        "bloquear_si": { "$ref": "#/$defs/condiciones" }
+      }
+    },
+    "dependencias": {
+      "type": "object",
+      "required": ["bloquear_si", "permitir_excepcion_explicita"],
+      "properties": {
+        "herramientas": { "type": "array", "items": { "type": "string" } },
+        "bloquear_si": { "$ref": "#/$defs/condiciones" },
+        "permitir_excepcion_explicita": { "type": "boolean" }
+      }
+    },
+    "secretos": {
+      "type": "object",
+      "required": ["bloquear_siempre"],
+      "properties": { "bloquear_siempre": { "type": "boolean" } }
+    },
+    "tests": {
+      "type": "object",
+      "required": ["bloquear_si_falla_alguno"],
+      "properties": {
+        "bloquear_si_falla_alguno": { "type": "boolean" },
+        "tipos_esperados": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "$defs": {
+    "condiciones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["campo", "operador", "valor"],
+        "additionalProperties": false,
+        "properties": {
+          "campo": { "type": "string" },
+          "operador": { "type": "string", "enum": [">", ">=", "<", "<=", "==", "!="] },
+          "valor": {},
+          "escala": { "type": "string", "description": "Nombre de una entrada en escalas." },
+          "mensaje": { "type": "string", "description": "Plantilla opcional con {campo}/{actual}/{valor}." }
+        }
+      }
+    }
+  }
+}

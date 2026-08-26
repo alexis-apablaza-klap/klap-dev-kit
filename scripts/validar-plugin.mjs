@@ -68,6 +68,18 @@ export function validarPlugin(root = resolveFromRoot()) {
     }
   }
 
+  // 3c. config/quality-gates.yaml — v1 (bloquear_si como strings de expresión) ya no es
+  // soportado; un archivo en formato viejo debe fallar acá, no en runtime durante una
+  // certificación real (ver scripts/lib/gates.mjs).
+  const gatesPath = path.join(root, "config", "quality-gates.yaml");
+  const gates = readYaml(gatesPath);
+  if (!gates) {
+    problemas.push("Falta config/quality-gates.yaml");
+  } else {
+    const { valido, errores } = validar(path.join(root, "schemas", "quality-gates.schema.json"), gates);
+    if (!valido) problemas.push(...errores.map((e) => `config/quality-gates.yaml: ${e}`));
+  }
+
   // 4. Todos los .json bajo schemas/ deben parsear
   const schemasDir = path.join(root, "schemas");
   const recorrerJson = (dir) => {

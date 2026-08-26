@@ -4,16 +4,16 @@ import { evaluarGate } from "../../scripts/quality-gate.mjs";
 
 const gates = {
   coverage: { minimo_porcentaje: 92 },
+  escalas: { rating: ["A", "B", "C", "D", "E"] },
   sonarqube: {
     quality_gate_debe_pasar: true,
     bloquear_si: [
-      "bugs_nuevos > 0",
-      "vulnerabilities_nuevas > 0",
-      "security_hotspots_sin_revisar > 0",
-      { rating_mantenibilidad_peor_que: "A" },
+      { campo: "bugs_nuevos", operador: ">", valor: 0 },
+      { campo: "vulnerabilities_nuevas", operador: ">", valor: 0 },
+      { campo: "security_hotspots_sin_revisar", operador: ">", valor: 0 },
+      { campo: "rating_mantenibilidad", operador: ">", valor: "A", escala: "rating", mensaje: "Rating de mantenibilidad {actual}, peor que {valor}." },
     ],
   },
-  dependencias: { bloquear_severidad_minima: "HIGH", permitir_excepcion_explicita: true },
   tests: { bloquear_si_falla_alguno: true },
 };
 
@@ -63,7 +63,7 @@ test("el umbral de rating de mantenibilidad se lee de gates.sonarqube.bloquear_s
     ...gates,
     sonarqube: {
       ...gates.sonarqube,
-      bloquear_si: [{ rating_mantenibilidad_peor_que: "B" }],
+      bloquear_si: [{ campo: "rating_mantenibilidad", operador: ">", valor: "B", escala: "rating" }],
     },
   };
   const veredictoB = evaluarGate({ ...reporteOk, sonar: { ...reporteOk.sonar, rating_mantenibilidad: "B" } }, gatesConUmbralB);
@@ -71,4 +71,25 @@ test("el umbral de rating de mantenibilidad se lee de gates.sonarqube.bloquear_s
 
   const veredictoC = evaluarGate({ ...reporteOk, sonar: { ...reporteOk.sonar, rating_mantenibilidad: "C" } }, gatesConUmbralB);
   assert.equal(veredictoC.aprobado, false);
+});
+
+test("agregar un umbral nuevo a bloquear_si no requiere tocar quality-gate.mjs", () => {
+  const gatesConCampoNuevo = {
+    ...gates,
+    sonarqube: {
+      ...gates.sonarqube,
+      bloquear_si: [...gates.sonarqube.bloquear_si, { campo: "code_smells_nuevos", operador: ">", valor: 5, mensaje: "{actual} code smell(s) nuevo(s)." }],
+    },
+  };
+  const veredicto = evaluarGate({ ...reporteOk, sonar: { ...reporteOk.sonar, code_smells_nuevos: 8 } }, gatesConCampoNuevo);
+  assert.equal(veredicto.aprobado, false);
+  assert.ok(veredicto.motivos.includes("8 code smell(s) nuevo(s)."));
+});
+
+test("condición con operador desconocido en config lanza error en vez de aprobar en silencio", () => {
+  const gatesInvalidos = {
+    ...gates,
+    sonarqube: { ...gates.sonarqube, bloquear_si: [{ campo: "bugs_nuevos", operador: "=>", valor: 0 }] },
+  };
+  assert.throws(() => evaluarGate({ ...reporteOk, sonar: { ...reporteOk.sonar, bugs_nuevos: 1 } }, gatesInvalidos), /operador desconocido/);
 });

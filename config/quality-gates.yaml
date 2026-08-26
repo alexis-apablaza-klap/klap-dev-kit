@@ -1,24 +1,35 @@
-# Umbrales de certificación. Fuente única — scripts/quality-gate.mjs lee este archivo,
-# nunca hardcodear umbrales en agents/skills.
+# Umbrales de certificación. Fuente única — scripts/quality-gate.mjs y scripts/deps-scan.mjs
+# leen este archivo (vía scripts/lib/gates.mjs), nunca hardcodear umbrales en agents/skills.
+#
+# version: 2 — bloquear_si es una lista de condiciones estructuradas ({campo, operador, valor})
+# en vez de strings de expresión. Cambiar un umbral, o agregar uno nuevo, es editar sólo este
+# archivo — nunca scripts/quality-gate.mjs ni scripts/deps-scan.mjs. Ver scripts/lib/gates.mjs.
 
-version: 1
+version: 2
 
 coverage:
   minimo_porcentaje: 92
   herramienta: jacoco # ajustar por stack (jacoco para Java, istanbul/nyc para TS)
   no_optimizar_ciegamente: true # priorizar calidad de pruebas sobre el número; ver standards/testing
 
+# Escalas ordinales nombradas, reutilizables por cualquier condición con `escala:`.
+escalas:
+  rating: [A, B, C, D, E]
+  severidad: [LOW, MEDIUM, HIGH, CRITICAL]
+
 sonarqube:
   quality_gate_debe_pasar: true
   bloquear_si:
-    - bugs_nuevos > 0
-    - vulnerabilities_nuevas > 0
-    - security_hotspots_sin_revisar > 0
-    - rating_mantenibilidad_peor_que: "A"
+    - { campo: bugs_nuevos, operador: ">", valor: 0, mensaje: "{actual} bug(s) nuevo(s) en Sonar." }
+    - { campo: vulnerabilities_nuevas, operador: ">", valor: 0, mensaje: "{actual} vulnerabilidad(es) nueva(s) en Sonar." }
+    - { campo: security_hotspots_sin_revisar, operador: ">", valor: 0, mensaje: "{actual} security hotspot(s) sin revisar." }
+    - { campo: rating_mantenibilidad, operador: ">", valor: "A", escala: rating, mensaje: "Rating de mantenibilidad {actual}, peor que {valor}." }
 
 dependencias:
   herramientas: [owasp-dependency-check, trivy]
-  bloquear_severidad_minima: HIGH # CRITICAL y HIGH bloquean; MEDIUM/LOW quedan reportados, no bloquean
+  # CRITICAL y HIGH bloquean; MEDIUM/LOW quedan reportados, no bloquean.
+  bloquear_si:
+    - { campo: severidad, operador: ">=", valor: HIGH, escala: severidad }
   permitir_excepcion_explicita: true # requiere justificación registrada, ver standards/seguridad
 
 secretos:

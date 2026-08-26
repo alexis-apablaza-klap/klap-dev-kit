@@ -12,9 +12,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { readYaml } from "./lib/yaml-io.mjs";
+import { algunaCondicionCumple } from "./lib/gates.mjs";
 import { resolveFromRoot, esPuntoDeEntrada } from "./lib/paths.mjs";
 
-const ORDEN_SEVERIDAD = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 const WIN = process.platform === "win32";
 
 function trivyDisponible() {
@@ -64,14 +64,10 @@ export function parsearDependencyCheckReport(reportePath) {
 }
 
 export function evaluarHallazgos(hallazgos, gates = readYaml(resolveFromRoot("config", "quality-gates.yaml"))) {
-  const umbralConfigurado = gates.dependencias.bloquear_severidad_minima;
-  const umbralIdx = ORDEN_SEVERIDAD.indexOf(umbralConfigurado);
-  if (umbralIdx === -1) {
-    throw new Error(
-      `config/quality-gates.yaml: dependencias.bloquear_severidad_minima="${umbralConfigurado}" no es una severidad válida (${ORDEN_SEVERIDAD.join("/")}). No se puede evaluar el gate de dependencias.`
-    );
-  }
-  const bloqueantes = hallazgos.filter((h) => ORDEN_SEVERIDAD.indexOf(h.severidad) >= umbralIdx);
+  const condiciones = gates.dependencias.bloquear_si;
+  // algunaCondicionCumple lanza si una condición referencia un operador o escala inválida —
+  // nunca aprueba todo en silencio ante config mal formada.
+  const bloqueantes = hallazgos.filter((h) => algunaCondicionCumple(condiciones, h, gates.escalas));
   return {
     aprobado: bloqueantes.length === 0,
     total_hallazgos: hallazgos.length,
