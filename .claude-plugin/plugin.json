@@ -9,5 +9,8 @@
   },
   "homepage": "https://github.com/alexis-apablaza-klap/klap-dev-kit",
   "repository": "https://github.com/alexis-apablaza-klap/klap-dev-kit",
-  "keywords": ["klap", "dev-kit", "sdlc", "standards", "certificacion"]
+  "keywords": ["klap", "dev-kit", "sdlc", "standards", "certificacion"],
+  "experimental": {
+    "evals": "evals"
+  }
 }

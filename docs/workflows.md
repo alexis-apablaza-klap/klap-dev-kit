@@ -35,3 +35,12 @@ exista una certificación aprobada (ver `docs/troubleshooting.md`).
 Cada fase deja su artefacto en `.klap/hu/<ISSUE-KEY>/` (`contexto.md`, `analisis.md`,
 `diseno.md`, `validacion.json`, `certificacion.json`). Si la sesión se corta, esos archivos
 quedan ahí — puedes retomar sin repetir fases ya completadas.
+
+## Evaluar el criterio de los agentes
+
+`npm test` valida el andamiaje determinista (schemas, scripts, hooks) — no si un agente
+razona bien. `evals/` tiene casos de `claude plugin eval` para eso (¿`analista` reporta una
+ambigüedad real como pregunta pendiente en vez de resolverla por su cuenta?, ¿`arquitecto`
+prioriza el patrón existente del componente?, ¿`seguridad` detecta una inyección SQL real?).
+Corre `npm run eval` como paso manual antes de publicar una versión — gasta tokens de API
+reales, por eso no está en CI. Detalle en `evals/README.md`.
