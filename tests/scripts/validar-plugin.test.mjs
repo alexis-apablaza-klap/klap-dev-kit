@@ -85,6 +85,49 @@ test("no reporta problema de contractVersion cuando tools.json y config/klap.yam
   }
 });
 
+function escribirAgente(root, nombreArchivo, frontmatterExtra = "") {
+  mkdirSync(path.join(root, "agents"), { recursive: true });
+  writeFileSync(
+    path.join(root, "agents", nombreArchivo),
+    `---\nname: agente-test\ndescription: Agente de prueba.\n${frontmatterExtra}---\n\nCuerpo del agente.\n`
+  );
+}
+
+test("agente sin tools ni disallowedTools reporta que hereda todas las tools por omisión", () => {
+  const root = crearRootTemporal();
+  try {
+    escribirAgente(root, "sin-restriccion.md");
+    const { problemas } = validarPlugin(root);
+    assert.ok(problemas.some((p) => p.includes("sin-restriccion.md") && p.includes("hereda todas las tools")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("agente con disallowedTools declarado no reporta problema de least privilege", () => {
+  const root = crearRootTemporal();
+  try {
+    escribirAgente(root, "con-restriccion.md", "disallowedTools: Write, Edit, Bash\n");
+    const { problemas } = validarPlugin(root);
+    assert.ok(!problemas.some((p) => p.includes("con-restriccion.md")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("agente que declara mcpServers/hooks/permissionMode reporta que se ignoran en agentes de plugin", () => {
+  const root = crearRootTemporal();
+  try {
+    escribirAgente(root, "con-campos-ignorados.md", "disallowedTools: Bash\nmcpServers: [algo]\nhooks: {}\npermissionMode: default\n");
+    const { problemas } = validarPlugin(root);
+    assert.ok(problemas.some((p) => p.includes("mcpServers")));
+    assert.ok(problemas.some((p) => p.includes("hooks")));
+    assert.ok(problemas.some((p) => p.includes("permissionMode")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("detecta obligatoriedad/estado que no coinciden entre standards/index.yaml y el frontmatter del doc", () => {
   const root = crearRootTemporal();
   try {

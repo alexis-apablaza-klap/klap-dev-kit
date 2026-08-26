@@ -139,7 +139,11 @@ export function validarPlugin(root = resolveFromRoot()) {
     }
   }
 
-  // 7. agents/*.md — frontmatter con name + description
+  // 7. agents/*.md — frontmatter con name + description, least privilege (tools/disallowedTools
+  // declarado explícitamente, nunca heredar todo por omisión) y ningún campo que un agente de
+  // plugin ignora en silencio (mcpServers/hooks/permissionMode sólo aplican a agentes de
+  // proyecto/usuario — ver docs oficial de subagentes).
+  const CAMPOS_IGNORADOS_EN_PLUGIN = ["mcpServers", "hooks", "permissionMode"];
   const agentsDir = path.join(root, "agents");
   if (existsSync(agentsDir)) {
     for (const entry of readdirSync(agentsDir, { withFileTypes: true })) {
@@ -148,6 +152,17 @@ export function validarPlugin(root = resolveFromRoot()) {
       const fm = leerFrontmatter(readFileSync(p, "utf8"));
       if (!fm?.name || !fm?.description) {
         problemas.push(`agents/${entry.name}: frontmatter incompleto (name/description)`);
+        continue;
+      }
+      if (!fm.tools && !fm.disallowedTools) {
+        problemas.push(
+          `agents/${entry.name}: no declara tools ni disallowedTools — hereda todas las tools de la sesión por omisión (least privilege, ver propuesta #1)`
+        );
+      }
+      for (const campo of CAMPOS_IGNORADOS_EN_PLUGIN) {
+        if (fm[campo] !== undefined) {
+          problemas.push(`agents/${entry.name}: declara "${campo}", que se ignora en silencio para agentes de plugin`);
+        }
       }
     }
   }
