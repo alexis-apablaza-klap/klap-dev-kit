@@ -1,0 +1,14 @@
+[
+  {
+    "tipo": "decision",
+    "titulo": "ADR-014: Cambio de estrategia de liquidación",
+    "extracto": "Se decide mover el cálculo de liquidación desde un batch nocturno a un cálculo incremental por venta, para reducir la latencia del anticipo.",
+    "keywords": ["liquidacion", "anticipo", "batch", "adr-014"]
+  },
+  {
+    "tipo": "proceso",
+    "titulo": "Proceso de conciliación diaria contable",
+    "extracto": "El componente contable concilia diariamente los movimientos de anticipo contra el mayor contable.",
+    "keywords": ["conciliacion", "contable", "anticipo"]
+  }
+]

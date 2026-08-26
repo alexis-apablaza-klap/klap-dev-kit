@@ -1,0 +1,16 @@
+[
+  {
+    "titulo": "ADR-014: Cambio de estrategia de liquidación",
+    "fuente": "adr",
+    "referencia": "ms-central-sva-anticipo-calculos/docs/decisions/ADR-014.md",
+    "componente": "ms-central-sva-anticipo-calculos",
+    "tags": ["liquidacion", "arquitectura"]
+  },
+  {
+    "titulo": "Definición de negocio: Abono Ya - Fase 1",
+    "fuente": "confluence",
+    "referencia": "CONFLUENCE-SPACE-ABY-101",
+    "componente": null,
+    "tags": ["abono-ya", "negocio"]
+  }
+]

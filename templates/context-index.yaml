@@ -1,0 +1,34 @@
+# EJEMPLO — plantilla de docs/context/index.yaml. Copiar a docs/context/index.yaml del repo.
+# Valida contra schemas/context-index.schema.json.
+#
+# Es el índice pequeño que Claude lee por defecto — cada `resumen` debe bastar para decidir
+# si vale la pena abrir el documento. No agregues entradas para todo lo que exista en docs/,
+# sólo lo que realmente ayude a decidir sin abrir el archivo.
+
+architecture:
+  resumen: Arquitectura general del componente: capas, principales flujos y decisiones vigentes.
+  path: docs/architecture/overview.md
+  tags: [architecture]
+
+integraciones-datos:
+  resumen: Bases de datos, esquemas y contratos de integración (REST/Kafka) que usa el componente.
+  path: docs/integrations/databases.md
+  tags: [database, postgresql, integrations]
+
+adr-014:
+  resumen: Cambio de estrategia de liquidación de batch nocturno a cálculo incremental por venta.
+  path: docs/decisions/ADR-014.md
+  tags: [architecture, liquidacion]
+
+deployment:
+  resumen: Pipeline de despliegue, variables de entorno esperadas y procedimiento de rollback.
+  path: docs/deployment/pipeline.md
+  tags: [deployment, ci-cd]
+
+# Ejemplo de entrada obsoleta: se mantiene en el índice para que quede trazado que existió,
+# pero se advierte que ya no aplica (no se borra sin más).
+diseno-legacy-batch:
+  resumen: Diseño del cálculo batch nocturno, reemplazado por ADR-014.
+  path: docs/history/diseno-batch-2025.md
+  tags: [history]
+  obsoleto: true

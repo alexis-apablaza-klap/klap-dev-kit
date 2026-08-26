@@ -1,0 +1,15 @@
+{
+  "name": "klap-dev-kit",
+  "owner": {
+    "name": "Klap - Equipo de Ingeniería",
+    "email": "alexis.apablaza@klap.cl",
+    "url": "https://github.com/klap-cl/klap-dev-kit"
+  },
+  "plugins": [
+    {
+      "name": "klap",
+      "source": "./",
+      "description": "Plugin corporativo Klap: workflow /klap:trabajar-hu y skills de ciclo de desarrollo completo."
+    }
+  ]
+}

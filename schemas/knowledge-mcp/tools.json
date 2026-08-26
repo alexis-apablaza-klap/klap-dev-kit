@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klap.cl/schemas/knowledge-mcp/tools.json",
+  "_descripcion": "Contrato de herramientas que el Dev-Kit espera de cualquier servidor MCP de Klap Knowledge (mock local o servicio real). El Dev-Kit sólo conoce esta interfaz — nunca Neo4j/Graphiti u otro detalle de implementación. Formato de cada entrada: definición de tool MCP (name, description, inputSchema) más outputSchema informativo (no forma parte del protocolo MCP, pero fija el contrato para el mock y los tests).",
+  "no_lectura": ["targeted_sync"],
+  "tools": [
+    {
+      "name": "buscar_producto",
+      "description": "Identifica el/los producto(s) Klap relacionados a un texto libre (p.ej. título+descripción de una HU de Jira).",
+      "inputSchema": {
+        "type": "object",
+        "required": ["texto"],
+        "properties": {
+          "texto": { "type": "string" }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["productos"],
+        "properties": {
+          "productos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["nombre", "confianza"],
+              "properties": {
+                "nombre": { "type": "string" },
+                "confianza": { "type": "number", "minimum": 0, "maximum": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "resumen_producto",
+      "description": "Memoria resumida y condensada de un producto Klap: capacidades, componentes asociados, clientes, procesos.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["producto"],
+        "properties": {
+          "producto": { "type": "string" }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["producto", "resumen", "componentes"],
+        "properties": {
+          "producto": { "type": "string" },
+          "resumen": { "type": "string" },
+          "fase": { "type": "string" },
+          "componentes": { "type": "array", "items": { "type": "string" } },
+          "actualizado_en": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    {
+      "name": "resumen_componente",
+      "description": "Memoria resumida de un componente/repositorio: capabilities, dependencias, APIs, relaciones con otros componentes y productos.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["componente"],
+        "properties": {
+          "componente": { "type": "string" }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["componente", "resumen"],
+        "properties": {
+          "componente": { "type": "string" },
+          "resumen": { "type": "string" },
+          "productos": { "type": "array", "items": { "type": "string" } },
+          "dependencias": { "type": "array", "items": { "type": "string" } },
+          "actualizado_en": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    {
+      "name": "buscar",
+      "description": "Búsqueda semántica/estructurada de propósito general sobre el grafo de conocimiento (decisiones, ADR, integraciones, procesos).",
+      "inputSchema": {
+        "type": "object",
+        "required": ["consulta"],
+        "properties": {
+          "consulta": { "type": "string" },
+          "tipos": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["producto", "componente", "decision", "api", "proceso", "documento"] }
+          },
+          "limite": { "type": "integer", "minimum": 1, "maximum": 50, "default": 10 }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["resultados"],
+        "properties": {
+          "resultados": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["tipo", "titulo", "extracto"],
+              "properties": {
+                "tipo": { "type": "string" },
+                "titulo": { "type": "string" },
+                "extracto": { "type": "string" },
+                "relevancia": { "type": "number", "minimum": 0, "maximum": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "documentos_relevantes",
+      "description": "Devuelve punteros (no el contenido) a documentos de Confluence/ADR relevantes para un componente o consulta, para expandir sólo si Klap Knowledge no fue suficiente.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["consulta"],
+        "properties": {
+          "consulta": { "type": "string" },
+          "componente": { "type": "string" }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["documentos"],
+        "properties": {
+          "documentos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["titulo", "fuente", "referencia"],
+              "properties": {
+                "titulo": { "type": "string" },
+                "fuente": { "type": "string", "enum": ["confluence", "adr", "jira"] },
+                "referencia": { "type": "string", "description": "ID o URL para resolver con el MCP de origen (p.ej. Atlassian)." },
+                "razon": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "targeted_sync",
+      "description": "Única operación de escritura: solicita al Knowledge Platform reprocesar fuentes específicas tras un cambio. Nunca escribe directamente al grafo.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["fuentes"],
+        "properties": {
+          "fuentes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["tipo", "referencia"],
+              "properties": {
+                "tipo": { "type": "string", "enum": ["confluence", "component-yaml", "git-repo"] },
+                "referencia": { "type": "string" }
+              }
+            }
+          },
+          "motivo": { "type": "string" }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["aceptado", "solicitud_id"],
+        "properties": {
+          "aceptado": { "type": "boolean" },
+          "solicitud_id": { "type": "string" }
+        }
+      }
+    }
+  ]
+}

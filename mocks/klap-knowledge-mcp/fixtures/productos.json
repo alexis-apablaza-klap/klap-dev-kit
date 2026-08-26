@@ -1,0 +1,30 @@
+[
+  {
+    "nombre": "abono-ya",
+    "resumen": "Pago adelantado al comercio de las ventas del día, sin esperar el proceso de pago normal (payout acceleration).",
+    "fase": "fase-1",
+    "componentes": ["ms-central-sva-anticipo-calculos", "ms-central-sva-anticipo-ondemand"],
+    "keywords": ["abono", "anticipo", "payout", "adelanto", "liquidacion"]
+  },
+  {
+    "nombre": "impulso-klap",
+    "resumen": "Crédito otorgado por R2 al comercio en base a su historial de ventas, pagado día a día vía retenciones sobre los pagos de Klap.",
+    "fase": "mantencion",
+    "componentes": [],
+    "keywords": ["credito", "impulso", "retencion", "r2"]
+  },
+  {
+    "nombre": "cuota-comercio",
+    "resumen": "Soluciones de pago en cuotas para comercio.",
+    "fase": "mantencion",
+    "componentes": [],
+    "keywords": ["cuota", "installment", "comercio"]
+  },
+  {
+    "nombre": "vouchering-itau",
+    "resumen": "Proyecto en definición, sin repositorios creados aún.",
+    "fase": "kickoff",
+    "componentes": [],
+    "keywords": ["itau", "voucher"]
+  }
+]

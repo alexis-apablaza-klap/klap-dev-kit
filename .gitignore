@@ -1,0 +1,8 @@
+node_modules/
+*.log
+.klap/hu/
+.DS_Store
+Thumbs.db
+
+# Estado local de Claude Code (settings.local.json, locks de tareas) — no compartido.
+.claude/

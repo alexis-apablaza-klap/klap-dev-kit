@@ -1,0 +1,50 @@
+# Configuración central del Klap Dev-Kit.
+# Única fuente de verdad para versiones de stack, nombres de MCP y rutas de índices.
+# No hardcodear ninguno de estos valores en skills, agents o standards — referenciar este archivo.
+
+version: 1
+
+mcp:
+  # Nombre del servidor MCP tal como está registrado en la sesión de Claude Code.
+  # Cambiar aquí cuando el servicio real de Klap Knowledge reemplace al mock.
+  knowledge:
+    server: klap-knowledge-local-mock
+    modo: mock # mock | produccion
+    fallback_si_no_disponible: true
+    # Comando para levantar el mock como proceso stdio independiente de Claude Code
+    # (usado por scripts/targeted-sync.mjs y por tests). No aplica en modo produccion.
+    mock_launch: ["node", "mocks/klap-knowledge-mcp/server.mjs"]
+  atlassian:
+    server: claude_ai_Atlassian # Rovo MCP conectado en sesión (Jira + Confluence)
+  sonarqube:
+    server: sonarqube # nombre esperado del MCP de SonarQube cuando esté disponible
+
+stack_soportado:
+  # origen: C:\klap-workspace\CLAUDE.md (2026-08-26). Confirmar con el equipo antes de v1.0.0.
+  backend:
+    java: "21"
+    spring_boot: "4.x"
+    gradle: "8.x"
+  frontend:
+    angular: "20.x"
+    typescript: "5.x"
+  datos:
+    postgresql: "16"
+  mensajeria:
+    confluent_kafka: "7.x"
+  infraestructura:
+    aws_lambda: true
+  ci:
+    proveedor: github-actions # portable a Bitbucket/Jenkins si el hosting migra
+
+rutas:
+  standards_index: standards/index.yaml
+  quality_gates: config/quality-gates.yaml
+  component_schema: schemas/component.schema.json
+  context_index_schema: schemas/context-index.schema.json
+  knowledge_mcp_contract: schemas/knowledge-mcp/tools.json
+
+hosting:
+  proveedor_actual: github
+  cuenta: alexis.apablaza@klap.cl
+  migracion_planificada: bitbucket # informativo — el CI debe mantenerse portable

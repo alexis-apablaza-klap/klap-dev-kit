@@ -1,0 +1,12 @@
+{
+  "ms-central-sva-anticipo-calculos": {
+    "resumen": "Calcula el monto anticipable por comercio a partir de las ventas del día. Expone REST interno y consume eventos de ventas.",
+    "productos": ["abono-ya"],
+    "dependencias": ["ms-central-sva-anticipo-ondemand", "contable", "mc_tlog"]
+  },
+  "ms-central-sva-anticipo-ondemand": {
+    "resumen": "Ejecuta el pago on-demand del anticipo ya calculado hacia el comercio.",
+    "productos": ["abono-ya"],
+    "dependencias": ["ms-central-sva-anticipo-calculos", "contable"]
+  }
+}

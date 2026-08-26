@@ -1,0 +1,14 @@
+{
+  "name": "klap",
+  "displayName": "Klap Dev-Kit",
+  "version": "0.1.0",
+  "description": "Estandariza y asiste el ciclo completo de desarrollo de software en Klap: contexto, análisis, diseño, implementación, certificación y documentación de una Historia de Usuario, con validaciones deterministas y consumo de Klap Knowledge vía MCP.",
+  "author": {
+    "name": "Klap - Equipo de Ingeniería",
+    "email": "alexis.apablaza@klap.cl"
+  },
+  "homepage": "https://github.com/klap-cl/klap-dev-kit",
+  "repository": "https://github.com/klap-cl/klap-dev-kit",
+  "license": "UNLICENSED",
+  "keywords": ["klap", "dev-kit", "sdlc", "standards", "certificacion"]
+}

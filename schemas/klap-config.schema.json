@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klap.cl/schemas/klap-config.schema.json",
+  "title": "config/klap.yaml",
+  "type": "object",
+  "required": ["version", "mcp", "stack_soportado", "rutas"],
+  "additionalProperties": true,
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "mcp": {
+      "type": "object",
+      "required": ["knowledge", "atlassian"],
+      "properties": {
+        "knowledge": {
+          "type": "object",
+          "required": ["server", "modo"],
+          "properties": {
+            "server": { "type": "string" },
+            "modo": { "type": "string", "enum": ["mock", "produccion"] },
+            "fallback_si_no_disponible": { "type": "boolean" },
+            "mock_launch": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "atlassian": {
+          "type": "object",
+          "required": ["server"],
+          "properties": { "server": { "type": "string" } }
+        },
+        "sonarqube": {
+          "type": "object",
+          "properties": { "server": { "type": "string" } }
+        }
+      }
+    },
+    "stack_soportado": { "type": "object" },
+    "rutas": {
+      "type": "object",
+      "required": ["standards_index", "quality_gates", "component_schema", "context_index_schema", "knowledge_mcp_contract"],
+      "additionalProperties": { "type": "string" }
+    },
+    "hosting": { "type": "object" }
+  }
+}

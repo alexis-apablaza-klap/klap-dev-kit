@@ -1,0 +1,7 @@
+{
+  "klap-knowledge-local-mock": {
+    "type": "stdio",
+    "command": "node",
+    "args": ["${CLAUDE_PLUGIN_ROOT}/mocks/klap-knowledge-mcp/server.mjs"]
+  }
+}

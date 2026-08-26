@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klap.cl/schemas/standards-index.schema.json",
+  "title": "standards/index.yaml",
+  "description": "Índice plano de todos los estándares Klap. Se lee completo (es pequeño); los documentos individuales se abren sólo bajo demanda.",
+  "type": "object",
+  "minProperties": 1,
+  "additionalProperties": {
+    "type": "object",
+    "required": ["resumen", "path", "obligatoriedad", "estado"],
+    "additionalProperties": false,
+    "properties": {
+      "resumen": { "type": "string", "maxLength": 300 },
+      "path": { "type": "string" },
+      "obligatoriedad": {
+        "type": "string",
+        "enum": ["MANDATORY", "RECOMMENDED", "CONTEXT_DEPENDENT"]
+      },
+      "estado": {
+        "type": "string",
+        "enum": ["vigente", "requiere-revision", "deprecado"]
+      },
+      "tags": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    }
+  }
+}

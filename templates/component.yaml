@@ -1,0 +1,81 @@
+# EJEMPLO — plantilla de component.yaml. Copiar a la raíz del repo y completar.
+# Valida contra schemas/component.schema.json — usa `node scripts/validar-component.mjs .`
+# desde la raíz del repo para verificar. Los datos de este ejemplo son ilustrativos, no reales.
+
+# Nombre lógico único del componente (coincide con el nombre del repositorio).
+componente: ms-central-sva-anticipo-calculos
+
+# Una o dos frases. Qué hace este componente, no cómo está implementado.
+descripcion: >-
+  Calcula el monto anticipable por comercio a partir de las ventas del día
+  para el producto Abono Ya.
+
+repositorio:
+  url: https://github.com/klap-cl/ms-central-sva-anticipo-calculos
+  rama_principal: main
+
+# Producto(s) Klap a los que pertenece o se relaciona este componente.
+# `fase` es la fase del PRODUCTO (no del componente): kickoff | mvp | fase-1 | mantencion.
+productos:
+  - nombre: abono-ya
+    fase: fase-1
+
+# Capacidades de negocio que este componente expone o soporta.
+capabilities:
+  - calculo-monto-anticipable
+  - validacion-elegibilidad-comercio
+
+# Otros componentes de los que este depende (para entender impacto y riesgo de cambios).
+dependencias:
+  - componente: ms-central-sva-anticipo-ondemand
+    tipo: rest
+    critica: true
+  - componente: contable
+    tipo: base-datos-compartida
+    critica: true
+  - componente: mc_tlog
+    tipo: kafka
+    critica: false
+
+# APIs que este componente expone hacia otros.
+apis_expuestas:
+  - nombre: obtener-monto-anticipable
+    tipo: rest
+    ruta_contrato: docs/integrations/openapi-anticipo-calculos.yaml
+    version: v1
+
+# APIs de otros componentes que este consume.
+apis_consumidas:
+  - nombre: ejecutar-pago-anticipo
+    componente_origen: ms-central-sva-anticipo-ondemand
+    tipo: rest
+
+# Bases de datos/esquemas que usa, y si es o no el dueño del esquema.
+datos:
+  - motor: postgresql
+    base: contable
+    esquema: sva_anticipo
+    propietario: true
+
+# Topics de Kafka en los que participa.
+eventos:
+  - topic: ventas.comercio.registradas
+    rol: consumidor
+    schema_registry: mc_tlog-schema-registry
+  - topic: anticipo.monto.calculado
+    rol: productor
+    schema_registry: mc_tlog-schema-registry
+
+# Stack tecnológico real del componente — usar los mismos identificadores que
+# config/klap.yaml → stack_soportado (java-21, spring-boot-4, gradle, postgresql, etc).
+tecnologias:
+  - java-21
+  - spring-boot-4
+  - gradle
+  - postgresql
+
+# Datos mínimos para relacionar este componente con Klap Knowledge.
+# component_id: TODO — confirmar con el equipo de Klap Knowledge / Arquitectura antes
+# de completarlo; no inventar un identificador.
+klap_knowledge:
+  component_id: TODO

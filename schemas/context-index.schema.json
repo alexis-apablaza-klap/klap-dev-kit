@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klap.cl/schemas/context-index.schema.json",
+  "title": "docs/context/index.yaml",
+  "description": "Índice pequeño de la documentación del componente. Es lo único que se lee por defecto; los documentos referenciados sólo se abren si la tarea lo requiere (progressive disclosure).",
+  "type": "object",
+  "minProperties": 1,
+  "additionalProperties": {
+    "type": "object",
+    "required": ["resumen", "path"],
+    "additionalProperties": false,
+    "properties": {
+      "resumen": {
+        "type": "string",
+        "maxLength": 300,
+        "description": "Una o dos frases. Debe bastar para decidir si vale la pena abrir el documento."
+      },
+      "path": {
+        "type": "string",
+        "description": "Ruta relativa al repo, p.ej. docs/architecture/overview.md."
+      },
+      "tags": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "obsoleto": {
+        "type": "boolean",
+        "default": false
+      }
+    }
+  }
+}
