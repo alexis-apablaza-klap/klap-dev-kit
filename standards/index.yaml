@@ -1,5 +1,9 @@
 # Índice plano de standards/. Se lee completo (es pequeño) — los documentos
 # individuales se abren sólo bajo demanda. Valida contra schemas/standards-index.schema.json.
+#
+# Campo opcional `productos: [...]` por entrada (no poblado hoy): agregar sólo cuando un
+# estándar sea específico de un producto (abono-ya/impulso-klap/cuota-comercio/vouchering-itau),
+# para poder filtrar el índice sin cargarlo completo cuando crezca a docenas de entradas.
 
 stack-tecnologico:
   resumen: "Cómo se usa el stack oficial Klap (Java 21, Spring Boot 4.x, Gradle, Angular 21+, PostgreSQL 16, Kafka, AWS Lambda). Las versiones viven en config/klap.yaml, no aquí."

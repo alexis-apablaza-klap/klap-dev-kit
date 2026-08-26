@@ -26,8 +26,16 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ### Pendiente para 1.0.0
 
-- Confirmar con el equipo el contenido migrado desde `eco-team-brain` (`estado:
-  requiere-revision` en `standards/index.yaml`).
+- Completar los 2 estándares que siguen en `estado: requiere-revision` en
+  `standards/index.yaml` — son esqueletos sin contenido confirmado por el equipo, no
+  contenido migrado pendiente de revisión (eso ya se cerró en Etapa 2):
+  `standards/infraestructura/aws-serverless.md` y `standards/arquitectura/ddd-avanzado.md`.
 - Reemplazar `klap-knowledge-local-mock` por el servicio real de Klap Knowledge cuando esté
-  disponible (cambiar `config/klap.yaml` → `mcp.knowledge.modo: produccion`).
+  disponible (cambiar `config/klap.yaml` → `mcp.knowledge.modo: produccion`), verificando
+  `contractVersion` en `schemas/knowledge-mcp/tools.json` contra lo que el servicio real
+  implemente.
 - Confirmar nombre de servidor MCP de SonarQube una vez esté desplegado.
+- Mutation testing (PIT/Stryker) como umbral de `config/quality-gates.yaml` — decidir
+  tooling por stack y calibrar el umbral con un repo real.
+- `scripts/auditar-kafka.mjs`: auditoría estática contra el checklist de
+  `standards/mensajeria/kafka-avanzado.md`.

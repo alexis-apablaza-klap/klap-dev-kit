@@ -23,6 +23,11 @@
       "tags": {
         "type": "array",
         "items": { "type": "string" }
+      },
+      "productos": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Opcional. Sólo cuando un estándar es específico de un producto (abono-ya, impulso-klap, cuota-comercio, vouchering-itau) — permite filtrar el índice sin cargarlo completo cuando crezca. No poblar por defecto."
       }
     }
   }
