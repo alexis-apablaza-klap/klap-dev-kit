@@ -8,9 +8,17 @@ on:
 # Toda la lógica de validación vive en scripts Node (scripts/*.mjs, tests/), no en este
 # YAML. Migrar de GitHub Actions a otro proveedor (p.ej. Bitbucket Pipelines) es cambiar
 # este archivo por su equivalente sin reescribir ninguna validación.
+#
+# Matriz ubuntu + windows: scripts/ejecutar-tests.mjs y scripts/deps-scan.mjs tienen ramas
+# de código exclusivas de Windows (gradlew.bat, shell: true en spawnSync) que sólo corren
+# en el runner windows-latest — nunca las ejecuta el mismo job que corre en ubuntu-latest.
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
@@ -26,3 +34,23 @@ jobs:
 
       - name: Coherencia estructural del plugin
         run: npm run validate
+
+      # bootstrap/install.ps1 no lo ejecuta ningún job — se verifica al menos que parsea sin
+      # errores de sintaxis en el runner windows-latest (nunca se ejecuta, sólo se parsea).
+      - name: Verificar sintaxis de bootstrap/install.ps1
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $errores = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            "bootstrap/install.ps1", [ref]$null, [ref]$errores
+          ) | Out-Null
+          if ($errores.Count -gt 0) {
+            $errores | ForEach-Object { Write-Error $_ }
+            exit 1
+          }
+          Write-Host "OK: bootstrap/install.ps1 parsea sin errores de sintaxis."
+
+      - name: Verificar sintaxis de bootstrap/install.sh (shellcheck)
+        if: runner.os == 'Linux'
+        run: shellcheck bootstrap/install.sh
