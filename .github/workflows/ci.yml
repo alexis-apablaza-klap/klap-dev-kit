@@ -35,6 +35,9 @@ jobs:
       - name: Coherencia estructural del plugin
         run: npm run validate
 
+      - name: Lint
+        run: npm run lint
+
       # bootstrap/install.ps1 no lo ejecuta ningún job — se verifica al menos que parsea sin
       # errores de sintaxis en el runner windows-latest (nunca se ejecuta, sólo se parsea).
       - name: Verificar sintaxis de bootstrap/install.ps1

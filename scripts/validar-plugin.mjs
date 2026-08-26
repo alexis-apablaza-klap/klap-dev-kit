@@ -4,7 +4,7 @@
  * archivos reales, skills/agents con frontmatter válido. Gate de CI antes de publicar
  * una versión (§19). No valida contenido de negocio — sólo estructura.
  */
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { readYaml } from "./lib/yaml-io.mjs";
 import { validar } from "./lib/schema-validate.mjs";

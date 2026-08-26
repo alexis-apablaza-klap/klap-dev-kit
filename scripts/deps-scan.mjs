@@ -81,7 +81,7 @@ if (esPuntoDeEntrada(import.meta.url)) {
   const trivyIdx = args.indexOf("--trivy");
   const dcIdx = args.indexOf("--dependency-check-report");
 
-  let hallazgos = [];
+  const hallazgos = [];
   const reportes = [];
   if (trivyIdx !== -1) {
     const r = escanearConTrivy(args[trivyIdx + 1]);

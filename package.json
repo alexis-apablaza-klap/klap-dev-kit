@@ -9,11 +9,17 @@
   },
   "scripts": {
     "test": "node --test",
-    "validate": "node scripts/validar-plugin.mjs"
+    "validate": "node scripts/validar-plugin.mjs",
+    "lint": "eslint ."
   },
   "dependencies": {
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "yaml": "^2.6.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.9.1",
+    "globals": "^17.11.0"
   }
 }

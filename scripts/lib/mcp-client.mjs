@@ -34,7 +34,7 @@ export class ClienteMcpStdio {
   }
 
   #rechazarTodas(err) {
-    for (const [id, pendiente] of this.#pendientes) {
+    for (const [, pendiente] of this.#pendientes) {
       clearTimeout(pendiente.timeout);
       pendiente.reject(err);
     }
