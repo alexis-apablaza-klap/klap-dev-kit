@@ -12,6 +12,14 @@ coverage:
   herramienta: jacoco # ajustar por stack (jacoco para Java, istanbul/nyc para TS)
   no_optimizar_ciegamente: true # priorizar calidad de pruebas sobre el número; ver standards/testing
 
+mutacion:
+  # REQUIERE-USUARIO: umbral placeholder sin calibrar — decidir con el equipo tras correr la
+  # herramienta contra un repo real (ver standards/testing/estrategia-y-coverage.md). No subir
+  # a producción sin ajustar este número con datos reales.
+  minimo_score: 60
+  herramienta: pitest # ajustar por stack (pitest para Java, stryker para TS)
+  no_optimizar_ciegamente: true # mismo principio que coverage.no_optimizar_ciegamente
+
 # Escalas ordinales nombradas, reutilizables por cualquier condición con `escala:`.
 escalas:
   rating: [A, B, C, D, E]

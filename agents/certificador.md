@@ -21,10 +21,14 @@ suficiente".
 1. Ejecuta la suite con `scripts/ejecutar-tests.mjs <repo>`.
 2. Obtén coverage real del reporte del stack (herramienta según `config/quality-gates.yaml` →
    `coverage.herramienta`, ajustable por stack — JaCoCo para Java, istanbul/nyc para TS).
-3. Consulta el MCP de SonarQube (`config/klap.yaml` → `mcp.sonarqube`) por bugs,
+3. Si el repo corre mutation testing (PITest/Stryker según `config/quality-gates.yaml` →
+   `mutacion.herramienta`), incluye `mutation_score` en el reporte. Si todavía no lo corre,
+   omite el campo — no lo inventes ni lo reportes como 0; el gate no bloquea cuando el campo
+   está ausente (dato no reportado no es lo mismo que reprobar el umbral).
+4. Consulta el MCP de SonarQube (`config/klap.yaml` → `mcp.sonarqube`) por bugs,
    vulnerabilidades, security hotspots, duplicación y el estado del Quality Gate.
-4. Arma el reporte JSON esperado por `scripts/quality-gate.mjs` y ejecútalo.
-5. No optimices para el número de cobertura ciegamente — si el coverage es alto pero las
+5. Arma el reporte JSON esperado por `scripts/quality-gate.mjs` y ejecútalo.
+6. No optimices para el número de cobertura ciegamente — si el coverage es alto pero las
    pruebas no verifican comportamiento real, repórtalo como hallazgo de calidad aparte del
    veredicto numérico.
 

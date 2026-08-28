@@ -35,7 +35,8 @@ Versionado según [SemVer](https://semver.org/lang/es/).
   `contractVersion` en `schemas/knowledge-mcp/tools.json` contra lo que el servicio real
   implemente.
 - Confirmar nombre de servidor MCP de SonarQube una vez esté desplegado.
-- Mutation testing (PIT/Stryker) como umbral de `config/quality-gates.yaml` — decidir
-  tooling por stack y calibrar el umbral con un repo real.
+- Mutation testing: el gate ya existe (`config/quality-gates.yaml` → `mutacion.minimo_score`,
+  `scripts/quality-gate.mjs`) — REQUIERE-USUARIO: falta calibrar `minimo_score` (hoy 60%,
+  placeholder) contra un repo real corriendo PITest/Stryker.
 - `scripts/auditar-kafka.mjs`: auditoría estática contra el checklist de
   `standards/mensajeria/kafka-avanzado.md`.

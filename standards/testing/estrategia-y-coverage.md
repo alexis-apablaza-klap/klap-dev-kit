@@ -66,10 +66,17 @@ void calcularMontoAnticipo_ventaConDescuento_aplicaPorcentajeCorrecto() {
 Si el `certificador` detecta coverage alto pero pruebas de este tipo débil, debe reportarlo
 como hallazgo de calidad separado del veredicto numérico del gate — ver `agents/certificador.md`.
 
-Mejora futura a evaluar por el equipo (no implementada en este kit): mutation testing
-(p.ej. PITest para Java) detecta este mismo problema de forma determinista — muta el código de
-producción y verifica si algún test lo captura. Si el equipo lo adopta, movería este control
-del juicio del `certificador` a un gate real en `scripts/quality-gate.mjs`.
+## Mutation testing — `config/quality-gates.yaml` → `mutacion.minimo_score`
+
+Detecta el mismo problema ("coverage alto, pruebas débiles") de forma determinista: muta el
+código de producción y verifica si algún test lo captura. El gate ya existe en
+`scripts/quality-gate.mjs` (bloquea si `mutation_score` reportado < `mutacion.minimo_score`) y
+sólo se evalúa cuando el repo efectivamente corre PITest (Java) o Stryker (TS) — un repo que
+todavía no lo tiene configurado no se bloquea por su ausencia.
+
+REQUIERE-USUARIO: `mutacion.minimo_score` en `config/quality-gates.yaml` es un placeholder
+(60%) sin calibrar contra un repo real — el equipo debe correr la herramienta contra un
+componente Klap real y ajustar el número antes de tratarlo como umbral definitivo.
 
 ## Tipos esperados en CI
 

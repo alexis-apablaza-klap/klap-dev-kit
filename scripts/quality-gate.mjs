@@ -7,6 +7,7 @@
  * Uso: node scripts/quality-gate.mjs <reporte.json>
  * reporte.json: {
  *   coverage_porcentaje: number,
+ *   mutation_score?: number, // opcional — sólo se evalúa si el repo corre PIT/Stryker
  *   sonar: { bugs_nuevos, vulnerabilities_nuevas, security_hotspots_sin_revisar, rating_mantenibilidad, quality_gate_status },
  *   tests: { total, fallidos }
  * }
@@ -25,6 +26,12 @@ export function evaluarGate(reporte, gates = readYaml(resolveFromRoot("config", 
 
   if (typeof reporte.coverage_porcentaje === "number" && reporte.coverage_porcentaje < gates.coverage.minimo_porcentaje) {
     motivos.push(`Coverage ${reporte.coverage_porcentaje}% bajo el mínimo ${gates.coverage.minimo_porcentaje}%.`);
+  }
+
+  // Sólo bloquea si el repo reportó mutation_score (no todos corren PIT/Stryker todavía) —
+  // dato no reportado no es lo mismo que violación del umbral, igual criterio que gates.mjs.
+  if (typeof reporte.mutation_score === "number" && reporte.mutation_score < gates.mutacion.minimo_score) {
+    motivos.push(`Mutation score ${reporte.mutation_score}% bajo el mínimo ${gates.mutacion.minimo_score}%.`);
   }
 
   const s = reporte.sonar ?? {};

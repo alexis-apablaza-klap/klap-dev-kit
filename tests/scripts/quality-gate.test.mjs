@@ -4,6 +4,7 @@ import { evaluarGate } from "../../scripts/quality-gate.mjs";
 
 const gates = {
   coverage: { minimo_porcentaje: 92 },
+  mutacion: { minimo_score: 60 },
   escalas: { rating: ["A", "B", "C", "D", "E"] },
   sonarqube: {
     quality_gate_debe_pasar: true,
@@ -39,6 +40,17 @@ test("coverage bajo el mínimo reprueba", () => {
   const veredicto = evaluarGate({ ...reporteOk, coverage_porcentaje: 80 }, gates);
   assert.equal(veredicto.aprobado, false);
   assert.ok(veredicto.motivos.some((m) => m.includes("Coverage")));
+});
+
+test("mutation score bajo el mínimo reprueba", () => {
+  const veredicto = evaluarGate({ ...reporteOk, mutation_score: 40 }, gates);
+  assert.equal(veredicto.aprobado, false);
+  assert.ok(veredicto.motivos.some((m) => m.includes("Mutation score")));
+});
+
+test("mutation_score ausente no bloquea (no todos los repos corren PIT/Stryker todavía)", () => {
+  const veredicto = evaluarGate(reporteOk, gates);
+  assert.equal(veredicto.aprobado, true);
 });
 
 test("Sonar Quality Gate distinto de OK reprueba", () => {

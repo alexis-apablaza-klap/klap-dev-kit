@@ -4,7 +4,7 @@
   "title": "config/quality-gates.yaml",
   "description": "Umbrales de certificación (v2): bloquear_si es una lista de condiciones estructuradas evaluadas por scripts/lib/gates.mjs — nunca strings de expresión ni umbrales hardcodeados en scripts.",
   "type": "object",
-  "required": ["version", "coverage", "escalas", "sonarqube", "dependencias", "secretos", "tests"],
+  "required": ["version", "coverage", "mutacion", "escalas", "sonarqube", "dependencias", "secretos", "tests"],
   "properties": {
     "version": { "const": 2, "description": "quality-gates.yaml v1 (bloquear_si como strings de expresión) ya no es soportado." },
     "coverage": {
@@ -12,6 +12,16 @@
       "required": ["minimo_porcentaje"],
       "properties": {
         "minimo_porcentaje": { "type": "number", "minimum": 0, "maximum": 100 },
+        "herramienta": { "type": "string" },
+        "no_optimizar_ciegamente": { "type": "boolean" }
+      }
+    },
+    "mutacion": {
+      "type": "object",
+      "description": "Gate opcional en la práctica: sólo bloquea cuando el reporte trae mutation_score (no todos los stacks/repos corren PIT/Stryker todavía).",
+      "required": ["minimo_score"],
+      "properties": {
+        "minimo_score": { "type": "number", "minimum": 0, "maximum": 100 },
         "herramienta": { "type": "string" },
         "no_optimizar_ciegamente": { "type": "boolean" }
       }
