@@ -176,3 +176,4 @@ node scripts/quality-gate.mjs .klap/hu/KLAP-123   # re-evalúa el veredicto de c
 | `docs/workflows.md` | Flujos de trabajo típicos combinando comandos |
 | `docs/troubleshooting.md` | Soluciones a problemas frecuentes (push bloqueado, falsos positivos de secretos, etc.) |
 | `docs/architecture-overview.md` | Cómo se relaciona el kit con Klap Knowledge y el resto del ecosistema |
+| `docs/claude-plugin-eval.md` | Qué hace `claude plugin eval`, los 3 casos del kit, y estado del early access |

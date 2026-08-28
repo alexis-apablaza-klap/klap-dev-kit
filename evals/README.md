@@ -28,9 +28,10 @@ Cada corrida gasta tokens de API reales — **no corre en CI**. Es un paso manua
 publicar una versión (ver `docs/workflows.md` → "Evaluar el criterio de los agentes").
 
 `claude plugin eval` es una función en *early access*: si ves `` `plugin eval` is currently in
-early access `` al correrlo, tu cuenta/organización todavía no tiene el flag habilitado —
-contacta a tu representante de cuenta Anthropic. `No eval cases found` (u otro error que no sea
-ese mensaje) significa que sí está habilitado y el problema es otro.
+early access `` al correrlo, tu cuenta/organización todavía no tiene el flag habilitado.
+`No eval cases found` (u otro error que no sea ese mensaje) significa que sí está habilitado y
+el problema es otro. Estado de la solicitud y por qué esto no bloquea nada del roadmap del kit:
+`docs/claude-plugin-eval.md`.
 
 ## Agregar un caso nuevo
 

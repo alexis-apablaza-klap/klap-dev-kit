@@ -58,11 +58,11 @@ archivo y qué campo está mal.
 
 ## `npm run eval` dice ``` `plugin eval` is currently in early access ```
 
-`claude plugin eval` (usado por `evals/`, ver `evals/README.md`) es una función en early
-access de Claude Code — el flag se habilita del lado de Anthropic, no hay setting local que lo
-active. Si tu cuenta/organización lo tiene habilitado, `claude plugin eval` en un directorio
-sin casos responde `No eval cases found` en vez del mensaje de early access; si sigues viendo
-ese mensaje, contacta a tu representante de cuenta Anthropic para solicitarlo.
+`claude plugin eval` (usado por `evals/`) es una función en early access de Claude Code — el
+flag se habilita del lado de Anthropic a nivel de organización, no hay setting local que lo
+active. Detalle completo (qué hace, estado de la solicitud, por qué no bloquea nada) en
+`docs/claude-plugin-eval.md`. Auto-test rápido: en un directorio sin casos, `No eval cases
+found` significa que ya está habilitado; si sigues viendo el mensaje de early access, no.
 
 ## `/klap:trabajar-hu` no muestra los 8 comandos tras instalar
 

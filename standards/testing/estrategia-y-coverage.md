@@ -81,9 +81,9 @@ código de producción y verifica si algún test lo captura. El gate ya existe e
 sólo se evalúa cuando el repo efectivamente corre PITest (Java) o Stryker (TS) — un repo que
 todavía no lo tiene configurado no se bloquea por su ausencia.
 
-REQUIERE-USUARIO: `mutacion.minimo_score` en `config/quality-gates.yaml` es un placeholder
-(60%) sin calibrar contra un repo real — el equipo debe correr la herramienta contra un
-componente Klap real y ajustar el número antes de tratarlo como umbral definitivo.
+`mutacion.minimo_score` en `config/quality-gates.yaml` (60%) es un umbral interino aceptado
+(decisión 2026-08-28) — no calibrado contra un repo real todavía. Recalibrarlo con un
+componente Klap real queda pospuesto a una etapa/ronda futura; mientras tanto no bloquea nada.
 
 ## Tipos esperados en CI
 

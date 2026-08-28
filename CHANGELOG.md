@@ -36,10 +36,11 @@ Versionado según [SemVer](https://semver.org/lang/es/).
   implemente.
 - Confirmar nombre de servidor MCP de SonarQube una vez esté desplegado.
 - Mutation testing: el gate ya existe (`config/quality-gates.yaml` → `mutacion.minimo_score`,
-  `scripts/quality-gate.mjs`) — REQUIERE-USUARIO: falta calibrar `minimo_score` (hoy 60%,
-  placeholder) contra un repo real corriendo PITest/Stryker.
+  `scripts/quality-gate.mjs`). `minimo_score` (60%) es un umbral interino **aceptado**
+  (decisión 2026-08-28) — recalibrarlo contra un repo real queda pospuesto a una etapa/ronda
+  futura, no bloquea nada mientras tanto.
 - `claude plugin eval`: 3 casos semilla escritos (`analista`, `arquitecto`, `seguridad`) pero
   nunca ejecutados — bloqueado por early access de Anthropic a nivel de organización, no por
-  código del kit. **Pendiente indefinido a criterio del equipo**: la autorización de Anthropic
-  puede demorar, y este ítem no bloquea el resto del roadmap del kit — se retoma cuando el
-  early access esté disponible.
+  código del kit. Solicitud ya enviada a la cuenta rep (2026-08-28), sin ETA. **Pendiente
+  indefinido, no bloqueante** por decisión explícita del usuario — ver
+  `docs/claude-plugin-eval.md`.

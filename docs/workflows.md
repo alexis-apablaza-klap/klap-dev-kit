@@ -43,4 +43,5 @@ razona bien. `evals/` tiene casos de `claude plugin eval` para eso (¿`analista`
 ambigüedad real como pregunta pendiente en vez de resolverla por su cuenta?, ¿`arquitecto`
 prioriza el patrón existente del componente?, ¿`seguridad` detecta una inyección SQL real?).
 Corre `npm run eval` como paso manual antes de publicar una versión — gasta tokens de API
-reales, por eso no está en CI. Detalle en `evals/README.md`.
+reales, por eso no está en CI. Detalle en `evals/README.md` y en `docs/claude-plugin-eval.md`
+(qué hace exactamente, estado actual del early access).
