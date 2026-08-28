@@ -40,4 +40,6 @@ Versionado según [SemVer](https://semver.org/lang/es/).
   placeholder) contra un repo real corriendo PITest/Stryker.
 - `claude plugin eval`: 3 casos semilla escritos (`analista`, `arquitecto`, `seguridad`) pero
   nunca ejecutados — bloqueado por early access de Anthropic a nivel de organización, no por
-  código del kit.
+  código del kit. **Pendiente indefinido a criterio del equipo**: la autorización de Anthropic
+  puede demorar, y este ítem no bloquea el resto del roadmap del kit — se retoma cuando el
+  early access esté disponible.

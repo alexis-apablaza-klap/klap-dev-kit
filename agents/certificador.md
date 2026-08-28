@@ -21,6 +21,10 @@ suficiente".
 1. Ejecuta la suite con `scripts/ejecutar-tests.mjs <repo>`.
 2. Obtén coverage real del reporte del stack (herramienta según `config/quality-gates.yaml` →
    `coverage.herramienta`, ajustable por stack — JaCoCo para Java, istanbul/nyc para TS).
+   `coverage.alcance: unit` — el `coverage_porcentaje` que pasas al script debe salir de la
+   ejecución de **unit tests solamente**; nunca de un reporte combinado con integration/
+   functional (infla el número y deja de medir lo que el umbral dice medir). Cobertura real de
+   negocio (que las pruebas verifiquen comportamiento) es el punto 6, no este número.
 3. Si el repo corre mutation testing (PITest/Stryker según `config/quality-gates.yaml` →
    `mutacion.herramienta`), incluye `mutation_score` en el reporte. Si todavía no lo corre,
    omite el campo — no lo inventes ni lo reportes como 0; el gate no bloquea cuando el campo

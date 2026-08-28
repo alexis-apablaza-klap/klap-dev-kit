@@ -9,6 +9,12 @@ version: 2
 
 coverage:
   minimo_porcentaje: 92
+  # Alcance deliberado: sólo unit tests (ver pirámide en standards/testing/estrategia-y-
+  # coverage.md). Nunca mezclar con la ejecución de integration/functional en el mismo reporte
+  # — ese número dejaría de medir lo que dice medir. Cobertura de negocio real (que las pruebas
+  # verifiquen comportamiento, no sólo ejecuten código) se valida vía no_optimizar_ciegamente
+  # abajo y tests.tipos_esperados, no con un % combinado.
+  alcance: unit
   herramienta: jacoco # ajustar por stack (jacoco para Java, istanbul/nyc para TS)
   no_optimizar_ciegamente: true # priorizar calidad de pruebas sobre el número; ver standards/testing
 

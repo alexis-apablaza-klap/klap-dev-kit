@@ -9,9 +9,10 @@
     "version": { "const": 2, "description": "quality-gates.yaml v1 (bloquear_si como strings de expresión) ya no es soportado." },
     "coverage": {
       "type": "object",
-      "required": ["minimo_porcentaje"],
+      "required": ["minimo_porcentaje", "alcance"],
       "properties": {
         "minimo_porcentaje": { "type": "number", "minimum": 0, "maximum": 100 },
+        "alcance": { "type": "string", "enum": ["unit"], "description": "Nunca mezclar con integration/functional en el mismo número — ver standards/testing/estrategia-y-coverage.md." },
         "herramienta": { "type": "string" },
         "no_optimizar_ciegamente": { "type": "boolean" }
       }

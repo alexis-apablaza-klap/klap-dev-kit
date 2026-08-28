@@ -31,9 +31,16 @@ es obligatorio.
 
 ## Coverage — JaCoCo
 
-El umbral vigente vive en `config/quality-gates.yaml` (`coverage.minimo_porcentaje`) —
-consúltalo ahí, no lo repitas de memoria. `scripts/quality-gate.mjs` es quien decide si el
+El umbral vigente vive en `config/quality-gates.yaml` (`coverage.minimo_porcentaje`, hoy 92%)
+— consúltalo ahí, no lo repitas de memoria. `scripts/quality-gate.mjs` es quien decide si el
 número reportado pasa o no; ningún agente debe aprobar/rechazar por su cuenta.
+
+**Alcance: sólo unit tests** (`coverage.alcance: unit`). El 92% se mide exclusivamente sobre la
+ejecución de la capa "Unit" de la pirámide de arriba — nunca sobre un reporte combinado con
+integration/functional. Mezclar ambos infla el número artificialmente (un caso funcional que
+recorre medio código de dominio no dice nada sobre si el dominio tiene unit tests reales) y dos
+tests distintos terminan midiendo la misma cosa. Que existan integration/functional/regression
+se valida aparte, vía `tests.tipos_esperados` — no como parte de este porcentaje.
 
 ## No optimizar cobertura ciegamente (MANDATORY el principio; hoy se apoya en juicio del `certificador`, no en script)
 
