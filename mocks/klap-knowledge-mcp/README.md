@@ -14,9 +14,10 @@ mientras `modo: mock`; el día que exista el servicio real basta con cambiar `se
 node mocks/klap-knowledge-mcp/server.mjs
 ```
 
-Habla JSON-RPC 2.0 con framing `Content-Length` (igual que LSP) por stdin/stdout.
-`scripts/lib/mcp-client.mjs` implementa un cliente mínimo para el mismo framing, usado
-por `scripts/targeted-sync.mjs` y por `tests/mcp/`.
+Habla JSON-RPC 2.0 con framing ndjson (un mensaje por línea, sin cabeceras
+`Content-Length` — eso es LSP, no MCP) por stdin/stdout. `scripts/lib/mcp-client.mjs`
+implementa un cliente mínimo para el mismo framing, usado por `scripts/targeted-sync.mjs`
+y por `tests/mcp/`.
 
 ## Fixtures
 
