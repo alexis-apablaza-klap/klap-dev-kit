@@ -45,7 +45,8 @@ de avanzar — no llegues a certificación con tests rotos.
 
 Invoca `certificador` y `seguridad` (pueden correr en paralelo, cada uno entrega su parte).
 El `certificador` corre `scripts/quality-gate.mjs` sobre las métricas reales que reunió;
-`seguridad` corre `scripts/deps-scan.mjs` e interpreta el diff. Combina ambos en
+`seguridad` corre `scripts/deps-scan.mjs` e interpreta el diff, y si el componente tiene
+`*KafkaConfig.java` corre además `scripts/auditar-kafka.mjs`. Combina ambos en
 `certificacion.json` con un único `aprobado` (AND de ambos) y la lista completa de `motivos`.
 Si `aprobado: false`, detente aquí y repórtalo — no continúes a documentación.
 

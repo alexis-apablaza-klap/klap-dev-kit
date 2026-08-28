@@ -32,8 +32,9 @@ La lógica de cada gate vive en `scripts/*.mjs` de este kit, no en el YAML del p
 | Gate | Script | Umbral |
 |---|---|---|
 | Tests | `scripts/ejecutar-tests.mjs` | `config/quality-gates.yaml` → `tests` |
-| Coverage + Sonar | `scripts/quality-gate.mjs` | `config/quality-gates.yaml` → `coverage`/`sonarqube` |
+| Coverage + Sonar + Mutación | `scripts/quality-gate.mjs` | `config/quality-gates.yaml` → `coverage`/`sonarqube`/`mutacion` |
 | Dependencias | `scripts/deps-scan.mjs` | `config/quality-gates.yaml` → `dependencias` |
+| Kafka (config estática, sólo si el componente tiene `*KafkaConfig.java`) | `scripts/auditar-kafka.mjs` | `config/quality-gates.yaml` → `kafka` |
 | Secretos | `scripts/escanear-secretos.mjs` | `config/quality-gates.yaml` → `secretos` (bloquea siempre) |
 | Coherencia del propio kit | `scripts/validar-plugin.mjs` | — (sólo aplica a este repo) |
 

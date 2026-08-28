@@ -38,5 +38,6 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 - Mutation testing: el gate ya existe (`config/quality-gates.yaml` → `mutacion.minimo_score`,
   `scripts/quality-gate.mjs`) — REQUIERE-USUARIO: falta calibrar `minimo_score` (hoy 60%,
   placeholder) contra un repo real corriendo PITest/Stryker.
-- `scripts/auditar-kafka.mjs`: auditoría estática contra el checklist de
-  `standards/mensajeria/kafka-avanzado.md`.
+- `claude plugin eval`: 3 casos semilla escritos (`analista`, `arquitecto`, `seguridad`) pero
+  nunca ejecutados — bloqueado por early access de Anthropic a nivel de organización, no por
+  código del kit.

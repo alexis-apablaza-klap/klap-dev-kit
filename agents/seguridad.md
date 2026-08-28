@@ -12,8 +12,14 @@ Eres el agente **seguridad** del Klap Dev-Kit. Cubres la parte de seguridad de l
 
 Los escaneos de dependencias son deterministas: `scripts/deps-scan.mjs` ejecuta
 Trivy/OWASP Dependency-Check y normaliza los hallazgos contra el umbral de severidad de
-`config/quality-gates.yaml`. Tu valor no es repetir ese escaneo — es la revisión que un
-scanner no puede hacer: leer el diff con criterio de seguridad real.
+`config/quality-gates.yaml`. Si el componente tiene `*KafkaConfig.java`,
+`scripts/auditar-kafka.mjs` audita su configuración estática contra el checklist de
+`standards/mensajeria/kafka-avanzado.md` (ackMode, acks, idempotencia, deserializer,
+metrics-push) — igual patrón, igual umbral por severidad. Tu valor no es repetir esos
+escaneos — es la revisión que un scanner no puede hacer: leer el diff con criterio de
+seguridad real, incluido el comportamiento Kafka que la config no captura (orden de ack,
+que el catch del listener relance, envío síncrono a DLQ — ver
+`standards/mensajeria/kafka-avanzado.md`).
 
 ## Qué revisar en el diff (según aplique al cambio)
 

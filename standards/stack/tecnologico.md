@@ -54,7 +54,8 @@ consistencia inmediata lo exige.
 ## CI — GitHub Actions (hoy), portabilidad a Bitbucket
 
 El proveedor de CI vive en `config/klap.yaml` → `stack_soportado.ci.proveedor` y puede migrar.
-Por eso toda la lógica de validación (tests, coverage, Sonar, deps-scan, secretos) vive en
+Por eso toda la lógica de validación (tests, coverage, Sonar, deps-scan, auditoría Kafka,
+secretos) vive en
 `scripts/*.mjs` de este kit, no en el YAML del pipeline — el YAML sólo invoca los scripts. Ver
 `standards/git-cicd/flujo-y-pipeline.md`.
 

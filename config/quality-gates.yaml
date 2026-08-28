@@ -40,6 +40,12 @@ dependencias:
     - { campo: severidad, operador: ">=", valor: HIGH, escala: severidad }
   permitir_excepcion_explicita: true # requiere justificación registrada, ver standards/seguridad
 
+kafka:
+  # Sólo aplica a componentes con *KafkaConfig.java — ver scripts/auditar-kafka.mjs y
+  # standards/mensajeria/kafka-avanzado.md. Mismo patrón que dependencias.bloquear_si.
+  bloquear_si:
+    - { campo: severidad, operador: ">=", valor: HIGH, escala: severidad }
+
 secretos:
   bloquear_siempre: true # cualquier hallazgo bloquea el commit, sin excepción
 

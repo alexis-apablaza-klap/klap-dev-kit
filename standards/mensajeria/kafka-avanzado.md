@@ -82,8 +82,15 @@ servicio), caso excepción (ack **no** invocado, excepción propagada), y caso d
 correcta, y error de envío que resulta en la excepción de dominio esperada (no la excepción
 cruda del cliente Kafka).
 
-## Auditoría de cumplimiento — mejora futura a evaluar
+## Auditoría de cumplimiento — `scripts/auditar-kafka.mjs`
 
-Una auditoría automatizada que revise una implementación Kafka existente contra este checklist
-con severidades (Crítica/Alta/Media/Baja) sería una extensión natural del agente
-`certificador`/`seguridad` de este kit — no implementada en esta v1.
+Reglas estáticas de texto sobre `*KafkaConfig.java` (ackMode, `enable.metrics.push`,
+`ErrorHandlingDeserializer`, `acks`, `enable.idempotence`, `max.poll.records`), clasificadas
+por severidad y evaluadas contra `config/quality-gates.yaml` → `kafka.bloquear_si` — mismo
+patrón que `scripts/deps-scan.mjs` con dependencias. Invocado por el agente `seguridad` en la
+fase de Certificación.
+
+Alcance deliberado: sólo config de `*KafkaConfig.java`. El comportamiento de listener/producer
+(orden de ack, que el `catch` relance, envío síncrono a DLQ) depende del flujo real del código
+de negocio, no de su config — sigue siendo criterio manual del agente `seguridad`/`certificador`
+sobre el diff, no algo que un grep pueda verificar sin ambigüedad.
