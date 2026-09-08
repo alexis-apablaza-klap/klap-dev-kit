@@ -15,7 +15,7 @@ que clonar ni compilar nada manualmente para usarlo dentro de Claude Code.
 /plugin install klap@klap-dev-kit
 ```
 
-Esto registra los 8 comandos `/klap:*`, los 6 agentes, los hooks de validación y el servidor
+Esto registra los 11 comandos `/klap:*`, los 7 agentes, los hooks de validación y el servidor
 MCP mock de Klap Knowledge (se activa solo, no requiere configuración adicional para empezar
 a probar el flujo).
 
@@ -50,7 +50,7 @@ sí se instala siempre por el mecanismo nativo de Claude Code, nunca por un CLI 
 
 ## Verificar la instalación
 
-Escribe `/klap:` en el prompt y deberían listarse los 8 skills (ver `docs/commands.md`).
+Escribe `/klap:` en el prompt y deberían listarse los 11 skills (ver `docs/commands.md`).
 
 Si además tienes el repo del kit clonado localmente (desarrollo/contribución, no instalación
 normal vía marketplace), `claude plugin validate --strict <ruta-al-repo>` valida el manifest y

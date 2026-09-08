@@ -10,13 +10,16 @@ caso (`evals/<caso>/prompt.md`) como una sesión real de Claude Code contra el p
 solo archivo con varios). Por eso gasta tokens de API reales dos veces (correr el caso + el
 juez) y por eso **no corre en CI**: es un paso manual antes de publicar una versión.
 
-## Los 3 casos de este kit (`evals/`)
+## Los 6 casos de este kit (`evals/`)
 
 | Caso | Falla si... |
 |---|---|
 | `analista-no-inventa-requisitos` | el agente resuelve una ambigüedad real de la HU por su cuenta en vez de reportarla en `## Preguntas pendientes` |
 | `arquitecto-consistencia-sobre-novedad` | el diseño elige una librería nueva sin justificar por qué se aparta del patrón ya presente en el componente |
 | `seguridad-detecta-sqli` | el review no identifica explícitamente la inyección SQL del diff, o la nombra sin severidad CRITICAL/HIGH |
+| `documentador-klap-no-inventa-memoria` | el agente inventa clientela, transforma una mención textual en un `component_id` real, omite fuentes, o aplica el patch inicial sin pausa humana |
+| `documentador-klap-usa-knowledge-primero` | el agente relee fuentes ya al día o usa un `expected_revision` distinto al que entregó `obtener_producto` |
+| `documentador-klap-conflicto-no-sobrescribe` | el agente elige una fuente en silencio ante una contradicción entre Confluence y Jira, en vez de exponer el conflicto |
 
 Correrlos: `npm run eval`. Agregar uno nuevo: `claude plugin eval init --bare <nombre>` (detalle
 completo, incluida la estructura de carpetas, en `evals/README.md`).

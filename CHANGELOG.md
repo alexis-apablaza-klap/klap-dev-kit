@@ -46,8 +46,17 @@ Versionado según [SemVer](https://semver.org/lang/es/).
   `scripts/quality-gate.mjs`). `minimo_score` (60%) es un umbral interino **aceptado**
   (decisión 2026-08-28) — recalibrarlo contra un repo real queda pospuesto a una etapa/ronda
   futura, no bloquea nada mientras tanto.
-- `claude plugin eval`: 3 casos semilla escritos (`analista`, `arquitecto`, `seguridad`) pero
-  nunca ejecutados — bloqueado por early access de Anthropic a nivel de organización, no por
-  código del kit. Solicitud ya enviada a la cuenta rep (2026-08-28), sin ETA. **Pendiente
-  indefinido, no bloqueante** por decisión explícita del usuario — ver
-  `docs/claude-plugin-eval.md`.
+- `claude plugin eval`: 6 casos semilla escritos (`analista`, `arquitecto`, `seguridad`,
+  3 de `documentador-klap`) pero nunca ejecutados — bloqueado por early access de Anthropic a
+  nivel de organización, no por código del kit. Solicitud ya enviada a la cuenta rep
+  (2026-08-28), sin ETA. **Pendiente indefinido, no bloqueante** por decisión explícita del
+  usuario — ver `docs/claude-plugin-eval.md`.
+- 2 casos de `documentador-klap` sin escribir aún (no bloqueantes, cubrir cuando se retome
+  `evals/`): historial idempotente (procesar dos veces la misma HU no debe crear dos eventos
+  duplicados) y actualizaciones rutinarias con autoaplicación (un issue Jira cerrado con fuente
+  inequívoca no debe generar una pregunta al humano).
+- Piloto de `documentador-klap` sobre 2-3 productos reales (no bloqueante para 1.0.0): antes de
+  generalizar `/klap:memoria-inicializar` a todo el catálogo, evaluar en casos reales cantidad
+  de preguntas al humano, calidad de la memoria de negocio inferida, precisión de relaciones y
+  componentes detectados, tamaño de los deltas Jira/Confluence por actualización, utilidad
+  real durante el análisis de una HU, y frecuencia de conflictos Git en la memoria compartida.
