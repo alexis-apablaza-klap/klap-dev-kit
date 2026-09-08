@@ -3,5 +3,11 @@
     "type": "stdio",
     "command": "node",
     "args": ["${CLAUDE_PLUGIN_ROOT}/mocks/klap-knowledge-mcp/server.mjs"]
+  },
+  "klap-knowledge": {
+    "type": "stdio",
+    "command": "C:\\klap-workspace\\klap-dev-kit-knowledge\\.venv\\Scripts\\python.exe",
+    "args": ["-m", "klap_knowledge.server"],
+    "cwd": "C:\\klap-workspace\\klap-dev-kit-knowledge"
   }
 }

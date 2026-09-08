@@ -8,8 +8,8 @@ mcp:
   # Nombre del servidor MCP tal como está registrado en la sesión de Claude Code.
   # Cambiar aquí cuando el servicio real de Klap Knowledge reemplace al mock.
   knowledge:
-    server: klap-knowledge-local-mock
-    modo: mock # mock | produccion
+    server: klap-knowledge
+    modo: produccion # mock | produccion
     fallback_si_no_disponible: true
     # Comando para levantar el mock como proceso stdio independiente de Claude Code
     # (usado por scripts/targeted-sync.mjs y por tests). No aplica en modo produccion.
