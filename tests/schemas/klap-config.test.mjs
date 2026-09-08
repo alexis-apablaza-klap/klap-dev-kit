@@ -55,6 +55,18 @@ test("contratos.knowledge_mcp fuera de formato semver falla", () => {
   assert.equal(valido, false);
 });
 
+test("memoria.repo_path es opcional pero valida como string si está presente", () => {
+  const conMemoria = { ...configMinima, memoria: { repo_path: "../klap-dev-kit-knowledge" } };
+  const { valido, errores } = validar(schemaPath, conMemoria);
+  assert.equal(valido, true, JSON.stringify(errores));
+});
+
+test("memoria.repo_path no-string falla", () => {
+  const invalido = { ...configMinima, memoria: { repo_path: 123 } };
+  const { valido } = validar(schemaPath, invalido);
+  assert.equal(valido, false);
+});
+
 test("config/klap.yaml real del repo es válida contra su propio schema", () => {
   const real = readYaml(resolveFromRoot("config", "klap.yaml"));
   const { valido, errores } = validar(schemaPath, real);

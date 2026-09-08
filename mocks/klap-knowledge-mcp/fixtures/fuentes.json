@@ -11,5 +11,16 @@
         "CONFLUENCE-SPACE-ABY-101": { "version": "3", "updated_at": "2026-08-01T00:00:00Z", "content_hash": "sha256:fixture" }
       }
     }
+  },
+  "impulso-klap": {
+    "jira": {
+      "epics": [
+        { "key": "IMP-500", "last_seen_updated_at": "2026-07-15T00:00:00Z", "last_processed_at": "2026-07-15T00:00:00Z" }
+      ]
+    },
+    "confluence": {
+      "spaces": [{ "key": "IMP", "last_scan_at": "2026-07-15T00:00:00Z" }],
+      "pages": {}
+    }
   }
 }

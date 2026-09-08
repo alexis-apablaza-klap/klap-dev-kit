@@ -12,9 +12,14 @@ contexto crudo acumulado.
 ## Orden estricto de recuperación de contexto
 
 1. Jira (MCP Atlassian): sólo los campos de la HU necesarios (título, descripción, criterios
-   de aceptación, componente/proyecto). No traer comentarios ni histórico completo salvo que
-   la tarea lo requiera explícitamente.
-2. Identificar producto(s) desde el texto de la HU vía `buscar_producto`.
+   de aceptación, componente/proyecto, **épica/`parent`**). No traer comentarios ni histórico
+   completo salvo que la tarea lo requiera explícitamente.
+2. **Gate de producto.** Si la HU tiene épica, resuélvela primero con `producto_por_epica`
+   (determinista, contra `sources.yaml`) — es la señal preferida sobre `buscar_producto`
+   (heurístico por texto libre), que sólo se usa como respaldo si la HU no tiene épica o la
+   tool devuelve `producto: null`. Si ninguna de las dos resuelve un producto existente, el
+   gate de producto (`agents/documentador-klap.md`, Flujo 0) determina si corresponde disparar
+   el alta — no lo decidas tú ni asumas que "no aplica memoria de producto" en silencio.
 3. Klap Knowledge (MCP, ver `config/klap.yaml` → `mcp.knowledge`): `resumen_producto` para el
    caso normal (memoria condensada) o, sólo si la HU necesita el detalle completo — relaciones
    entre productos, componentes con criticidad, fuentes por dato —, `obtener_producto`. Sigue

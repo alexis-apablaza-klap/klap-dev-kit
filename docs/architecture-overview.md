@@ -28,9 +28,9 @@ Klap Dev-Kit (este repo)                          Klap Knowledge (servicio exter
 │                  umbrales,     │
 │                  nombres MCP   │
 │ schemas/       → contratos     │
-│   knowledge-mcp/tools.json ────┼──── contrato que el kit conoce (10 tools:
-└──────────────┬────────────────┘      buscar_producto, resumen_producto,
-               │                        resumen_componente, buscar,
+│   knowledge-mcp/tools.json ────┼──── contrato que el kit conoce (11 tools:
+└──────────────┬────────────────┘      producto_por_epica, buscar_producto,
+               │                        resumen_producto, resumen_componente, buscar,
                │ MCP (stdio, contrato   documentos_relevantes, obtener_producto,
                │ intercambiable)        historial_producto, estado_fuentes,
                │                        aplicar_patch_memoria, targeted_sync)
@@ -50,7 +50,7 @@ Klap Dev-Kit (este repo)                          Klap Knowledge (servicio exter
 ## La separación es literal, no sólo conceptual
 
 El Dev-Kit **no tiene ningún código que hable de la implementación de Klap Knowledge**. Todo
-lo que sabe es el contrato de `schemas/knowledge-mcp/tools.json`: diez tools, todas de lectura
+lo que sabe es el contrato de `schemas/knowledge-mcp/tools.json`: once tools, todas de lectura
 salvo las declaradas en `no_lectura` — `aplicar_patch_memoria` (única vía real de escritura,
 patch estructurado con evidencia, la usa `agents/documentador-klap.md`) y, deprecada,
 `targeted_sync` (acuse degradado, eliminación real prevista para `3.0.0`). Ninguna tool escribe

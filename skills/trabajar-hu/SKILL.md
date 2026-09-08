@@ -17,7 +17,7 @@ asumas nombres de servidor ni umbrales hardcodeados.
 
 | # | Fase | Agente | Artefacto | Pausa |
 |---|---|---|---|---|
-| 1 | Contexto | `analista` | `contexto.md` | no |
+| 1 | Contexto | `documentador-klap` (gate de producto) + `analista` | `contexto.md` | **bloqueante si el producto no existe** |
 | 2 | Análisis | `analista` | `analisis.md` | **sí — confirmar antes de diseñar** |
 | 3 | Diseño | `arquitecto` | `diseno.md` | **sí — confirmar antes de implementar** |
 | 4 | Implementación | `desarrollador` | diff + tests | no |
@@ -31,6 +31,10 @@ detalle — no lo cargues de entrada).
 
 ## Reglas duras
 
+- Fase 1 abre con un gate real: `documentador-klap` (Flujo 0, ver `agents/documentador-klap.md`)
+  resuelve el producto de la HU vía su épica (`producto_por_epica`, con `buscar_producto` como
+  respaldo). Si no existe, la HU **no avanza a Análisis** hasta que `/klap:memoria-inicializar`
+  se ejecute y su pausa humana obligatoria se apruebe.
 - Fase 6 es un gate real: si `certificacion.json` tiene `aprobado: false`, la HU no avanza a
   fase 7. Reporta los motivos tal cual el script los emitió, sin suavizarlos.
 - Las pausas de fase 2, 3 y 7 son puntos de revisión humana explícitos: presenta el artefacto

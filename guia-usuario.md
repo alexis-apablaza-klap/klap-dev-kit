@@ -53,7 +53,7 @@ Detalle completo: `docs/installation.md`. Problemas comunes: `docs/troubleshooti
 | Comandos `/klap:*` | 11 | Ejecutar el flujo completo, una fase puntual, o gestionar la memoria de producto en Klap Knowledge |
 | Agentes especializados | 7 | Cada uno cubre una fase del flujo o la memoria global de producto (los invocan los comandos, no se llaman a mano) |
 | Hooks de validación | 3 | Bloquean automáticamente commits con secretos y pushes sin certificación |
-| Scripts deterministas | 8 | Tests, coverage, quality gate, escaneo de secretos/dependencias, validación de artefactos |
+| Scripts deterministas | 10 | Tests, coverage, quality gate, escaneo de secretos/dependencias, validación de artefactos, git de la memoria de producto |
 | MCP mock de Klap Knowledge | 1 | Simula la memoria organizacional para probar el flujo sin el servicio real |
 | Estándares Klap | catálogo en `standards/` | Guías versionadas de arquitectura, seguridad, testing, etc. |
 | Plantillas | en `templates/` | `component.yaml`, ADR, RDC, `context-index.yaml` para adoptar el kit en un repo |
@@ -106,11 +106,17 @@ fase. Sirve saber qué hace cada uno para entender qué esperar en cada pausa de
 día que exista el servicio real, sólo cambia `config/klap.yaml` — ningún comando ni agente
 necesita tocarse.
 
-El contrato tiene 10 tools: las de consulta de siempre (`buscar_producto`, `resumen_producto`,
-`resumen_componente`, `buscar`, `documentos_relevantes`), la memoria estructurada completa de
-un producto (`obtener_producto`, `historial_producto`, `estado_fuentes`), y una única vía de
-escritura real — `aplicar_patch_memoria` — que sólo usa el agente `documentador-klap` (nunca a
-mano). `targeted_sync` sigue existiendo pero está deprecada.
+El contrato tiene 11 tools: las de consulta de siempre (`buscar_producto`, `resumen_producto`,
+`resumen_componente`, `buscar`, `documentos_relevantes`), `producto_por_epica` (resuelve
+determinísticamente el producto de una HU a partir de su épica Jira — es el gate de producto de
+fase 1 de `/klap:trabajar-hu`), la memoria estructurada completa de un producto
+(`obtener_producto`, `historial_producto`, `estado_fuentes`), y una única vía de escritura real
+— `aplicar_patch_memoria` — que sólo usa el agente `documentador-klap` (nunca a mano).
+`targeted_sync` sigue existiendo pero está deprecada.
+
+Cada vez que `aplicar_patch_memoria` se aplica, `scripts/memoria-git.mjs` deja el cambio en una
+rama `producto/<id>` del checkout de `klap-dev-kit-knowledge` (`config/klap.yaml` →
+`memoria.repo_path`) con PR hacia `main` — el merge siempre es humano.
 
 Para levantarlo manualmente fuera de Claude Code (debug):
 
@@ -130,8 +136,10 @@ node mocks/klap-knowledge-mcp/server.mjs
 
 Avanza fase por fase, deteniéndose a pedir tu confirmación después de **Análisis** y de
 **Diseño** (los puntos más baratos para corregir el rumbo), y se detiene solo si la
-certificación no aprueba. Al final entrega un resumen corto; el detalle de cada fase queda en
-`.klap/hu/KLAP-123/`.
+certificación no aprueba. Si la HU pertenece a un producto que todavía no existe en Klap
+Knowledge, **Contexto** se detiene primero: dispara `/klap:memoria-inicializar` y pide tu
+aprobación antes de seguir — la HU no se analiza sin memoria de producto resuelta. Al final
+entrega un resumen corto; el detalle de cada fase queda en `.klap/hu/KLAP-123/`.
 
 ### Solo una fase puntual
 

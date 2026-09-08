@@ -3,6 +3,25 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 Versionado según [SemVer](https://semver.org/lang/es/).
 
+## [Unreleased]
+
+### Added
+
+- Gate de producto por Épica Jira en fase 1 de `/klap:trabajar-hu`: nueva tool
+  `producto_por_epica` (contrato Klap Knowledge MCP `2.1.0`, aditiva y retrocompatible) que
+  resuelve determinísticamente el producto de una HU contra `sources.yaml`, con
+  `buscar_producto` como respaldo heurístico. Si ningún producto existe, la fase se detiene y
+  dispara `/klap:memoria-inicializar` con su pausa humana obligatoria — el análisis nunca
+  avanza sin memoria de producto resuelta (`agents/documentador-klap.md`, nuevo Flujo 0).
+- El Flujo A (alta inicial) de `documentador-klap` ahora pregunta siempre épica(s) Jira y
+  espacio(s) Confluence del producto, y su patch incluye `upsert_source_state` de forma
+  obligatoria — antes el alta no dejaba registrado el cursor que el gate necesita para
+  encontrar el producto la próxima vez.
+- `scripts/memoria-git.mjs`: deja cada `aplicar_patch_memoria` aplicado en una rama
+  `producto/<product_id>` del checkout de `klap-dev-kit-knowledge`
+  (`config/klap.yaml` → `memoria.repo_path`) con PR hacia `main` — el merge sigue siendo
+  siempre humano, nunca automático.
+
 ## [0.1.0] - 2026-08-26
 
 ### Added
@@ -46,8 +65,17 @@ Versionado según [SemVer](https://semver.org/lang/es/).
   `scripts/quality-gate.mjs`). `minimo_score` (60%) es un umbral interino **aceptado**
   (decisión 2026-08-28) — recalibrarlo contra un repo real queda pospuesto a una etapa/ronda
   futura, no bloquea nada mientras tanto.
-- `claude plugin eval`: 3 casos semilla escritos (`analista`, `arquitecto`, `seguridad`) pero
-  nunca ejecutados — bloqueado por early access de Anthropic a nivel de organización, no por
-  código del kit. Solicitud ya enviada a la cuenta rep (2026-08-28), sin ETA. **Pendiente
-  indefinido, no bloqueante** por decisión explícita del usuario — ver
-  `docs/claude-plugin-eval.md`.
+- `claude plugin eval`: 6 casos semilla escritos (`analista`, `arquitecto`, `seguridad`,
+  3 de `documentador-klap`) pero nunca ejecutados — bloqueado por early access de Anthropic a
+  nivel de organización, no por código del kit. Solicitud ya enviada a la cuenta rep
+  (2026-08-28), sin ETA. **Pendiente indefinido, no bloqueante** por decisión explícita del
+  usuario — ver `docs/claude-plugin-eval.md`.
+- 2 casos de `documentador-klap` sin escribir aún (no bloqueantes, cubrir cuando se retome
+  `evals/`): historial idempotente (procesar dos veces la misma HU no debe crear dos eventos
+  duplicados) y actualizaciones rutinarias con autoaplicación (un issue Jira cerrado con fuente
+  inequívoca no debe generar una pregunta al humano).
+- Piloto de `documentador-klap` sobre 2-3 productos reales (no bloqueante para 1.0.0): antes de
+  generalizar `/klap:memoria-inicializar` a todo el catálogo, evaluar en casos reales cantidad
+  de preguntas al humano, calidad de la memoria de negocio inferida, precisión de relaciones y
+  componentes detectados, tamaño de los deltas Jira/Confluence por actualización, utilidad
+  real durante el análisis de una HU, y frecuencia de conflictos Git en la memoria compartida.
