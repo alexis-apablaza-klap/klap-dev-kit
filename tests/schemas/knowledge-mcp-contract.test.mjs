@@ -7,6 +7,7 @@ import { readYaml } from "../../scripts/lib/yaml-io.mjs";
 const contrato = JSON.parse(readFileSync(resolveFromRoot("schemas", "knowledge-mcp", "tools.json"), "utf8"));
 
 const TOOLS_ESPERADAS = [
+  "producto_por_epica",
   "buscar_producto",
   "resumen_producto",
   "resumen_componente",
@@ -19,7 +20,7 @@ const TOOLS_ESPERADAS = [
   "targeted_sync",
 ];
 
-test("el contrato declara exactamente las 10 tools esperadas", () => {
+test("el contrato declara exactamente las 11 tools esperadas", () => {
   const nombres = contrato.tools.map((t) => t.name).sort();
   assert.deepEqual(nombres, [...TOOLS_ESPERADAS].sort());
 });

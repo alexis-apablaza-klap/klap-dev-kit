@@ -5,12 +5,27 @@ fase que estás ejecutando.
 
 ## Fase 1 — Contexto
 
-Invoca `analista` con el `<ISSUE-KEY>`. El agente sigue el orden estricto documentado en
+**Paso 0 — gate de producto (bloqueante).** Antes de invocar al `analista`, trae de Jira (MCP
+Atlassian) el `<ISSUE-KEY>` con su épica/`parent`, e invoca `documentador-klap` en su
+**Flujo 0** (`agents/documentador-klap.md`) con el ISSUE-KEY y esa épica. Tres desenlaces:
+- **Producto resuelto** (por `producto_por_epica` o, si la épica no está sincronizada aún, por
+  `buscar_producto` confirmando un producto existente) → continúa al paso siguiente con ese
+  producto ya identificado.
+- **Producto existe pero su épica no estaba registrada** → `documentador-klap` deja pendiente
+  un `upsert_source_state` (Flujo B) y continúa igual — no bloquea la HU por esto.
+- **Requiere alta** (ninguna señal resuelve un producto existente) → **detente aquí**. Dispara
+  `/klap:memoria-inicializar` para ese producto; su pausa humana obligatoria decide si se
+  aprueba la creación. Sólo al aplicarse el patch de alta continúa esta fase — no adivines ni
+  avances "sin memoria de producto" en silencio.
+
+Con el producto resuelto, invoca `analista` con el `<ISSUE-KEY>` (y el producto ya
+identificado, para que no repita el gate). El agente sigue el orden estricto documentado en
 `agents/analista.md` (Jira → producto → Klap Knowledge → component.yaml/índice →
 `documentos_relevantes`/`buscar` → Confluence sólo si falta algo). Guarda su salida en
 `.klap/hu/<ISSUE-KEY>/contexto.md`. Corre
 `node scripts/validar-artefacto-fase.mjs contexto .klap/hu/<ISSUE-KEY>/contexto.md`; si faltan
-secciones, reinvoca a `analista` con la lista antes de avanzar a fase 2. Sin pausa humana.
+secciones, reinvoca a `analista` con la lista antes de avanzar a fase 2. Sin pausa humana
+adicional (la única pausa de esta fase es la del gate de producto, si aplicó).
 
 ## Fase 2 — Análisis
 
@@ -69,7 +84,12 @@ a la fase 8.
    producir sólo el delta de memoria global que corresponde a esta HU — nunca reescanear todo
    el producto. Si `documentador-klap` señala un conflicto o ambigüedad de alto impacto, repórtalo
    igual que cualquier pregunta pendiente — no lo resuelvas por tu cuenta.
-3. Cierra con un resumen corto: qué se hizo, artefactos generados, estado de certificación, el
+3. Si `aplicar_patch_memoria` se aplicó (`applied: true`), corre
+   `node scripts/memoria-git.mjs --producto <product_id> --issue <ISSUE-KEY>`: deja el cambio
+   en la rama `producto/<product_id>` del checkout de `klap-dev-kit-knowledge` con PR hacia
+   `main`. El merge del PR es humano — repórtalo como pendiente de revisión, nunca como cerrado.
+4. Cierra con un resumen corto: qué se hizo, artefactos generados, estado de certificación, el
    resultado de `documentador-klap` (aplicado o pendiente de confirmación, con
-   `new_revision`/`changed_files` si aplicó), y qué queda pendiente (si algo del análisis quedó
-   como pregunta abierta que no bloqueaba la HU pero vale la pena registrar).
+   `new_revision`/`changed_files` si aplicó), el PR de memoria si se creó, y qué queda pendiente
+   (si algo del análisis quedó como pregunta abierta que no bloqueaba la HU pero vale la pena
+   registrar).

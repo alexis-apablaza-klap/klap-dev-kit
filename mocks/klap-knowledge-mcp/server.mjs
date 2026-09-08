@@ -39,6 +39,17 @@ function normalizar(texto) {
 }
 
 const handlers = {
+  producto_por_epica({ epica }) {
+    for (const [productId, fuentes] of Object.entries(fuentesPorProducto)) {
+      const match = fuentes?.jira?.epics?.some((e) => e.key === epica);
+      if (match) {
+        const p = productos.find((x) => x.id === productId);
+        return { producto: p?.nombre ?? productId, product_id: productId, origen: "sources.jira.epics" };
+      }
+    }
+    return { producto: null, product_id: null, origen: "sources.jira.epics" };
+  },
+
   buscar_producto({ texto }) {
     const t = normalizar(texto);
     const resultados = productos

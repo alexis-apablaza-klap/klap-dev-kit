@@ -18,7 +18,7 @@ function validarContraOutputSchema(nombreTool, structuredContent) {
   assert.ok(valido, `"${nombreTool}" no cumple su outputSchema: ${errores.join("; ")}`);
 }
 
-test("el mock de Klap Knowledge responde initialize y tools/list con las 10 tools reales", async () => {
+test("el mock de Klap Knowledge responde initialize y tools/list con las 11 tools reales", async () => {
   const cliente = new ClienteMcpStdio(["node", serverPath]);
   try {
     const init = await cliente.iniciar();
@@ -34,10 +34,49 @@ test("el mock de Klap Knowledge responde initialize y tools/list con las 10 tool
       "estado_fuentes",
       "historial_producto",
       "obtener_producto",
+      "producto_por_epica",
       "resumen_componente",
       "resumen_producto",
       "targeted_sync",
     ]);
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("producto_por_epica: épica registrada resuelve al producto correcto", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const r = await cliente.llamarTool("producto_por_epica", { epica: "SVA-1000" });
+    validarContraOutputSchema("producto_por_epica", r.structuredContent);
+    assert.equal(r.structuredContent.producto, "abono-ya");
+    assert.equal(r.structuredContent.product_id, "abono-ya");
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("producto_por_epica: distingue entre productos con épicas distintas", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const r = await cliente.llamarTool("producto_por_epica", { epica: "IMP-500" });
+    validarContraOutputSchema("producto_por_epica", r.structuredContent);
+    assert.equal(r.structuredContent.producto, "impulso-klap");
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("producto_por_epica: épica no registrada en ningún producto devuelve producto null", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const r = await cliente.llamarTool("producto_por_epica", { epica: "NUEVO-1" });
+    validarContraOutputSchema("producto_por_epica", r.structuredContent);
+    assert.equal(r.structuredContent.producto, null);
+    assert.equal(r.structuredContent.product_id, null);
   } finally {
     cliente.cerrar();
   }

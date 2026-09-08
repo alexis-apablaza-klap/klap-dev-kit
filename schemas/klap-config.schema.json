@@ -33,6 +33,12 @@
       }
     },
     "stack_soportado": { "type": "object" },
+    "memoria": {
+      "type": "object",
+      "properties": {
+        "repo_path": { "type": "string" }
+      }
+    },
     "rutas": {
       "type": "object",
       "required": ["standards_index", "quality_gates", "component_schema", "context_index_schema", "knowledge_mcp_contract"],

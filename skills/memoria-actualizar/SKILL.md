@@ -10,9 +10,12 @@ actualización incremental**.
 
 Si el argumento es un issue Jira (p.ej. `SVA-1925`):
 
-1. identifica a qué producto pertenece (`buscar_producto` sobre título/descripción del issue);
+1. identifica a qué producto pertenece: si el issue tiene épica/`parent`, resuélvela primero
+   con `producto_por_epica` (determinista); usa `buscar_producto` sobre título/descripción sólo
+   como respaldo si no hay épica o la tool no resuelve nada;
 2. deja que el agente lea sólo ese issue y decida, con `estado_fuentes`, qué más hace falta;
-3. genera y aplica el patch resultante.
+3. genera y aplica el patch resultante — si la épica no estaba registrada en `sources.yaml`,
+   agrega `upsert_source_state` para que la próxima resolución sea determinista.
 
 Si el argumento es un producto (p.ej. `abono-ya`):
 
@@ -25,3 +28,7 @@ Por defecto, esta skill **no pausa** para cambios de bajo riesgo (ver criterios 
 `agents/documentador-klap.md`) — sólo se detiene si el propio agente detecta ambigüedad,
 conflicto o un cambio canónico de alto impacto. No la uses para inicializar un producto que no
 existe todavía — para eso está `/klap:memoria-inicializar`.
+
+Tras cada `aplicar_patch_memoria` con `applied: true`, corre
+`node scripts/memoria-git.mjs --producto <product_id> [--issue <ISSUE-KEY>]` para dejar el
+cambio en la rama `producto/<product_id>` con PR hacia `main` (merge humano).

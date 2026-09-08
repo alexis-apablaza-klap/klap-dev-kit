@@ -29,6 +29,11 @@ Reglas:
 - `historial_producto` y `estado_fuentes` son de consulta explícita: no forman parte del
   recorrido por defecto de una HU — se usan cuando hace falta contexto histórico o cuando se
   va a ejecutar una actualización incremental de memoria y hay que decidir qué fuentes releer.
+- `producto_por_epica` (desde `2.1.0`) resuelve el gate de producto de fase 1 de
+  `/klap:trabajar-hu`: dado el `parent`/épica de la HU, busca en `sources.yaml` de cada
+  producto y devuelve el que corresponde, o `producto: null` si ninguno la tiene registrada.
+  Es determinista (cursores, no texto libre) — úsala antes de `buscar_producto`, que sigue
+  siendo el fallback heurístico cuando la HU no tiene épica o la épica aún no está sincronizada.
 
 ## Cambio de contrato — protocolo
 

@@ -42,6 +42,12 @@ stack_soportado:
   ci:
     proveedor: github-actions # portable a Bitbucket/Jenkins si el hosting migra
 
+memoria:
+  # Checkout local del repo de memoria (klap-dev-kit-knowledge), usado por
+  # scripts/memoria-git.mjs para dejar cada patch aplicado en una rama producto/<id> con PR
+  # hacia main. Ruta relativa a la raíz de este repo — asume el layout hermano de klap-workspace.
+  repo_path: ../klap-dev-kit-knowledge
+
 rutas:
   standards_index: standards/index.yaml
   quality_gates: config/quality-gates.yaml
@@ -59,4 +65,4 @@ contratos:
   # Un mismatch con el contractVersion del schema falla npm run validate — es la señal
   # explícita de "el contrato avanzó, revisa antes de asumir compatibilidad" en vez de
   # una ruptura silenciosa cuando Etapa 3 reemplace el mock por el servicio real.
-  knowledge_mcp: "2.0.0"
+  knowledge_mcp: "2.1.0"

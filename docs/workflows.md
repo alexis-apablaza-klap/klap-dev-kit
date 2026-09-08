@@ -4,7 +4,7 @@ Vista para developers de las 8 fases (el detalle técnico exacto que sigue Claud
 `skills/trabajar-hu/references/fases.md`, pensado para el modelo, no para leer a mano).
 
 ```
-1. Contexto        → trae la HU y todo lo relevante, sin que tengas que ir a buscarlo tú
+1. Contexto        → (gate) resuelve el producto por su épica; trae la HU y todo lo relevante
 2. Análisis        → (pausa) revisas hechos/supuestos/preguntas antes de que se diseñe nada
 3. Diseño          → (pausa) revisas la propuesta antes de que se toque código
 4. Implementación  → se escribe el código y las pruebas
@@ -21,6 +21,15 @@ barato. Pausar después de implementar no tendría el mismo valor — ya se escr
 La pausa antes de Confluence existe porque Confluence es un sistema compartido con el resto de
 la organización; el cambio en el repo (Git) no necesita esa pausa porque ya es revisable por
 Pull Request.
+
+## Qué significa que Contexto abra con un "gate" de producto
+
+Antes de tocar la HU, Contexto resuelve determinísticamente a qué producto Klap pertenece vía
+su épica Jira (`producto_por_epica`, contra los cursores de `sources.yaml` en la memoria — ver
+`agents/documentador-klap.md`, Flujo 0). Si no existe, la fase **se detiene ahí**: dispara
+`/klap:memoria-inicializar` y espera la pausa humana obligatoria de esa skill antes de
+continuar. Es deliberado — analizar y diseñar sin memoria de producto resuelta produce trabajo
+que después hay que reconciliar a mano.
 
 ## Qué significa que Certificación sea un "gate"
 

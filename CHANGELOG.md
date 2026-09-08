@@ -3,6 +3,25 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 Versionado según [SemVer](https://semver.org/lang/es/).
 
+## [Unreleased]
+
+### Added
+
+- Gate de producto por Épica Jira en fase 1 de `/klap:trabajar-hu`: nueva tool
+  `producto_por_epica` (contrato Klap Knowledge MCP `2.1.0`, aditiva y retrocompatible) que
+  resuelve determinísticamente el producto de una HU contra `sources.yaml`, con
+  `buscar_producto` como respaldo heurístico. Si ningún producto existe, la fase se detiene y
+  dispara `/klap:memoria-inicializar` con su pausa humana obligatoria — el análisis nunca
+  avanza sin memoria de producto resuelta (`agents/documentador-klap.md`, nuevo Flujo 0).
+- El Flujo A (alta inicial) de `documentador-klap` ahora pregunta siempre épica(s) Jira y
+  espacio(s) Confluence del producto, y su patch incluye `upsert_source_state` de forma
+  obligatoria — antes el alta no dejaba registrado el cursor que el gate necesita para
+  encontrar el producto la próxima vez.
+- `scripts/memoria-git.mjs`: deja cada `aplicar_patch_memoria` aplicado en una rama
+  `producto/<product_id>` del checkout de `klap-dev-kit-knowledge`
+  (`config/klap.yaml` → `memoria.repo_path`) con PR hacia `main` — el merge sigue siendo
+  siempre humano, nunca automático.
+
 ## [0.1.0] - 2026-08-26
 
 ### Added
