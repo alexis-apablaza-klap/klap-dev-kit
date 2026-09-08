@@ -1,9 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://klap.cl/schemas/knowledge-mcp/tools.json",
-  "_descripcion": "Contrato de herramientas que el Dev-Kit espera de cualquier servidor MCP de Klap Knowledge (mock local o servicio real). El Dev-Kit sólo conoce esta interfaz — nunca Neo4j/Graphiti u otro detalle de implementación. Formato de cada entrada: definición de tool MCP (name, description, inputSchema) más outputSchema informativo (no forma parte del protocolo MCP, pero fija el contrato para el mock y los tests).",
-  "contractVersion": "1.0.0",
-  "no_lectura": ["targeted_sync"],
+  "_descripcion": "Contrato de herramientas que el Dev-Kit espera de cualquier servidor MCP de Klap Knowledge (mock local o servicio real). El Dev-Kit sólo conoce esta interfaz — nunca Neo4j/Graphiti, Git+SQLite ni ningún otro detalle de implementación. Formato de cada entrada: definición de tool MCP (name, description, inputSchema) más outputSchema informativo (no forma parte del protocolo MCP, pero fija el contrato para el mock y los tests).",
+  "contractVersion": "2.0.0",
+  "_nota_v2": "v2.0.0 agrega memoria estructurada de producto (obtener_producto, historial_producto, estado_fuentes) y la única vía de escritura real (aplicar_patch_memoria). targeted_sync queda deprecated (acuse degradado, no reprocesa nada) mientras agents/documentador.md y agents/documentador-klap.md migran; eliminación real prevista para 3.0.0 — no eliminar antes.",
+  "no_lectura": ["targeted_sync", "aplicar_patch_memoria"],
   "tools": [
     {
       "name": "buscar_producto",
@@ -48,10 +49,10 @@
         "required": ["producto", "resumen", "componentes"],
         "properties": {
           "producto": { "type": "string" },
-          "resumen": { "type": "string" },
+          "resumen": { "type": ["string", "null"] },
           "fase": { "type": "string" },
           "componentes": { "type": "array", "items": { "type": "string" } },
-          "actualizado_en": { "type": "string", "format": "date-time" }
+          "actualizado_en": { "type": ["string", "null"], "format": "date-time" }
         }
       }
     },
@@ -70,10 +71,10 @@
         "required": ["componente", "resumen"],
         "properties": {
           "componente": { "type": "string" },
-          "resumen": { "type": "string" },
+          "resumen": { "type": ["string", "null"] },
           "productos": { "type": "array", "items": { "type": "string" } },
           "dependencias": { "type": "array", "items": { "type": "string" } },
-          "actualizado_en": { "type": "string", "format": "date-time" }
+          "actualizado_en": { "type": ["string", "null"], "format": "date-time" }
         }
       }
     },
@@ -144,8 +145,509 @@
       }
     },
     {
+      "name": "obtener_producto",
+      "description": "Memoria estructurada completa de un producto Klap (equivalente al product.yaml resuelto): identidad, negocio, ecosistema/relaciones, representación técnica y metadata de revisión. Úsala en vez de resumen_producto cuando la tarea necesita el detalle completo, no sólo un resumen condensado.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["producto"],
+        "properties": {
+          "producto": { "type": "string" }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["producto"],
+        "$comment": "Nombres internos en inglés a propósito, idénticos a product.schema.json y memory-patch.schema.json de klap-dev-kit-knowledge — sólo la clave contenedora 'producto' sigue la convención en español del resto de este contrato (como 'producto'/'componente' en las demás tools). Traducir los campos internos obligaría a klap-dev-kit-knowledge a mapear ida y vuelta contra su propio storage sin necesidad.",
+        "$defs": {
+          "criticality": { "type": "string", "enum": ["low", "medium", "high"] },
+          "source_ref": {
+            "type": "object",
+            "required": ["type", "ref"],
+            "properties": {
+              "type": { "type": "string", "enum": ["confluence", "jira", "adr", "component-yaml", "manual"] },
+              "ref": { "type": "string" },
+              "version": { "type": "string" },
+              "updated_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "properties": {
+          "producto": {
+            "type": ["object", "null"],
+            "description": "null si el producto no existe en Klap Knowledge.",
+            "required": ["id", "name", "status"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "aliases": { "type": "array", "items": { "type": "string" } },
+              "status": { "type": "string", "enum": ["kickoff", "mvp", "fase-1", "mantencion", "deprecado"] }
+            }
+          },
+          "business": {
+            "type": ["object", "null"],
+            "properties": {
+              "description": { "type": "string" },
+              "objective": { "type": "string" },
+              "target_customers": { "type": "array", "items": { "type": "string" } },
+              "value_proposition": { "type": "array", "items": { "type": "string" } },
+              "capabilities": { "type": "array", "items": { "type": "string" } },
+              "sources": { "type": "array", "items": { "$ref": "#/$defs/source_ref" } }
+            }
+          },
+          "ecosystem": {
+            "type": ["object", "null"],
+            "properties": {
+              "importance": { "type": "string" },
+              "relations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["product_id", "type", "direction"],
+                  "properties": {
+                    "product_id": { "type": "string" },
+                    "type": { "type": "string", "enum": ["depends_on", "depended_by", "integrates_with", "competes_with", "relates_to"] },
+                    "direction": { "type": "string", "enum": ["outbound", "inbound"] },
+                    "criticality": { "$ref": "#/$defs/criticality" },
+                    "description": { "type": "string" },
+                    "sources": { "type": "array", "items": { "$ref": "#/$defs/source_ref" } }
+                  }
+                }
+              }
+            }
+          },
+          "technical": {
+            "type": ["object", "null"],
+            "properties": {
+              "components": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["component_id", "criticality"],
+                  "properties": {
+                    "component_id": { "type": "string" },
+                    "role": { "type": "string" },
+                    "criticality": { "$ref": "#/$defs/criticality" },
+                    "repository": { "type": ["string", "null"] },
+                    "sources": { "type": "array", "items": { "$ref": "#/$defs/source_ref" } }
+                  }
+                }
+              }
+            }
+          },
+          "metadata": {
+            "type": ["object", "null"],
+            "properties": {
+              "created_at": { "type": "string", "format": "date-time" },
+              "updated_at": { "type": "string", "format": "date-time" },
+              "revision": { "type": "integer", "minimum": 1 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "historial_producto",
+      "description": "Eventos históricos relevantes de un producto (creación, cambios de negocio/técnicos/integraciones, decisiones, deprecaciones), orden descendente por fecha. Úsala sólo cuando la tarea necesita contexto histórico explícito — no por defecto.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["producto"],
+        "properties": {
+          "producto": { "type": "string" },
+          "desde": { "type": "string", "format": "date-time" },
+          "hasta": { "type": "string", "format": "date-time" },
+          "limite": { "type": "integer", "minimum": 1, "maximum": 200, "default": 50 }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["eventos"],
+        "properties": {
+          "eventos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["event_id", "occurred_at", "type", "summary", "sources"],
+              "properties": {
+                "event_id": { "type": "string" },
+                "occurred_at": { "type": "string", "format": "date-time" },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "product_created", "business_change", "functional_change", "technical_change",
+                    "integration_change", "component_added", "component_removed", "relation_changed",
+                    "decision", "deprecation", "incident_relevant", "documentation_change"
+                  ]
+                },
+                "summary": { "type": "string" },
+                "affected_components": { "type": "array", "items": { "type": "string" } },
+                "sources": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["type", "ref"],
+                    "properties": {
+                      "type": { "type": "string", "enum": ["confluence", "jira", "adr", "component-yaml", "manual"] },
+                      "ref": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "estado_fuentes",
+      "description": "Cursores de sincronización por fuente (Jira/Confluence) para un producto: qué se leyó y cuándo. Sirve para decidir, antes de una actualización incremental, qué fuentes son nuevas o cambiaron sin releer todo.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["producto"],
+        "properties": {
+          "producto": { "type": "string" }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["fuentes"],
+        "properties": {
+          "fuentes": {
+            "type": "object",
+            "properties": {
+              "jira": {
+                "type": "object",
+                "properties": {
+                  "epics": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["key"],
+                      "properties": {
+                        "key": { "type": "string" },
+                        "last_seen_updated_at": { "type": "string", "format": "date-time" },
+                        "last_processed_at": { "type": "string", "format": "date-time" }
+                      }
+                    }
+                  }
+                }
+              },
+              "confluence": {
+                "type": "object",
+                "properties": {
+                  "spaces": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["key"],
+                      "properties": {
+                        "key": { "type": "string" },
+                        "last_scan_at": { "type": "string", "format": "date-time" }
+                      }
+                    }
+                  },
+                  "pages": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "version": { "type": "string" },
+                        "updated_at": { "type": "string", "format": "date-time" },
+                        "content_hash": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "aplicar_patch_memoria",
+      "description": "Única tool de escritura estructurada sobre la memoria de un producto: recibe un patch ya generado por el agente documentador-klap (con evidencia/fuente por operación) y lo valida/persiste. Nunca se escribe memoria de otra forma — no existe una operación de escritura libre en este contrato.",
+      "inputSchema": {
+        "$comment": "Copia exacta de memory-patch.schema.json (klap-dev-kit-knowledge/schemas/memory-patch.schema.json) al momento de aceptar contractVersion 2.0.0. Es una copia deliberada, no una referencia cruzada entre repos: tools.json debe seguir siendo autocontenido (ver schemas/knowledge-mcp/README.md).",
+        "type": "object",
+        "required": ["product_id", "expected_revision", "generated_by", "operations"],
+        "additionalProperties": false,
+        "$defs": {
+          "entity_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "record_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9:_-]*$" },
+          "criticality": { "type": "string", "enum": ["low", "medium", "high"] },
+          "source_ref": {
+            "type": "object",
+            "required": ["type", "ref"],
+            "additionalProperties": false,
+            "properties": {
+              "type": { "type": "string", "enum": ["confluence", "jira", "adr", "component-yaml", "manual"] },
+              "ref": { "type": "string", "minLength": 1 },
+              "version": { "type": "string" },
+              "updated_at": { "type": "string", "format": "date-time" }
+            }
+          },
+          "operation": {
+            "type": "object",
+            "required": ["op", "value"],
+            "properties": { "op": { "type": "string" }, "value": { "type": "object" } },
+            "oneOf": [
+              {
+                "properties": {
+                  "op": { "const": "create_product" },
+                  "value": {
+                    "type": "object",
+                    "required": ["id", "name", "status"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "id": { "$ref": "#/$defs/entity_id" },
+                      "name": { "type": "string", "minLength": 1 },
+                      "status": { "type": "string", "enum": ["kickoff", "mvp", "fase-1", "mantencion", "deprecado"] }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "op": { "const": "update_business" },
+                  "value": {
+                    "type": "object",
+                    "required": ["sources"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": { "type": "string" },
+                      "objective": { "type": "string" },
+                      "target_customers": { "type": "array", "items": { "type": "string" } },
+                      "value_proposition": { "type": "array", "items": { "type": "string" } },
+                      "capabilities": { "type": "array", "items": { "type": "string" } },
+                      "sources": { "type": "array", "items": { "$ref": "#/$defs/source_ref" }, "minItems": 1 }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "op": { "const": "upsert_product_relation" },
+                  "value": {
+                    "type": "object",
+                    "required": ["product_id", "type", "direction"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "product_id": { "$ref": "#/$defs/entity_id" },
+                      "type": { "type": "string", "enum": ["depends_on", "depended_by", "integrates_with", "competes_with", "relates_to"] },
+                      "direction": { "type": "string", "enum": ["outbound", "inbound"] },
+                      "criticality": { "$ref": "#/$defs/criticality" },
+                      "description": { "type": "string" },
+                      "sources": { "type": "array", "items": { "$ref": "#/$defs/source_ref" } }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "op": { "const": "remove_product_relation" },
+                  "value": {
+                    "type": "object",
+                    "required": ["product_id", "type"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "product_id": { "$ref": "#/$defs/entity_id" },
+                      "type": { "type": "string" }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "op": { "const": "upsert_component_link" },
+                  "value": {
+                    "type": "object",
+                    "required": ["component_id", "criticality"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "component_id": { "$ref": "#/$defs/entity_id" },
+                      "role": { "type": "string" },
+                      "criticality": { "$ref": "#/$defs/criticality" },
+                      "repository": { "type": ["string", "null"] },
+                      "sources": { "type": "array", "items": { "$ref": "#/$defs/source_ref" } }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "op": { "const": "remove_component_link" },
+                  "value": {
+                    "type": "object",
+                    "required": ["component_id"],
+                    "additionalProperties": false,
+                    "properties": { "component_id": { "$ref": "#/$defs/entity_id" } }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "op": { "const": "append_event" },
+                  "value": {
+                    "type": "object",
+                    "required": ["event_id", "occurred_at", "type", "summary", "sources", "created_by"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "event_id": { "$ref": "#/$defs/record_id" },
+                      "occurred_at": { "type": "string", "format": "date-time" },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "product_created", "business_change", "functional_change", "technical_change",
+                          "integration_change", "component_added", "component_removed", "relation_changed",
+                          "decision", "deprecation", "incident_relevant", "documentation_change"
+                        ]
+                      },
+                      "summary": { "type": "string", "minLength": 1 },
+                      "sources": { "type": "array", "items": { "$ref": "#/$defs/source_ref" }, "minItems": 1 },
+                      "affected_components": { "type": "array", "items": { "$ref": "#/$defs/entity_id" } },
+                      "created_by": { "type": "string", "minLength": 1 }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "op": { "const": "upsert_document" },
+                  "value": {
+                    "type": "object",
+                    "required": ["document_id", "source_type", "source_ref", "title", "last_processed_at"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "document_id": { "$ref": "#/$defs/record_id" },
+                      "source_type": { "type": "string", "enum": ["confluence", "jira", "adr"] },
+                      "source_ref": { "type": "string", "minLength": 1 },
+                      "title": { "type": "string", "minLength": 1 },
+                      "summary": { "type": "string" },
+                      "topics": { "type": "array", "items": { "type": "string" } },
+                      "source_version": { "type": "string" },
+                      "source_updated_at": { "type": "string", "format": "date-time" },
+                      "content_hash": { "type": "string" },
+                      "last_processed_at": { "type": "string", "format": "date-time" },
+                      "superseded": { "type": "boolean" }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "op": { "const": "upsert_source_state" },
+                  "value": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "jira": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "epics": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": ["key"],
+                              "additionalProperties": false,
+                              "properties": {
+                                "key": { "type": "string", "minLength": 1 },
+                                "last_seen_updated_at": { "type": "string", "format": "date-time" },
+                                "last_processed_at": { "type": "string", "format": "date-time" }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "confluence": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "spaces": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": ["key"],
+                              "additionalProperties": false,
+                              "properties": {
+                                "key": { "type": "string", "minLength": 1 },
+                                "last_scan_at": { "type": "string", "format": "date-time" }
+                              }
+                            }
+                          },
+                          "pages": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "version": { "type": "string" },
+                                "updated_at": { "type": "string", "format": "date-time" },
+                                "content_hash": { "type": "string" }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "op": { "const": "supersede_fact" },
+                  "value": {
+                    "type": "object",
+                    "required": ["event_id", "superseded_by"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "event_id": { "$ref": "#/$defs/record_id" },
+                      "superseded_by": { "$ref": "#/$defs/record_id" },
+                      "reason": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "properties": {
+          "product_id": { "$ref": "#/$defs/entity_id" },
+          "expected_revision": { "type": "integer", "minimum": 0 },
+          "reason": { "type": "string" },
+          "generated_by": {
+            "type": "object",
+            "required": ["agent"],
+            "additionalProperties": false,
+            "properties": {
+              "agent": { "type": "string", "minLength": 1 },
+              "model_family": { "type": "string" }
+            }
+          },
+          "operations": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/$defs/operation" }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": ["applied", "product_id", "previous_revision", "new_revision", "changed_files"],
+        "properties": {
+          "applied": { "type": "boolean" },
+          "product_id": { "type": "string" },
+          "previous_revision": { "type": "integer" },
+          "new_revision": { "type": "integer" },
+          "changed_files": { "type": "array", "items": { "type": "string" } },
+          "rejected_reason": { "type": "string" }
+        }
+      }
+    },
+    {
       "name": "targeted_sync",
-      "description": "Única operación de escritura: solicita al Knowledge Platform reprocesar fuentes específicas tras un cambio. Nunca escribe directamente al grafo.",
+      "description": "[DEPRECATED — eliminación real prevista para contractVersion 3.0.0, ver no_lectura] Antigua única operación de escritura: solicitaba a Klap Knowledge reprocesar fuentes específicas tras un cambio. Desde 2.0.0 la escritura real es aplicar_patch_memoria; esta tool sólo responde un acuse degradado (no reprocesa nada) mientras los consumidores migran.",
+      "deprecated": true,
       "inputSchema": {
         "type": "object",
         "required": ["fuentes"],

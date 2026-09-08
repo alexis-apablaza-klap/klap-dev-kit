@@ -39,6 +39,8 @@ decidió cada cosa en su momento. Ver el ejemplo `adr-014`/`diseno-legacy-batch`
 ## Orden de actualización (MANDATORY el orden, ver `agents/documentador.md` para el detalle)
 
 Primero la memoria del repo (revisable por PR), después Confluence sólo si hay conocimiento a
-nivel producto, y sólo entonces `targeted_sync` hacia Klap Knowledge. Nunca al revés — escribir
-a Confluence sin que el repo refleje el cambio deja la memoria versionada desactualizada, que
-es la fuente que el siguiente desarrollador leerá primero.
+nivel producto, y sólo entonces se entrega el contexto compacto al agente `documentador-klap`
+(ver `agents/documentador-klap.md`), que es quien decide si corresponde un patch de memoria
+global hacia Klap Knowledge vía `aplicar_patch_memoria`. Nunca al revés — escribir a Confluence
+sin que el repo refleje el cambio deja la memoria versionada desactualizada, que es la fuente
+que el siguiente desarrollador leerá primero.

@@ -1,0 +1,20 @@
+{
+  "abono-ya": [
+    {
+      "event_id": "evt:abono-ya:2026-08-01-liquidacion",
+      "occurred_at": "2026-08-01T00:00:00Z",
+      "type": "technical_change",
+      "summary": "Se movió el cálculo de liquidación de un batch nocturno a un cálculo incremental por venta (ADR-014).",
+      "affected_components": ["ms-central-sva-anticipo-calculos"],
+      "sources": [{ "type": "adr", "ref": "ms-central-sva-anticipo-calculos/docs/decisions/ADR-014.md" }]
+    },
+    {
+      "event_id": "evt:abono-ya:2026-06-01-creacion",
+      "occurred_at": "2026-06-01T00:00:00Z",
+      "type": "product_created",
+      "summary": "Alta inicial del producto abono-ya en Klap Knowledge.",
+      "affected_components": [],
+      "sources": [{ "type": "manual", "ref": "carga-inicial-knowledge" }]
+    }
+  ]
+}

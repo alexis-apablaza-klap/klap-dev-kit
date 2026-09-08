@@ -14,19 +14,24 @@ contexto crudo acumulado.
 1. Jira (MCP Atlassian): sólo los campos de la HU necesarios (título, descripción, criterios
    de aceptación, componente/proyecto). No traer comentarios ni histórico completo salvo que
    la tarea lo requiera explícitamente.
-2. Identificar producto(s) desde el texto de la HU.
-3. Klap Knowledge (MCP, ver `config/klap.yaml` → `mcp.knowledge`): `buscar_producto` →
-   `resumen_producto` → `resumen_componente`. Si el servidor no responde y
+2. Identificar producto(s) desde el texto de la HU vía `buscar_producto`.
+3. Klap Knowledge (MCP, ver `config/klap.yaml` → `mcp.knowledge`): `resumen_producto` para el
+   caso normal (memoria condensada) o, sólo si la HU necesita el detalle completo — relaciones
+   entre productos, componentes con criticidad, fuentes por dato —, `obtener_producto`. Sigue
+   con `resumen_componente` para el/los componente(s) afectados. Si el servidor no responde y
    `fallback_si_no_disponible` es `true`, decláralo explícitamente en el artefacto y continúa
    con lo disponible — nunca inventes un resumen.
-4. Repo: leer `component.yaml` y `docs/context/index.yaml` (el índice, no los documentos).
+4. `historial_producto` **sólo si** la HU necesita contexto histórico explícito (p.ej. "qué
+   cambió recientemente en X", una HU que reabre o revierte una decisión previa). No es parte
+   del recorrido por defecto — no cargues el timeline completo de un producto por rutina.
+5. Repo: leer `component.yaml` y `docs/context/index.yaml` (el índice, no los documentos).
    Abrir sólo los 1-3 documentos que el índice marque relevantes para esta HU.
-5. Klap Knowledge → `documentos_relevantes` (punteros a Confluence/ADR/Jira relevantes al
+6. Klap Knowledge → `documentos_relevantes` (punteros a Confluence/ADR/Jira relevantes al
    componente/consulta) y, si una pregunta puntual no queda resuelta por los resúmenes
    anteriores, `buscar` (búsqueda semántica general sobre decisiones/ADR/procesos). Nunca vayas
    directo a Confluence sin pasar primero por estas herramientas — son el mecanismo pensado
    para decidir *qué* documento vale la pena abrir.
-6. Confluence (MCP Atlassian) **sólo si**: `documentos_relevantes`/`buscar` señalaron un
+7. Confluence (MCP Atlassian) **sólo si**: `documentos_relevantes`/`buscar` señalaron un
    documento específico, falta información, hay incertidumbre, o hay conflicto entre fuentes.
    Nunca como primer paso.
 

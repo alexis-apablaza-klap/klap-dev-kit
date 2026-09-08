@@ -28,11 +28,13 @@ Klap Dev-Kit (este repo)                          Klap Knowledge (servicio exter
 │                  umbrales,     │
 │                  nombres MCP   │
 │ schemas/       → contratos     │
-│   knowledge-mcp/tools.json ────┼──── contrato que el kit conoce
-└──────────────┬────────────────┘      (buscar_producto, resumen_producto,
+│   knowledge-mcp/tools.json ────┼──── contrato que el kit conoce (10 tools:
+└──────────────┬────────────────┘      buscar_producto, resumen_producto,
                │                        resumen_componente, buscar,
-               │ MCP (stdio, contrato   documentos_relevantes, targeted_sync)
-               │ intercambiable)                 │
+               │ MCP (stdio, contrato   documentos_relevantes, obtener_producto,
+               │ intercambiable)        historial_producto, estado_fuentes,
+               │                        aplicar_patch_memoria, targeted_sync)
+               │                                 │
                ▼                                 ▼
 ┌─────────────────────────────┐      ┌─────────────────────────────┐
 │ mocks/klap-knowledge-mcp/     │      │  Servicio real de Klap        │
@@ -48,9 +50,13 @@ Klap Dev-Kit (este repo)                          Klap Knowledge (servicio exter
 ## La separación es literal, no sólo conceptual
 
 El Dev-Kit **no tiene ningún código que hable de la implementación de Klap Knowledge**. Todo
-lo que sabe es el contrato de `schemas/knowledge-mcp/tools.json`: seis tools, todas de lectura
-salvo `targeted_sync`, que es una solicitud de reprocesamiento — nunca una escritura directa.
-El servidor detrás de ese contrato es intercambiable cambiando dos líneas en
+lo que sabe es el contrato de `schemas/knowledge-mcp/tools.json`: diez tools, todas de lectura
+salvo las declaradas en `no_lectura` — `aplicar_patch_memoria` (única vía real de escritura,
+patch estructurado con evidencia, la usa `agents/documentador-klap.md`) y, deprecada,
+`targeted_sync` (acuse degradado, eliminación real prevista para `3.0.0`). Ninguna tool escribe
+directo al almacenamiento interno de Klap Knowledge — eso es responsabilidad exclusiva del
+servidor detrás del contrato. El servidor detrás de ese contrato es intercambiable cambiando
+dos líneas en
 `config/klap.yaml` (`mcp.knowledge.server` y `modo`); ningún skill ni agente referencia el
 mock ni el servicio real por nombre.
 
@@ -65,6 +71,7 @@ mock ni el servicio real por nombre.
         ▼
   agents/analista.md → agents/arquitecto.md → agents/desarrollador.md
         → agents/certificador.md + agents/seguridad.md → agents/documentador.md
+        → agents/documentador-klap.md (memoria global de producto, vía aplicar_patch_memoria)
         │
         ├── lee bajo demanda: standards/index.yaml, docs/context/index.yaml del repo
         ├── consulta: MCP Klap Knowledge (mock o real), MCP Atlassian, MCP SonarQube
