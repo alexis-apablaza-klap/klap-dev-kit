@@ -1,30 +1,96 @@
 [
   {
+    "id": "abono-ya",
     "nombre": "abono-ya",
+    "aliases": ["Abono Ya", "payout acceleration"],
     "resumen": "Pago adelantado al comercio de las ventas del día, sin esperar el proceso de pago normal (payout acceleration).",
     "fase": "fase-1",
     "componentes": ["ms-central-sva-anticipo-calculos", "ms-central-sva-anticipo-ondemand"],
-    "keywords": ["abono", "anticipo", "payout", "adelanto", "liquidacion"]
+    "keywords": ["abono", "anticipo", "payout", "adelanto", "liquidacion"],
+    "revision": 3,
+    "business": {
+      "description": "Pago adelantado al comercio de las ventas del día, sin esperar el proceso de pago normal.",
+      "objective": "Reducir la fricción de caja del comercio adelantando el flujo de sus ventas ya conciliadas.",
+      "target_customers": ["comercios adheridos a Klap con ventas diarias recurrentes"],
+      "value_proposition": ["liquidez el mismo día hábil", "sin trámite manual de solicitud"],
+      "capabilities": ["cálculo de monto anticipable", "pago on-demand del anticipo"],
+      "sources": [
+        { "type": "confluence", "ref": "CONFLUENCE-SPACE-ABY-101", "updated_at": "2026-08-01T00:00:00Z" }
+      ]
+    },
+    "ecosystem": {
+      "importance": "producto core de la línea de adelantos de Klap",
+      "relations": [
+        {
+          "product_id": "impulso-klap",
+          "type": "relates_to",
+          "direction": "outbound",
+          "criticality": "low",
+          "description": "Comparten al mismo comercio como cliente pero son ofertas de crédito/adelanto independientes.",
+          "sources": [{ "type": "manual", "ref": "conversacion-equipo-2026-08" }]
+        }
+      ]
+    },
+    "technical": {
+      "components": [
+        {
+          "component_id": "ms-central-sva-anticipo-calculos",
+          "role": "calcula el monto anticipable",
+          "criticality": "high",
+          "repository": "ms-central-sva-anticipo-calculos",
+          "sources": [{ "type": "component-yaml", "ref": "ms-central-sva-anticipo-calculos/component.yaml" }]
+        },
+        {
+          "component_id": "ms-central-sva-anticipo-ondemand",
+          "role": "ejecuta el pago on-demand del anticipo",
+          "criticality": "high",
+          "repository": "ms-central-sva-anticipo-ondemand",
+          "sources": [{ "type": "component-yaml", "ref": "ms-central-sva-anticipo-ondemand/component.yaml" }]
+        }
+      ]
+    },
+    "metadata": {
+      "created_at": "2026-06-01T00:00:00Z",
+      "updated_at": "2026-08-01T00:00:00Z"
+    }
   },
   {
+    "id": "impulso-klap",
     "nombre": "impulso-klap",
     "resumen": "Crédito otorgado por R2 al comercio en base a su historial de ventas, pagado día a día vía retenciones sobre los pagos de Klap.",
     "fase": "mantencion",
     "componentes": [],
-    "keywords": ["credito", "impulso", "retencion", "r2"]
+    "keywords": ["credito", "impulso", "retencion", "r2"],
+    "revision": 1,
+    "metadata": {
+      "created_at": "2026-05-01T00:00:00Z",
+      "updated_at": "2026-05-01T00:00:00Z"
+    }
   },
   {
+    "id": "cuota-comercio",
     "nombre": "cuota-comercio",
     "resumen": "Soluciones de pago en cuotas para comercio.",
     "fase": "mantencion",
     "componentes": [],
-    "keywords": ["cuota", "installment", "comercio"]
+    "keywords": ["cuota", "installment", "comercio"],
+    "revision": 1,
+    "metadata": {
+      "created_at": "2026-05-01T00:00:00Z",
+      "updated_at": "2026-05-01T00:00:00Z"
+    }
   },
   {
+    "id": "vouchering-itau",
     "nombre": "vouchering-itau",
     "resumen": "Proyecto en definición, sin repositorios creados aún.",
     "fase": "kickoff",
     "componentes": [],
-    "keywords": ["itau", "voucher"]
+    "keywords": ["itau", "voucher"],
+    "revision": 1,
+    "metadata": {
+      "created_at": "2026-09-01T00:00:00Z",
+      "updated_at": "2026-09-01T00:00:00Z"
+    }
   }
 ]

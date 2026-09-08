@@ -19,7 +19,7 @@ Dentro de una sesión de Claude Code:
 /plugin install klap@klap-dev-kit
 ```
 
-Con eso quedan activos: los 8 comandos `/klap:*`, los 6 agentes especializados, los hooks de
+Con eso quedan activos: los 11 comandos `/klap:*`, los 7 agentes especializados, los hooks de
 validación y el servidor MCP mock de Klap Knowledge (se activa solo, sin pasos extra).
 
 **Actualizar:**
@@ -28,7 +28,7 @@ validación y el servidor MCP mock de Klap Knowledge (se activa solo, sin pasos 
 /plugin update klap@klap-dev-kit
 ```
 
-**Verificar que quedó instalado:** escribe `/klap:` en el prompt — deberían listarse los 8
+**Verificar que quedó instalado:** escribe `/klap:` en el prompt — deberían listarse los 11
 comandos.
 
 ### Requisitos
@@ -50,8 +50,8 @@ Detalle completo: `docs/installation.md`. Problemas comunes: `docs/troubleshooti
 
 | Herramienta | Cantidad | Para qué sirve |
 |---|---|---|
-| Comandos `/klap:*` | 8 | Ejecutar el flujo completo o una fase puntual del ciclo de desarrollo |
-| Agentes especializados | 6 | Cada uno cubre una fase del flujo (los invocan los comandos, no se llaman a mano) |
+| Comandos `/klap:*` | 11 | Ejecutar el flujo completo, una fase puntual, o gestionar la memoria de producto en Klap Knowledge |
+| Agentes especializados | 7 | Cada uno cubre una fase del flujo o la memoria global de producto (los invocan los comandos, no se llaman a mano) |
 | Hooks de validación | 3 | Bloquean automáticamente commits con secretos y pushes sin certificación |
 | Scripts deterministas | 8 | Tests, coverage, quality gate, escaneo de secretos/dependencias, validación de artefactos |
 | MCP mock de Klap Knowledge | 1 | Simula la memoria organizacional para probar el flujo sin el servicio real |
@@ -70,6 +70,9 @@ Detalle completo: `docs/installation.md`. Problemas comunes: `docs/troubleshooti
 | `/klap:documentar [ISSUE-KEY]` | Actualiza memoria del repo y, si corresponde, Confluence |
 | `/klap:actualizar-componente [repo]` | Da de alta o pone al día `component.yaml` / `docs/context/index.yaml` de un repo |
 | `/klap:consultar-estandar <tema>` | Muestra el estándar Klap relevante a un tema, sin arrancar ningún flujo |
+| `/klap:memoria-inicializar <producto>` | Construye la memoria inicial de un producto en Klap Knowledge (pausa humana antes de aplicar) |
+| `/klap:memoria-actualizar <producto\|ISSUE-KEY>` | Actualiza incrementalmente la memoria de un producto, sin releer todo |
+| `/klap:memoria-consultar <producto o pregunta>` | Responde usando la memoria consolidada de Klap Knowledge |
 
 Tabla ampliada con criterios de cuándo usar cada uno: `docs/commands.md`.
 
@@ -86,6 +89,7 @@ fase. Sirve saber qué hace cada uno para entender qué esperar en cada pausa de
 | `certificador` | Validación/Certificación | Ejecuta e interpreta tests, coverage y Sonar contra los umbrales del kit |
 | `seguridad` | Certificación | Revisión OWASP del diff e interpretación de Trivy/Dependency-Check |
 | `documentador` | Documentación | Actualiza memoria del repo y, si corresponde, Confluence |
+| `documentador-klap` | Finalización (y `/klap:memoria-*`) | Mantiene la memoria global de producto en Klap Knowledge; nunca inventa negocio, componentes ni relaciones |
 
 ### 2.3 Hooks (automáticos, no requieren acción)
 
@@ -101,6 +105,12 @@ fase. Sirve saber qué hace cada uno para entender qué esperar en cada pausa de
 (`mocks/klap-knowledge-mcp/fixtures/`) para probar el flujo sin depender del servicio real. El
 día que exista el servicio real, sólo cambia `config/klap.yaml` — ningún comando ni agente
 necesita tocarse.
+
+El contrato tiene 10 tools: las de consulta de siempre (`buscar_producto`, `resumen_producto`,
+`resumen_componente`, `buscar`, `documentos_relevantes`), la memoria estructurada completa de
+un producto (`obtener_producto`, `historial_producto`, `estado_fuentes`), y una única vía de
+escritura real — `aplicar_patch_memoria` — que sólo usa el agente `documentador-klap` (nunca a
+mano). `targeted_sync` sigue existiendo pero está deprecada.
 
 Para levantarlo manualmente fuera de Claude Code (debug):
 
@@ -144,6 +154,15 @@ Quieres re-certificar después de un fix, sin repetir análisis/diseño:
 ```
 
 Devuelve sólo el estándar relevante — no arranca ninguna fase.
+
+### Consulta rápida a la memoria de un producto (sin flujo)
+
+```
+/klap:memoria-consultar "qué productos dependen de Liquidaciones"
+```
+
+Responde con la memoria consolidada de Klap Knowledge, expandiendo a Jira/Confluence sólo si
+hace falta — nunca escribe memoria, aunque detecte algo desactualizado.
 
 ### Onboarding de un repo nuevo al kit
 

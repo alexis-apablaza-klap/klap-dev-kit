@@ -12,11 +12,18 @@ Versionado según [SemVer](https://semver.org/lang/es/).
   validación, certificación, documentación, finalización) y skills complementarios
   (`analizar`, `disenar`, `desarrollar`, `certificar`, `documentar`,
   `actualizar-componente`, `consultar-estandar`).
-- Seis agentes especializados: `analista`, `arquitecto`, `desarrollador`, `certificador`,
-  `seguridad`, `documentador`.
-- Contrato de Klap Knowledge MCP (`schemas/knowledge-mcp/`) y servidor mock local
-  (`mocks/klap-knowledge-mcp/`) para desarrollar y testear el kit desacoplado del servicio
-  real.
+- Siete agentes especializados: `analista`, `arquitecto`, `desarrollador`, `certificador`,
+  `seguridad`, `documentador`, `documentador-klap` (memoria organizacional de producto en Klap
+  Knowledge, separada de la memoria técnica del repo que mantiene `documentador`).
+- Contrato de Klap Knowledge MCP v2.0.0 (`schemas/knowledge-mcp/tools.json`, 10 tools) y
+  servidor mock local (`mocks/klap-knowledge-mcp/`) para desarrollar y testear el kit
+  desacoplado del servicio real. v2 agrega memoria estructurada de producto
+  (`obtener_producto`, `historial_producto`, `estado_fuentes`) y la única vía real de
+  escritura, `aplicar_patch_memoria` (patch estructurado con evidencia); `targeted_sync` queda
+  deprecada (acuse degradado, eliminación real prevista para `3.0.0`).
+- Skills `memoria-inicializar`, `memoria-actualizar` y `memoria-consultar` para gestionar la
+  memoria de producto en Klap Knowledge fuera de `/klap:trabajar-hu` (que ahora invoca
+  `documentador-klap` en su fase 8 de Finalización).
 - Validaciones deterministas (`scripts/*.mjs`) y hooks bloqueantes (`hooks/hooks.json`):
   escaneo de secretos en commit, certificación en verde antes de push, validación de
   memoria de componente tras cada escritura.

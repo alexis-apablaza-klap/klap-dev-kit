@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
- * Solicita a Klap Knowledge un targeted-sync (reprocesamiento de fuentes específicas)
- * tras un cambio documental. Es la ÚNICA operación de escritura sobre Klap Knowledge,
- * y sigue siendo una solicitud — nunca escribe directamente al grafo.
+ * [DEPRECATED] Solicita a Klap Knowledge un targeted-sync (reprocesamiento de fuentes
+ * específicas) tras un cambio documental. Desde el contrato v2.0.0 la vía real de escritura es
+ * `aplicar_patch_memoria` (ver agents/documentador-klap.md) — este script sólo queda como
+ * acuse degradado mientras targeted_sync exista en el contrato (eliminación real prevista para
+ * 3.0.0, ver schemas/knowledge-mcp/tools.json → no_lectura). No lo uses en flujos nuevos.
  *
  * Uso: node scripts/targeted-sync.mjs --fuente confluence:PAGE-123 --fuente component-yaml:./component.yaml [--motivo "texto"]
  *
@@ -50,7 +52,7 @@ async function main() {
     await cliente.iniciar();
     const resultado = await cliente.llamarTool("targeted_sync", { fuentes, motivo });
     console.log(JSON.stringify(resultado, null, 2));
-    process.exit(resultado.aceptado ? 0 : 1);
+    process.exit(resultado.structuredContent?.aceptado ? 0 : 1);
   } finally {
     cliente.cerrar();
   }

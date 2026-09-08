@@ -54,12 +54,22 @@ Si `aprobado: false`, detente aquí y repórtalo — no continúes a documentaci
 
 Invoca `documentador` con el diff final y `diseno.md`/`analisis.md` como contexto de qué
 cambió. **Pausa antes de escribir a Confluence** (el cambio en el repo vía Git no necesita
-pausa adicional, ya es revisable por PR). Si hubo cambio en Confluence, confirma el
-`targeted_sync` solicitado.
+pausa adicional, ya es revisable por PR). No dispares ninguna escritura a Klap Knowledge desde
+esta fase — el resultado (diff de `docs/` + cambio de Confluence si aplica) se entrega íntegro
+a la fase 8.
 
 ## Fase 8 — Finalización
 
-Invoca la capacidad de `/klap:actualizar-componente` sobre el repo si el `documentador` no
-la cubrió ya. Cierra con un resumen corto: qué se hizo, artefactos generados, estado de
-certificación, y qué queda pendiente (si algo del análisis quedó como pregunta abierta que no
-bloqueaba la HU pero vale la pena registrar).
+1. Invoca la capacidad de `/klap:actualizar-componente` sobre el repo si el `documentador` no
+   la cubrió ya.
+2. Invoca `documentador-klap` (ver `agents/documentador-klap.md`, Flujo B — actualización
+   incremental) con un input compacto: `<ISSUE-KEY>`, el/los producto(s) ya identificados en
+   fase 1, `analisis.md`, `diseno.md`, un resumen del diff final, los componentes afectados,
+   los documentos de Confluence modificados (si hubo) y el resultado del `documentador`. Debe
+   producir sólo el delta de memoria global que corresponde a esta HU — nunca reescanear todo
+   el producto. Si `documentador-klap` señala un conflicto o ambigüedad de alto impacto, repórtalo
+   igual que cualquier pregunta pendiente — no lo resuelvas por tu cuenta.
+3. Cierra con un resumen corto: qué se hizo, artefactos generados, estado de certificación, el
+   resultado de `documentador-klap` (aplicado o pendiente de confirmación, con
+   `new_revision`/`changed_files` si aplicó), y qué queda pendiente (si algo del análisis quedó
+   como pregunta abierta que no bloqueaba la HU pero vale la pena registrar).

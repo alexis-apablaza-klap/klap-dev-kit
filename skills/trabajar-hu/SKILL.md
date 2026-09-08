@@ -24,7 +24,7 @@ asumas nombres de servidor ni umbrales hardcodeados.
 | 5 | Validación | `scripts/ejecutar-tests.mjs`, `scripts/validar-component.mjs` | `validacion.json` | no |
 | 6 | Certificación | `certificador` + `seguridad` (en paralelo) | `certificacion.json` | **bloqueante si `aprobado: false`** |
 | 7 | Documentación | `documentador` | diff en `docs/` (+ Confluence si aplica) | **sí, antes de tocar Confluence** |
-| 8 | Finalización | orquestador | invoca `/klap:actualizar-componente`, resumen final | no |
+| 8 | Finalización | orquestador + `documentador-klap` | invoca `/klap:actualizar-componente`, patch de memoria global de producto, resumen final | no (salvo que `documentador-klap` detecte conflicto) |
 
 Instrucciones detalladas de cada fase: `references/fases.md` (ábrelo sólo si necesitas el
 detalle — no lo cargues de entrada).

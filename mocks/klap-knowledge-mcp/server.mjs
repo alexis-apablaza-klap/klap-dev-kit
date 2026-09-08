@@ -2,7 +2,8 @@
 /**
  * Mock stdio de Klap Knowledge MCP. Implementa el contrato de schemas/knowledge-mcp/tools.json
  * sirviendo fixtures locales, para desarrollar y testear el Dev-Kit sin depender del
- * servicio real. Framing JSON-RPC 2.0 con cabeceras Content-Length (igual que LSP).
+ * servicio real. Framing JSON-RPC 2.0 con ndjson (un mensaje por línea, sin cabeceras
+ * Content-Length — eso es LSP, no MCP).
  *
  * No representa cómo se implementará Klap Knowledge — sólo el contrato observable.
  */
@@ -20,6 +21,13 @@ const productos = fixture("productos");
 const componentes = fixture("componentes");
 const documentos = fixture("documentos");
 const busqueda = fixture("busqueda");
+const historialPorProducto = fixture("historial");
+const fuentesPorProducto = fixture("fuentes");
+
+// Estado in-memory de revisión por producto para aplicar_patch_memoria: seedeado desde el
+// fixture y mutado sólo durante la vida del proceso — el mock no persiste a disco, es fiel al
+// contrato (aplicar/rechazar por expected_revision), no a la arquitectura de storage real.
+const revisionPorProducto = new Map(productos.map((p) => [p.id, p.revision ?? 1]));
 const contrato = JSON.parse(
   readFileSync(path.join(aqui, "..", "..", "schemas", "knowledge-mcp", "tools.json"), "utf8")
 );
@@ -91,10 +99,58 @@ const handlers = {
     return { documentos: docs };
   },
 
+  obtener_producto({ producto }) {
+    const p = productos.find((x) => x.nombre === producto || x.id === producto);
+    if (!p) return { producto: null, business: null, ecosystem: null, technical: null, metadata: null };
+    return {
+      producto: { id: p.id, name: p.nombre, aliases: p.aliases ?? [], status: p.fase },
+      business: p.business ?? null,
+      ecosystem: p.ecosystem ?? null,
+      technical: p.technical ?? null,
+      metadata: p.metadata
+        ? { ...p.metadata, revision: revisionPorProducto.get(p.id) ?? p.revision ?? 1 }
+        : null,
+    };
+  },
+
+  historial_producto({ producto, desde, hasta, limite = 50 }) {
+    let eventos = historialPorProducto[producto] ?? [];
+    if (desde) eventos = eventos.filter((e) => e.occurred_at >= desde);
+    if (hasta) eventos = eventos.filter((e) => e.occurred_at <= hasta);
+    eventos = [...eventos].sort((a, b) => (a.occurred_at < b.occurred_at ? 1 : -1)).slice(0, limite);
+    return { eventos };
+  },
+
+  estado_fuentes({ producto }) {
+    return { fuentes: fuentesPorProducto[producto] ?? {} };
+  },
+
+  aplicar_patch_memoria({ product_id, expected_revision, operations }) {
+    const previous_revision = revisionPorProducto.get(product_id) ?? 0;
+    if (expected_revision !== previous_revision) {
+      return {
+        applied: false,
+        product_id,
+        previous_revision,
+        new_revision: previous_revision,
+        changed_files: [],
+        rejected_reason: `expected_revision (${expected_revision}) no coincide con la revisión actual (${previous_revision})`,
+      };
+    }
+    const new_revision = previous_revision + 1;
+    revisionPorProducto.set(product_id, new_revision);
+    const changed_files = [`products/${product_id}/product.yaml`];
+    if (operations.some((op) => op.op === "append_event")) changed_files.push(`products/${product_id}/timeline.ndjson`);
+    if (operations.some((op) => op.op === "upsert_document")) changed_files.push(`products/${product_id}/documents.yaml`);
+    if (operations.some((op) => op.op === "upsert_source_state")) changed_files.push(`products/${product_id}/sources.yaml`);
+    return { applied: true, product_id, previous_revision, new_revision, changed_files };
+  },
+
   targeted_sync({ fuentes, motivo }) {
     const solicitud_id = randomUUID();
     process.stderr.write(
-      `[mock-knowledge] targeted_sync solicitado (${solicitud_id}): ${fuentes.length} fuente(s) — ${motivo ?? "sin motivo"}\n`
+      `[mock-knowledge] targeted_sync solicitado — DEPRECATED, acuse degradado, no reprocesa nada ` +
+        `(${solicitud_id}): ${fuentes.length} fuente(s) — ${motivo ?? "sin motivo"}\n`
     );
     return { aceptado: true, solicitud_id };
   },

@@ -6,9 +6,20 @@ import { readYaml } from "../../scripts/lib/yaml-io.mjs";
 
 const contrato = JSON.parse(readFileSync(resolveFromRoot("schemas", "knowledge-mcp", "tools.json"), "utf8"));
 
-const TOOLS_ESPERADAS = ["buscar_producto", "resumen_producto", "resumen_componente", "buscar", "documentos_relevantes", "targeted_sync"];
+const TOOLS_ESPERADAS = [
+  "buscar_producto",
+  "resumen_producto",
+  "resumen_componente",
+  "buscar",
+  "documentos_relevantes",
+  "obtener_producto",
+  "historial_producto",
+  "estado_fuentes",
+  "aplicar_patch_memoria",
+  "targeted_sync",
+];
 
-test("el contrato declara exactamente las 6 tools esperadas", () => {
+test("el contrato declara exactamente las 10 tools esperadas", () => {
   const nombres = contrato.tools.map((t) => t.name).sort();
   assert.deepEqual(nombres, [...TOOLS_ESPERADAS].sort());
 });
@@ -22,8 +33,14 @@ test("cada tool tiene name, description, inputSchema y outputSchema", () => {
   }
 });
 
-test("targeted_sync es la única operación declarada como no-lectura", () => {
-  assert.deepEqual(contrato.no_lectura, ["targeted_sync"]);
+test("aplicar_patch_memoria y targeted_sync son las operaciones declaradas como no-lectura", () => {
+  assert.deepEqual([...contrato.no_lectura].sort(), ["aplicar_patch_memoria", "targeted_sync"]);
+});
+
+test("targeted_sync está marcada deprecated y sigue declarando su contrato completo", () => {
+  const tool = contrato.tools.find((t) => t.name === "targeted_sync");
+  assert.equal(tool.deprecated, true);
+  assert.ok(tool.inputSchema && tool.outputSchema);
 });
 
 test("contractVersion está presente y es semver", () => {

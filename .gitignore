@@ -1,6 +1,7 @@
 node_modules/
 *.log
 .klap/hu/
+.klap/knowledge/
 .DS_Store
 Thumbs.db
 

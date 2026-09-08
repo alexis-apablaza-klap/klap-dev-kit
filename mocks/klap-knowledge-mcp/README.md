@@ -21,10 +21,21 @@ y por `tests/mcp/`.
 
 ## Fixtures
 
-- `productos.json` — productos Klap y palabras clave para `buscar_producto`.
+- `productos.json` — productos Klap, palabras clave para `buscar_producto`, y memoria
+  estructurada (`negocio`/`ecosistema`/`tecnico`/`metadata`/`revision`) para `obtener_producto`
+  y `aplicar_patch_memoria`.
 - `componentes.json` — memoria resumida por componente.
 - `documentos.json` — punteros a Confluence/ADR para `documentos_relevantes`.
 - `busqueda.json` — contenido indexado para `buscar`.
+- `historial.json` — eventos por producto para `historial_producto`.
+- `fuentes.json` — cursores de sincronización por producto para `estado_fuentes`.
 
 Editar estos archivos para ampliar los escenarios de prueba — no requieren reiniciar
 nada más que el proceso del servidor.
+
+## `aplicar_patch_memoria` en el mock
+
+La revisión por producto se seedea desde `productos.json` (`revision`) y se mantiene sólo en
+memoria del proceso — el mock no persiste a disco. Sirve para probar el ciclo optimista
+(`expected_revision` vs `previous_revision`/`new_revision`), no como referencia de storage real
+(eso lo define `klap-dev-kit-knowledge`, nunca este mock).

@@ -17,6 +17,15 @@ no algo que un script pueda comparar contra un umbral. Estos casos cierran esa b
   propuesta elige la novedad sin justificar por qué se aparta de lo existente.
 - `seguridad-detecta-sqli/` — diff con concatenación de strings en una query SQL. El grader
   falla si el hallazgo no aparece, o aparece sin severidad CRITICAL/HIGH.
+- `documentador-klap-no-inventa-memoria/` — inicialización de un producto con una sola fuente
+  ambigua. El grader falla si el agente inventa clientela, transforma una mención textual en un
+  `component_id` real, omite fuentes, o aplica el patch inicial sin pausa humana.
+- `documentador-klap-usa-knowledge-primero/` — actualización incremental con `estado_fuentes`
+  ya resuelto. El grader falla si el agente relee fuentes que ya estaban al día o usa un
+  `expected_revision` distinto al que le entregó `obtener_producto`.
+- `documentador-klap-conflicto-no-sobrescribe/` — Confluence y Jira contradicen el objetivo de
+  un producto. El grader falla si el agente elige una de las dos fuentes en silencio en vez de
+  exponer el conflicto para confirmación humana.
 
 ## Cómo correrlos
 

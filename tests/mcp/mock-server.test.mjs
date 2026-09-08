@@ -18,7 +18,7 @@ function validarContraOutputSchema(nombreTool, structuredContent) {
   assert.ok(valido, `"${nombreTool}" no cumple su outputSchema: ${errores.join("; ")}`);
 }
 
-test("el mock de Klap Knowledge responde initialize y tools/list con las 6 tools reales", async () => {
+test("el mock de Klap Knowledge responde initialize y tools/list con las 10 tools reales", async () => {
   const cliente = new ClienteMcpStdio(["node", serverPath]);
   try {
     const init = await cliente.iniciar();
@@ -27,9 +27,13 @@ test("el mock de Klap Knowledge responde initialize y tools/list con las 6 tools
     const { tools } = await cliente.listarTools();
     const nombres = tools.map((t) => t.name).sort();
     assert.deepEqual(nombres, [
+      "aplicar_patch_memoria",
       "buscar",
       "buscar_producto",
       "documentos_relevantes",
+      "estado_fuentes",
+      "historial_producto",
+      "obtener_producto",
       "resumen_componente",
       "resumen_producto",
       "targeted_sync",
@@ -108,7 +112,7 @@ test("documentos_relevantes: resultado cumple su outputSchema para un componente
   }
 });
 
-test("targeted_sync: resultado cumple su outputSchema y devuelve aceptado + solicitud_id", async () => {
+test("targeted_sync: resultado cumple su outputSchema y devuelve aceptado + solicitud_id (deprecated)", async () => {
   const cliente = new ClienteMcpStdio(["node", serverPath]);
   try {
     await cliente.iniciar();
@@ -119,6 +123,132 @@ test("targeted_sync: resultado cumple su outputSchema y devuelve aceptado + soli
     validarContraOutputSchema("targeted_sync", r.structuredContent);
     assert.equal(r.structuredContent.aceptado, true);
     assert.ok(typeof r.structuredContent.solicitud_id === "string" && r.structuredContent.solicitud_id.length > 0);
+    assert.ok(
+      contrato.find((t) => t.name === "targeted_sync").deprecated,
+      "targeted_sync debe seguir marcada deprecated en el contrato mientras responda"
+    );
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("obtener_producto: resultado cumple su outputSchema y trae memoria estructurada completa", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const r = await cliente.llamarTool("obtener_producto", { producto: "abono-ya" });
+    validarContraOutputSchema("obtener_producto", r.structuredContent);
+    assert.equal(r.structuredContent.producto.id, "abono-ya");
+    assert.ok(r.structuredContent.business.description.length > 0);
+    assert.ok(r.structuredContent.technical.components.some((c) => c.component_id === "ms-central-sva-anticipo-calculos"));
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("obtener_producto: producto inexistente devuelve producto null sin inventar memoria", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const r = await cliente.llamarTool("obtener_producto", { producto: "no-existe" });
+    validarContraOutputSchema("obtener_producto", r.structuredContent);
+    assert.equal(r.structuredContent.producto, null);
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("historial_producto: resultado cumple su outputSchema y respeta el límite", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const r = await cliente.llamarTool("historial_producto", { producto: "abono-ya", limite: 1 });
+    validarContraOutputSchema("historial_producto", r.structuredContent);
+    assert.equal(r.structuredContent.eventos.length, 1);
+    assert.equal(r.structuredContent.eventos[0].event_id, "evt:abono-ya:2026-08-01-liquidacion");
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("estado_fuentes: resultado cumple su outputSchema para un producto con cursores", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const r = await cliente.llamarTool("estado_fuentes", { producto: "abono-ya" });
+    validarContraOutputSchema("estado_fuentes", r.structuredContent);
+    assert.ok(r.structuredContent.fuentes.jira.epics.length > 0);
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("aplicar_patch_memoria: patch válido con expected_revision correcto se aplica y sube la revisión", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const antes = await cliente.llamarTool("obtener_producto", { producto: "impulso-klap" });
+    const revisionPrevia = antes.structuredContent.metadata.revision;
+    const r = await cliente.llamarTool("aplicar_patch_memoria", {
+      product_id: "impulso-klap",
+      expected_revision: revisionPrevia,
+      generated_by: { agent: "documentador-klap" },
+      operations: [
+        {
+          op: "append_event",
+          value: {
+            event_id: "evt:impulso-klap:test",
+            occurred_at: "2026-09-08T00:00:00Z",
+            type: "documentation_change",
+            summary: "Evento de prueba.",
+            sources: [{ type: "manual", ref: "test" }],
+            created_by: "documentador-klap",
+          },
+        },
+      ],
+    });
+    validarContraOutputSchema("aplicar_patch_memoria", r.structuredContent);
+    assert.equal(r.structuredContent.applied, true);
+    assert.equal(r.structuredContent.previous_revision, revisionPrevia);
+    assert.equal(r.structuredContent.new_revision, revisionPrevia + 1);
+    assert.ok(r.structuredContent.changed_files.includes("products/impulso-klap/timeline.ndjson"));
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("aplicar_patch_memoria: expected_revision desalineado se rechaza sin aplicar", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const r = await cliente.llamarTool("aplicar_patch_memoria", {
+      product_id: "cuota-comercio",
+      expected_revision: 999,
+      generated_by: { agent: "documentador-klap" },
+      operations: [{ op: "update_business", value: { description: "x", sources: [{ type: "manual", ref: "test" }] } }],
+    });
+    validarContraOutputSchema("aplicar_patch_memoria", r.structuredContent);
+    assert.equal(r.structuredContent.applied, false);
+    assert.ok(r.structuredContent.rejected_reason.length > 0);
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("aplicar_patch_memoria: rechaza un patch con una operación fuera de forma (inputSchema)", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    await assert.rejects(
+      () =>
+        cliente.llamarTool("aplicar_patch_memoria", {
+          product_id: "cuota-comercio",
+          expected_revision: 1,
+          generated_by: { agent: "documentador-klap" },
+          operations: [{ op: "operacion_inexistente", value: {} }],
+        }),
+      /Argumentos inválidos/
+    );
   } finally {
     cliente.cerrar();
   }
