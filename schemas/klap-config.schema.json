@@ -36,7 +36,11 @@
     "memoria": {
       "type": "object",
       "properties": {
-        "repo_path": { "type": "string" }
+        "repo_path": { "type": "string" },
+        "workspace_root": {
+          "type": "string",
+          "description": "Ruta (relativa a la raíz de este repo) a la carpeta que contiene las carpetas de cada producto (p.ej. <workspace_root>/abono-ya/<repo>). Usada por scripts/descubrir-componentes.mjs para el escaneo local — no requiere que exista si el descubrimiento de componentes no se usa en este entorno."
+        }
       }
     },
     "rutas": {
