@@ -49,7 +49,6 @@ function escribirConfigYContrato(root, { versionContrato, versionRegistrada }) {
     rutas: {
       standards_index: "standards/index.yaml",
       quality_gates: "config/quality-gates.yaml",
-      component_schema: "schemas/component.schema.json",
       context_index_schema: "schemas/context-index.schema.json",
       knowledge_mcp_contract: "schemas/knowledge-mcp/tools.json",
     },

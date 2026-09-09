@@ -20,7 +20,7 @@ Atlassian) el `<ISSUE-KEY>` con su épica/`parent`, e invoca `documentador-klap`
 
 Con el producto resuelto, invoca `analista` con el `<ISSUE-KEY>` (y el producto ya
 identificado, para que no repita el gate). El agente sigue el orden estricto documentado en
-`agents/analista.md` (Jira → producto → Klap Knowledge → component.yaml/índice →
+`agents/analista.md` (Jira → producto → Klap Knowledge → índice de contexto →
 `documentos_relevantes`/`buscar` → Confluence sólo si falta algo). Guarda su salida en
 `.klap/hu/<ISSUE-KEY>/contexto.md`. Corre
 `node scripts/validar-artefacto-fase.mjs contexto .klap/hu/<ISSUE-KEY>/contexto.md`; si faltan
@@ -52,7 +52,7 @@ el diff + las pruebas en el repo de trabajo.
 
 Ejecuta, no invoques un agente para esto — es determinista:
 - `node scripts/ejecutar-tests.mjs <repo>`
-- `node scripts/validar-component.mjs <repo>` si la HU tocó `component.yaml` o el índice
+- `node scripts/validar-contexto.mjs <repo>` si la HU tocó el índice de contexto
 Guarda el resultado combinado en `validacion.json`. Si algo falla aquí, vuelve a fase 4 antes
 de avanzar — no llegues a certificación con tests rotos.
 

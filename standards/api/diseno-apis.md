@@ -71,7 +71,7 @@ envelope, sin excepción de componente:
 
 ## OpenAPI como contrato fuente de verdad (MANDATORY para APIs expuestas)
 
-El OpenAPI del componente (referenciado en `component.yaml` → `apis_expuestas.ruta_contrato`)
+El OpenAPI del componente (ubicado en el repo, referenciado desde `docs/context/index.yaml`)
 es lo que describe el comportamiento real de la API — se actualiza como parte del mismo cambio
 que modifica el endpoint, no después. Un endpoint sin reflejo en el OpenAPI no está
 correctamente documentado aunque funcione.

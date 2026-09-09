@@ -38,14 +38,14 @@
           "role": "calcula el monto anticipable",
           "criticality": "high",
           "repository": "ms-central-sva-anticipo-calculos",
-          "sources": [{ "type": "component-yaml", "ref": "ms-central-sva-anticipo-calculos/component.yaml" }]
+          "sources": [{ "type": "manual", "ref": "ms-central-sva-anticipo-calculos (revisión directa del repo)" }]
         },
         {
           "component_id": "ms-central-sva-anticipo-ondemand",
           "role": "ejecuta el pago on-demand del anticipo",
           "criticality": "high",
           "repository": "ms-central-sva-anticipo-ondemand",
-          "sources": [{ "type": "component-yaml", "ref": "ms-central-sva-anticipo-ondemand/component.yaml" }]
+          "sources": [{ "type": "manual", "ref": "ms-central-sva-anticipo-ondemand (revisión directa del repo)" }]
         }
       ]
     },

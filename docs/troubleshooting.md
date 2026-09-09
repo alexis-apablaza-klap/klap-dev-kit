@@ -4,7 +4,7 @@
 
 Comportamiento esperado, no una falla: si el MCP de Klap Knowledge no está disponible, el
 agente `analista` lo declara explícitamente en `contexto.md` y continúa con Jira + la memoria
-del repo (`component.yaml` / `docs/context/index.yaml`). No debería inventar un resumen de
+del repo (`docs/context/index.yaml`). No debería inventar un resumen de
 producto o componente. Si ves que sí lo inventó, es un bug de comportamiento del agente, no
 del MCP — repórtalo.
 

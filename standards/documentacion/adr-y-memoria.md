@@ -29,9 +29,11 @@ decidió cada cosa en su momento. Ver el ejemplo `adr-014`/`diseno-legacy-batch`
 
 ## Memoria del repo vs documentación de producto
 
-- **`component.yaml` + `docs/context/`** (en el repo, versionado por Git): memoria técnica del
+- **`docs/context/`** (en el repo, versionado por Git): memoria técnica del
   componente — arquitectura, integraciones, decisiones, deployment, historial. Es lo que
-  `/klap:actualizar-componente` mantiene y lo que el `analista` lee primero.
+  `/klap:actualizar-componente` mantiene y lo que el `analista` lee primero. La representación
+  del componente en sí (qué productos lo usan, sus capabilities) vive en Klap Knowledge, no en
+  un archivo del repo.
 - **Confluence**: conocimiento a nivel de producto o cross-componente que no pertenece a un
   repo específico (definiciones de negocio, procesos, decisiones que afectan a varios
   componentes).

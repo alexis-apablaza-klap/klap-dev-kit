@@ -59,8 +59,8 @@ sustanciales que se benefician de encapsularse:
 - **Value Object**: se compara por valor, inmutable (`Monto`, `PeriodoLiquidacion`).
 - **Agregado**: raíz que garantiza invariantes de un conjunto de entidades/VOs relacionados —
   las modificaciones pasan siempre por la raíz.
-- **Bounded Context**: un componente puede pertenecer a más de un producto (ver
-  `component.yaml`), pero su dominio interno debe tener un límite claro — no compartir
+- **Bounded Context**: un componente puede pertenecer a más de un producto (ver su
+  representación en Klap Knowledge), pero su dominio interno debe tener un límite claro — no compartir
   entidades de dominio entre componentes; compartir contratos (DTOs de API/eventos) sí.
 
 Si el componente es esencialmente CRUD con poca lógica, forzar agregados/value objects agrega

@@ -59,7 +59,7 @@ en vez de inventar una propia.
 ## Migraciones (CONTEXT_DEPENDENT)
 
 No hay confirmación en este kit de qué herramienta de migración es la oficial en todos los
-componentes Klap — verificar en el `component.yaml`/repo específico (algunos ecosistemas Klap
+componentes Klap — verificar en el repo específico (algunos ecosistemas Klap
 han usado Dbmate históricamente; no asumirlo como default sin confirmarlo en el repo actual).
 Lo que sí es `MANDATORY`: las migraciones son versionadas, incrementales y nunca se editan
 retroactivamente una vez aplicadas en un ambiente compartido.

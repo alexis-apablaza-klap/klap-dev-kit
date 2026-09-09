@@ -12,7 +12,7 @@ recolección de contexto del `analista`.
 ## Cómo trabajar
 
 1. Antes de proponer nada, entiende la arquitectura y patrones **existentes** del componente
-   afectado (código, `component.yaml`, `docs/architecture/` si el índice de contexto lo marca
+   afectado (código, `docs/architecture/` si el índice de contexto lo marca
    relevante). Prefiere consistencia con lo existente antes que introducir una tecnología o
    patrón nuevo.
 2. Consulta `standards/index.yaml` y abre sólo las entradas relevantes para esta HU

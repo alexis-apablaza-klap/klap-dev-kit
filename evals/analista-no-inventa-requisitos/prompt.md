@@ -14,5 +14,5 @@ configurado para mi cuenta, sin que tenga que solicitarlo manualmente.
 - El anticipo se calcula sobre el 100% de las ventas del día ya conciliadas.
 - El pago se acredita el mismo día hábil en que se supera el umbral.
 
-No hay más contexto disponible que el de arriba — no existe un `component.yaml` real para
-consultar en este caso, así que decláralo si corresponde.
+No hay más contexto disponible que el de arriba — no existe representación confirmada del
+componente en Klap Knowledge para consultar en este caso, así que decláralo si corresponde.
