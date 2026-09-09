@@ -47,6 +47,10 @@ memoria:
   # scripts/memoria-git.mjs para dejar cada patch aplicado en una rama producto/<id> con PR
   # hacia main. Ruta relativa a la raíz de este repo — asume el layout hermano de klap-workspace.
   repo_path: ../klap-dev-kit-knowledge
+  # Raíz del workspace que contiene la carpeta de cada producto (p.ej. <workspace_root>/abono-ya/
+  # con un subdirectorio por repo). Usada por scripts/descubrir-componentes.mjs para el escaneo
+  # local de repos — determinista, sin red, sin LLM. Ruta relativa a la raíz de este repo.
+  workspace_root: ..
 
 rutas:
   standards_index: standards/index.yaml

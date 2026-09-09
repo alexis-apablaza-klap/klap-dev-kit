@@ -21,7 +21,7 @@ asumas nombres de servidor ni umbrales hardcodeados.
 | 2 | Análisis | `analista` | `analisis.md` | **sí — confirmar antes de diseñar** |
 | 3 | Diseño | `arquitecto` | `diseno.md` | **sí — confirmar antes de implementar** |
 | 4 | Implementación | `desarrollador` | diff + tests | no |
-| 5 | Validación | `scripts/ejecutar-tests.mjs`, `scripts/validar-component.mjs` | `validacion.json` | no |
+| 5 | Validación | `scripts/ejecutar-tests.mjs`, `scripts/validar-contexto.mjs` | `validacion.json` | no |
 | 6 | Certificación | `certificador` + `seguridad` (en paralelo) | `certificacion.json` | **bloqueante si `aprobado: false`** |
 | 7 | Documentación | `documentador` | diff en `docs/` (+ Confluence si aplica) | **sí, antes de tocar Confluence** |
 | 8 | Finalización | orquestador + `documentador-klap` | invoca `/klap:actualizar-componente`, patch de memoria global de producto, resumen final | no (salvo que `documentador-klap` detecte conflicto) |

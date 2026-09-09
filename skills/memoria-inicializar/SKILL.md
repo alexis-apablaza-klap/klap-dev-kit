@@ -19,14 +19,25 @@ No implementa lógica de negocio por sí mismo — sólo orquesta al agente:
    `/klap:memoria-actualizar` en vez de reinicializar);
 2. **preguntar siempre** épica(s) Jira y espacio(s) Confluence del producto — anclan toda
    sincronización futura, no son inferibles con confianza. El resto de las preguntas mínimas
-   (nombre oficial si hay dudas, público esperado, objetivo, relación con otros productos,
-   componentes sin `component_id` claro) se pre-llenan desde las fuentes y se presentan para
-   confirmar, no como cuestionario abierto;
-3. presentar la propuesta (`.klap/knowledge/<producto>/proposal.md` y `patch.json`) — el patch
-   debe incluir `upsert_source_state` con las épicas/espacios recogidos, sin excepción;
-4. **pausa humana obligatoria** antes de aplicar — sin excepción para creación inicial;
-5. tras aprobar, aplicar el patch y reportar `product_id`/`new_revision`/`changed_files`;
-6. correr `node scripts/memoria-git.mjs --producto <product_id>` para dejar el alta en una
+   (nombre oficial si hay dudas, público esperado, objetivo, relación con otros productos) se
+   pre-llenan desde las fuentes y se presentan para confirmar, no como cuestionario abierto;
+3. **descubrir componentes candidatos.** Corre
+   `node scripts/descubrir-componentes.mjs --producto <producto>` (determinista, sin LLM, sin
+   red — `documentador-klap` no puede ejecutarlo, tiene `disallowedTools: Bash`) y entrega su
+   salida (`.klap/knowledge/<producto>/componentes.json`) al agente junto con el resto del
+   contexto recopilado. El agente la cruza con Confluence/Jira/Klap Knowledge y produce
+   `componentes.md`: una tabla **provisional y editable** (incluir/tipo/`component_id`/
+   repositorio/criticidad/rol/evidencia/confianza) — revísala, quita filas, corrige
+   clasificación `principal`/`secundario`, y agrega componentes que no tengan checkout local
+   (p.ej. mencionados sólo en Confluence) antes de continuar. El agente relee la tabla editada;
+   si la dejas vacía a propósito, el alta continúa sin componentes;
+4. presentar la propuesta (`.klap/knowledge/<producto>/proposal.md` y `patch.json`) — el patch
+   debe incluir `upsert_source_state` con las épicas/espacios recogidos, sin excepción, y las
+   operaciones de componente que resulten de la tabla validada en el paso 3 (si quedó alguna
+   fila incluida);
+5. **pausa humana obligatoria** antes de aplicar — sin excepción para creación inicial;
+6. tras aprobar, aplicar el patch y reportar `product_id`/`new_revision`/`changed_files`;
+7. correr `node scripts/memoria-git.mjs --producto <product_id>` para dejar el alta en una
    rama `producto/<product_id>` con PR hacia `main` (merge humano, no automático).
 
 Si el usuario pide inicializar un producto que ya existe, no lo trates como error silencioso:
