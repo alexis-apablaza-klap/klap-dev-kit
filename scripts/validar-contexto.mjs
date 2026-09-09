@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Valida la memoria técnica de un repositorio: component.yaml y docs/context/index.yaml
- * contra sus JSON Schemas, y que cada `path` del índice exista realmente.
+ * Valida la memoria técnica de un repositorio: docs/context/index.yaml
+ * contra su JSON Schema, y que cada `path` del índice exista realmente.
  *
- * Uso: node scripts/validar-component.mjs [ruta-del-repo]   (default: cwd)
+ * Uso: node scripts/validar-contexto.mjs [ruta-del-repo]   (default: cwd)
  */
 import { existsSync } from "node:fs";
 import path from "node:path";
@@ -11,17 +11,8 @@ import { readYaml } from "./lib/yaml-io.mjs";
 import { validar } from "./lib/schema-validate.mjs";
 import { resolveFromRoot, esPuntoDeEntrada } from "./lib/paths.mjs";
 
-export function validarComponente(repoPath) {
+export function validarContexto(repoPath) {
   const problemas = [];
-
-  const componentPath = path.join(repoPath, "component.yaml");
-  const componentData = readYaml(componentPath);
-  if (!componentData) {
-    problemas.push(`No existe ${componentPath}`);
-  } else {
-    const { valido, errores } = validar(resolveFromRoot("schemas", "component.schema.json"), componentData);
-    if (!valido) problemas.push(...errores.map((e) => `component.yaml: ${e}`));
-  }
 
   const indexPath = path.join(repoPath, "docs", "context", "index.yaml");
   const indexData = readYaml(indexPath);
@@ -44,12 +35,12 @@ export function validarComponente(repoPath) {
 
 if (esPuntoDeEntrada(import.meta.url)) {
   const repoPath = path.resolve(process.argv[2] ?? process.cwd());
-  const { valido, problemas } = validarComponente(repoPath);
+  const { valido, problemas } = validarContexto(repoPath);
   if (valido) {
-    console.log(`OK: memoria de componente válida en ${repoPath}`);
+    console.log(`OK: memoria de contexto válida en ${repoPath}`);
     process.exit(0);
   } else {
-    console.error(`Memoria de componente inválida en ${repoPath}:`);
+    console.error(`Memoria de contexto inválida en ${repoPath}:`);
     for (const p of problemas) console.error(`  - ${p}`);
     process.exit(1);
   }

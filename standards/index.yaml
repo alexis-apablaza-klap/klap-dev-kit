@@ -62,7 +62,7 @@ git-cicd-flujo-pipeline:
   tags: [git, ci-cd, pipeline]
 
 documentacion-adr-memoria:
-  resumen: "Cuándo escribir un ADR (incl. cuándo reemplazar uno previo, nunca editarlo), relación entre memoria del repo (component.yaml/docs/context) y documentación de producto en Confluence."
+  resumen: "Cuándo escribir un ADR (incl. cuándo reemplazar uno previo, nunca editarlo), relación entre memoria del repo (docs/context) y documentación de producto en Confluence."
   path: standards/documentacion/adr-y-memoria.md
   obligatoriedad: RECOMMENDED
   estado: vigente

@@ -4,9 +4,9 @@
  * analisis.md, diseno.md): siguen siendo prosa libre, pero deben contener los encabezados
  * `## ...` que sus agentes (agents/analista.md, agents/arquitecto.md) prometen — antes de
  * este script, esa promesa dependía por completo de que el LLM no se saltara una sección y de
- * que el humano lo notara leyendo con atención en la pausa de fase. component.yaml y el índice
- * de contexto ya tienen este tipo de chequeo determinista (validar-component.mjs); esto le da
- * el mismo trato a la prosa de fase.
+ * que el humano lo notara leyendo con atención en la pausa de fase. El índice de contexto ya
+ * tiene este tipo de chequeo determinista (validar-contexto.mjs); esto le da el mismo trato a
+ * la prosa de fase.
  *
  * No valida contenido — sólo que cada sección requerida exista como encabezado `## Título`.
  *

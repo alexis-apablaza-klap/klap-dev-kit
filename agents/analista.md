@@ -29,7 +29,7 @@ contexto crudo acumulado.
 4. `historial_producto` **sólo si** la HU necesita contexto histórico explícito (p.ej. "qué
    cambió recientemente en X", una HU que reabre o revierte una decisión previa). No es parte
    del recorrido por defecto — no cargues el timeline completo de un producto por rutina.
-5. Repo: leer `component.yaml` y `docs/context/index.yaml` (el índice, no los documentos).
+5. Repo: leer `docs/context/index.yaml` (el índice, no los documentos).
    Abrir sólo los 1-3 documentos que el índice marque relevantes para esta HU.
 6. Klap Knowledge → `documentos_relevantes` (punteros a Confluence/ADR/Jira relevantes al
    componente/consulta) y, si una pregunta puntual no queda resuelta por los resúmenes

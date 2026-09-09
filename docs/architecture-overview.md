@@ -79,7 +79,7 @@ mock ni el servicio real por nombre.
         │
         ▼
   hooks/hooks.json   → bloquea git commit con secretos, bloquea git push sin certificación,
-                        valida component.yaml/index.yaml al escribirlos
+                        valida docs/context/index.yaml al escribirlo
 ```
 
 ## Qué NO es parte de este repo

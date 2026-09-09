@@ -189,10 +189,7 @@ export function validarPlugin(root = resolveFromRoot()) {
 
   // 9. templates/*.yaml deben parsear y validar contra su schema — son el primer ejemplo que
   // ve un equipo adoptando el kit; un YAML roto ahí no lo detecta ningún otro chequeo.
-  const plantillasConSchema = [
-    ["component.yaml", "component.schema.json"],
-    ["context-index.yaml", "context-index.schema.json"],
-  ];
+  const plantillasConSchema = [["context-index.yaml", "context-index.schema.json"]];
   for (const [archivoTemplate, archivoSchema] of plantillasConSchema) {
     const templatePath = path.join(root, "templates", archivoTemplate);
     if (!existsSync(templatePath)) continue;

@@ -62,5 +62,5 @@ secretos) vive en
 ## Regla general
 
 Ante una duda de "¿qué versión/librería uso?", el orden es: `config/klap.yaml` →
-`component.yaml` del repo (si ya fija algo distinto y justificado) → preguntar al equipo. Nunca
+build/manifest del repo (si ya fija algo distinto y justificado) → preguntar al equipo. Nunca
 asumir una versión por conocimiento genérico del framework.

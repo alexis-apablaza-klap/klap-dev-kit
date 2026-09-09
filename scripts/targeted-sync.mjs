@@ -6,7 +6,7 @@
  * acuse degradado mientras targeted_sync exista en el contrato (eliminación real prevista para
  * 3.0.0, ver schemas/knowledge-mcp/tools.json → no_lectura). No lo uses en flujos nuevos.
  *
- * Uso: node scripts/targeted-sync.mjs --fuente confluence:PAGE-123 --fuente component-yaml:./component.yaml [--motivo "texto"]
+ * Uso: node scripts/targeted-sync.mjs --fuente confluence:PAGE-123 [--motivo "texto"]
  *
  * Sólo funciona cuando config/klap.yaml define mcp.knowledge.mock_launch (desarrollo/CI).
  * En producción, esta solicitud la hace el skill/agente directamente contra el MCP real

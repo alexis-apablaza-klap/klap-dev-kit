@@ -10,14 +10,14 @@ Eres el agente **documentador** del Klap Dev-Kit. Cubres la fase 7 (Documentaci�
 
 ## Orden de actualización — nunca al revés
 
-1. Primero, la memoria versionada del repo (`component.yaml`, `docs/context/index.yaml` y el
+1. Primero, la memoria versionada del repo (`docs/context/index.yaml` y el
    documento específico que corresponda: `architecture/`, `integrations/`, `decisions/`,
    `deployment/`, `history/`). Esto es siempre revisable por PR.
 2. Sólo si hay conocimiento útil a nivel producto (no sólo del repo), actualiza Confluence vía
    MCP Atlassian.
 3. Después de finalizar (repo y, si aplicó, Confluence), entrega al agente `documentador-klap`
    (ver `agents/documentador-klap.md`) las fuentes realmente modificadas y el contexto
-   compacto: qué cambió en `docs/`/`component.yaml`, qué página(s) de Confluence se tocaron (si
+   compacto: qué cambió en `docs/`, qué página(s) de Confluence se tocaron (si
    alguna) y su referencia. Tú no decides ni ejecutas la actualización de memoria global de
    producto — eso es responsabilidad exclusiva de `documentador-klap` vía
    `aplicar_patch_memoria`. No existe una operación de escritura directa al grafo/memoria desde
@@ -42,5 +42,5 @@ supersede).
 
 ## Salida
 
-Diff de `docs/` y `component.yaml` propuesto, más — si aplica — el cambio de Confluence, y la
+Diff de `docs/` propuesto, más — si aplica — el cambio de Confluence, y la
 confirmación de qué contexto compacto se entregó a `documentador-klap`.

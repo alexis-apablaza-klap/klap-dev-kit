@@ -56,7 +56,7 @@ Detalle completo: `docs/installation.md`. Problemas comunes: `docs/troubleshooti
 | Scripts deterministas | 10 | Tests, coverage, quality gate, escaneo de secretos/dependencias, validación de artefactos, git de la memoria de producto |
 | MCP mock de Klap Knowledge | 1 | Simula la memoria organizacional para probar el flujo sin el servicio real |
 | Estándares Klap | catálogo en `standards/` | Guías versionadas de arquitectura, seguridad, testing, etc. |
-| Plantillas | en `templates/` | `component.yaml`, ADR, RDC, `context-index.yaml` para adoptar el kit en un repo |
+| Plantillas | en `templates/` | ADR, RDC, `context-index.yaml` para adoptar el kit en un repo |
 
 ### 2.1 Comandos `/klap:*`
 
@@ -68,7 +68,7 @@ Detalle completo: `docs/installation.md`. Problemas comunes: `docs/troubleshooti
 | `/klap:desarrollar [diseno.md]` | Solo implementación, a partir de un diseño ya aprobado |
 | `/klap:certificar [repo] [ISSUE-KEY]` | Tests + coverage + Sonar + dependencias, con veredicto — para re-certificar sin repetir todo |
 | `/klap:documentar [ISSUE-KEY]` | Actualiza memoria del repo y, si corresponde, Confluence |
-| `/klap:actualizar-componente [repo]` | Da de alta o pone al día `component.yaml` / `docs/context/index.yaml` de un repo |
+| `/klap:actualizar-componente [repo]` | Da de alta o pone al día `docs/context/index.yaml` de un repo. La representación del componente vive en Klap Knowledge |
 | `/klap:consultar-estandar <tema>` | Muestra el estándar Klap relevante a un tema, sin arrancar ningún flujo |
 | `/klap:memoria-inicializar <producto>` | Construye la memoria inicial de un producto en Klap Knowledge (pausa humana antes de aplicar) |
 | `/klap:memoria-actualizar <producto\|ISSUE-KEY>` | Actualiza incrementalmente la memoria de un producto, sin releer todo |
@@ -97,7 +97,7 @@ fase. Sirve saber qué hace cada uno para entender qué esperar en cada pausa de
 |---|---|---|
 | `pre-commit-secret-scan.mjs` | Antes de `git commit` | Bloquea el commit si detecta un patrón de secreto en el diff |
 | `pre-push-quality-gate.mjs` | Antes de `git push` en una rama con el issue en el nombre (`feature/KLAP-123-...`) | Bloquea el push si no hay certificación aprobada para ese issue |
-| `post-write-validate-memoria.mjs` | Después de escribir/editar archivos de memoria | Valida que `component.yaml` / índices sigan siendo consistentes |
+| `post-write-validate-memoria.mjs` | Después de escribir/editar archivos de memoria | Valida que el índice de contexto siga siendo consistente |
 
 ### 2.4 MCP: Klap Knowledge
 
@@ -178,8 +178,9 @@ hace falta — nunca escribe memoria, aunque detecte algo desactualizado.
 /klap:actualizar-componente ms-central-sva-anticipo-calculos
 ```
 
-Revisa el repo y propone/actualiza `component.yaml` y `docs/context/index.yaml` para que el
-resto de los comandos tengan memoria de ese componente.
+Revisa el repo y propone/actualiza `docs/context/index.yaml` para que el
+resto de los comandos tengan memoria de ese componente. La representación del componente en sí
+(qué productos lo usan, sus capabilities) vive en Klap Knowledge, no en un archivo del repo.
 
 ### Scripts deterministas (fuera del flujo de un comando)
 

@@ -33,12 +33,12 @@ Fase 2 — Análisis: 4 requisitos funcionales, 1 pregunta pendiente sobre el re
 Fase 3 — Diseño: ajuste en el cálculo de monto anticipable, sin cambio de contrato REST.
          ⏸ Confirma para continuar a implementación.
 Fase 4 — Implementación: 3 archivos modificados, pruebas unitarias agregadas.
-Fase 5 — Validación: tests OK, component.yaml consistente.
+Fase 5 — Validación: tests OK, índice de contexto consistente.
 Fase 6 — Certificación: coverage 94%, Sonar Quality Gate OK, sin vulnerabilidades HIGH/CRITICAL.
          ✅ aprobado.
 Fase 7 — Documentación: docs/decisions/ADR-015.md propuesto.
          ⏸ Confirma antes de publicar en Confluence.
-Fase 8 — Finalización: component.yaml e índice actualizados. Listo para PR.
+Fase 8 — Finalización: índice de contexto actualizado. Listo para PR.
 ```
 
 Salida resumida — el detalle real de cada fase queda en `.klap/hu/KLAP-123/`.
@@ -69,9 +69,9 @@ una sola fase o capacidad (`analizar`, `disenar`, `desarrollar`, `certificar`, `
 | `agents/` | 6 sub-agentes especializados (analista, arquitecto, desarrollador, certificador, seguridad, documentador) |
 | `standards/` | Estándares Klap versionados, con índice para progressive disclosure |
 | `hooks/` + `scripts/` | Validaciones deterministas: secretos, tests, coverage, dependencias, quality gate |
-| `schemas/` | Contratos: `component.yaml`, índice de contexto, y el contrato de Klap Knowledge MCP |
+| `schemas/` | Contratos: índice de contexto, y el contrato de Klap Knowledge MCP |
 | `mocks/klap-knowledge-mcp/` | Servidor MCP mock para desarrollar/testear el kit sin el servicio real |
-| `templates/` | Plantillas para adoptar el kit en un repo de producto (`component.yaml`, ADR, RDC, etc.) |
+| `templates/` | Plantillas para adoptar el kit en un repo de producto (ADR, RDC, `context-index.yaml`, etc.) |
 | `config/` | Única fuente de verdad de versiones de stack, nombres de MCP y umbrales de certificación |
 | `docs/` | Esta documentación humana |
 
