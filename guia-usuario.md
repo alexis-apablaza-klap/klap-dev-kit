@@ -53,7 +53,7 @@ Detalle completo: `docs/installation.md`. Problemas comunes: `docs/troubleshooti
 | Comandos `/klap:*` | 11 | Ejecutar el flujo completo, una fase puntual, o gestionar la memoria de producto en Klap Knowledge |
 | Agentes especializados | 7 | Cada uno cubre una fase del flujo o la memoria global de producto (los invocan los comandos, no se llaman a mano) |
 | Hooks de validación | 3 | Bloquean automáticamente commits con secretos y pushes sin certificación |
-| Scripts deterministas | 10 | Tests, coverage, quality gate, escaneo de secretos/dependencias, validación de artefactos, git de la memoria de producto |
+| Scripts deterministas | 11 | Tests, coverage, quality gate, escaneo de secretos/dependencias, validación de artefactos, git de la memoria de producto, descubrimiento local de componentes |
 | MCP mock de Klap Knowledge | 1 | Simula la memoria organizacional para probar el flujo sin el servicio real |
 | Estándares Klap | catálogo en `standards/` | Guías versionadas de arquitectura, seguridad, testing, etc. |
 | Plantillas | en `templates/` | ADR, RDC, `context-index.yaml` para adoptar el kit en un repo |
@@ -68,7 +68,7 @@ Detalle completo: `docs/installation.md`. Problemas comunes: `docs/troubleshooti
 | `/klap:desarrollar [diseno.md]` | Solo implementación, a partir de un diseño ya aprobado |
 | `/klap:certificar [repo] [ISSUE-KEY]` | Tests + coverage + Sonar + dependencias, con veredicto — para re-certificar sin repetir todo |
 | `/klap:documentar [ISSUE-KEY]` | Actualiza memoria del repo y, si corresponde, Confluence |
-| `/klap:actualizar-componente [repo]` | Da de alta o pone al día `docs/context/index.yaml` de un repo. La representación del componente vive en Klap Knowledge |
+| `/klap:actualizar-componente [repo]` | Reconcilia el componente del repo en Klap Knowledge (propone `upsert_component`) y pone al día `docs/context/index.yaml` |
 | `/klap:consultar-estandar <tema>` | Muestra el estándar Klap relevante a un tema, sin arrancar ningún flujo |
 | `/klap:memoria-inicializar <producto>` | Construye la memoria inicial de un producto en Klap Knowledge (pausa humana antes de aplicar) |
 | `/klap:memoria-actualizar <producto\|ISSUE-KEY>` | Actualiza incrementalmente la memoria de un producto, sin releer todo |
@@ -178,9 +178,20 @@ hace falta — nunca escribe memoria, aunque detecte algo desactualizado.
 /klap:actualizar-componente ms-central-sva-anticipo-calculos
 ```
 
-Revisa el repo y propone/actualiza `docs/context/index.yaml` para que el
-resto de los comandos tengan memoria de ese componente. La representación del componente en sí
-(qué productos lo usan, sus capabilities) vive en Klap Knowledge, no en un archivo del repo.
+Klap Knowledge es la única fuente de verdad de los componentes — no existe (ni hace falta) un
+`component.yaml` en el repo. El comando infiere del código real (dependencias declaradas,
+endpoints, topics Kafka) y **propone** una operación `upsert_component` hacia Klap Knowledge
+(aplicada por `documentador-klap`, nunca a mano), y de forma separada pone al día
+`docs/context/index.yaml` (memoria técnica del repo, no cambia).
+
+### Descubrimiento de componentes al cargar un producto
+
+`/klap:memoria-inicializar`/`/klap:memoria-actualizar` escanean localmente los repos del
+producto (`scripts/descubrir-componentes.mjs`, determinista, sin LLM) y presentan una tabla
+provisional editable (`componentes.md`) antes de vincular nada — puedes quitar filas, corregir
+la clasificación `principal`/`secundario` (un componente `secundario` es una dependencia
+transversal compartida, como una base de datos, que nunca se vincula directo al producto), o
+agregar componentes que no tengan checkout local.
 
 ### Scripts deterministas (fuera del flujo de un comando)
 

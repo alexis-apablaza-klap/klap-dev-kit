@@ -45,10 +45,11 @@ Salida resumida — el detalle real de cada fase queda en `.klap/hu/KLAP-123/`.
 
 ## Comandos
 
-8 comandos `/klap:*`: el flujo completo (`trabajar-hu`) y 7 comandos puntuales para ejecutar
+11 comandos `/klap:*`: el flujo completo (`trabajar-hu`), 7 comandos puntuales para ejecutar
 una sola fase o capacidad (`analizar`, `disenar`, `desarrollar`, `certificar`, `documentar`,
-`actualizar-componente`, `consultar-estandar`). Tabla completa con cuándo usar cada uno:
-`docs/commands.md`.
+`actualizar-componente`, `consultar-estandar`) y 3 para gestionar la memoria organizacional de
+producto en Klap Knowledge (`memoria-inicializar`, `memoria-actualizar`, `memoria-consultar`).
+Tabla completa con cuándo usar cada uno: `docs/commands.md`.
 
 ## Requisitos
 
@@ -65,8 +66,8 @@ una sola fase o capacidad (`analizar`, `disenar`, `desarrollar`, `certificar`, `
 
 | Carpeta | Qué es |
 |---|---|
-| `skills/` | Los 8 comandos `/klap:*` |
-| `agents/` | 6 sub-agentes especializados (analista, arquitecto, desarrollador, certificador, seguridad, documentador) |
+| `skills/` | Los 11 comandos `/klap:*` |
+| `agents/` | 7 sub-agentes especializados (analista, arquitecto, desarrollador, certificador, seguridad, documentador, documentador-klap) |
 | `standards/` | Estándares Klap versionados, con índice para progressive disclosure |
 | `hooks/` + `scripts/` | Validaciones deterministas: secretos, tests, coverage, dependencias, quality gate |
 | `schemas/` | Contratos: índice de contexto, y el contrato de Klap Knowledge MCP |
