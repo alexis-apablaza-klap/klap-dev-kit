@@ -150,10 +150,15 @@ const handlers = {
     }
     const new_revision = previous_revision + 1;
     revisionPorProducto.set(product_id, new_revision);
-    const changed_files = [`products/${product_id}/product.yaml`];
+    const componentesNuevos = operations.filter((op) => op.op === "upsert_component");
+    // Los componentes se listan primero — mismo orden de escritura que store.py (real): un
+    // componente huérfano es memoria válida, un link a un componente inexistente no lo es.
+    const changed_files = componentesNuevos.map((op) => `components/${op.value.component_id}.yaml`);
+    changed_files.push(`products/${product_id}/product.yaml`);
     if (operations.some((op) => op.op === "append_event")) changed_files.push(`products/${product_id}/timeline.ndjson`);
     if (operations.some((op) => op.op === "upsert_document")) changed_files.push(`products/${product_id}/documents.yaml`);
     if (operations.some((op) => op.op === "upsert_source_state")) changed_files.push(`products/${product_id}/sources.yaml`);
+    if (componentesNuevos.length) changed_files.push("catalog.yaml");
     return { applied: true, product_id, previous_revision, new_revision, changed_files };
   },
 

@@ -7,6 +7,14 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ### Added
 
+- Contrato Klap Knowledge MCP `2.3.0`: nueva operación `upsert_component` en
+  `aplicar_patch_memoria` para crear/actualizar `memory/components/<id>.yaml` — hasta ahora
+  `upsert_component_link` no tenía forma de que ese archivo llegara a existir, así que ningún
+  producto podía terminar con `technical.components` poblado. Klap Knowledge pasa a ser la
+  única fuente de verdad de los componentes; `component.yaml` por repo se elimina del kit (ver
+  entrada de `Removed` más abajo). Nuevo valor `"repo"` en `source_ref.type`
+  (`"component-yaml"` queda deprecado, se retira en `3.0.0`). Ver
+  `docs/contrato-v2.3-propuesta.md` en `klap-dev-kit-knowledge`.
 - Gate de producto por Épica Jira en fase 1 de `/klap:trabajar-hu`: nueva tool
   `producto_por_epica` (contrato Klap Knowledge MCP `2.1.0`, aditiva y retrocompatible) que
   resuelve determinísticamente el producto de una HU contra `sources.yaml`, con
@@ -21,6 +29,14 @@ Versionado según [SemVer](https://semver.org/lang/es/).
   `producto/<product_id>` del checkout de `klap-dev-kit-knowledge`
   (`config/klap.yaml` → `memoria.repo_path`) con PR hacia `main` — el merge sigue siendo
   siempre humano, nunca automático.
+
+### Removed
+
+- `component.yaml` por repo: eliminado por completo (schema, template, script de validación
+  `validar-component.mjs` → `validar-contexto.mjs`, hook de validación, y toda referencia en
+  agentes/skills/standards/docs). Un archivo por repo no se mantenía actualizado y su exigencia
+  bloqueaba todo enlace producto-componente en Klap Knowledge. `docs/context/index.yaml` (memoria
+  técnica del repo) no se ve afectado — es un concepto distinto.
 
 ## [0.1.0] - 2026-08-26
 

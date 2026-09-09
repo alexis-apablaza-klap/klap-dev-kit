@@ -64,4 +64,4 @@ contratos:
   # Un mismatch con el contractVersion del schema falla npm run validate — es la señal
   # explícita de "el contrato avanzó, revisa antes de asumir compatibilidad" en vez de
   # una ruptura silenciosa cuando Etapa 3 reemplace el mock por el servicio real.
-  knowledge_mcp: "2.2.0"
+  knowledge_mcp: "2.3.0"
