@@ -2,9 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://klap.cl/schemas/knowledge-mcp/tools.json",
   "_descripcion": "Contrato de herramientas que el Dev-Kit espera de cualquier servidor MCP de Klap Knowledge (mock local o servicio real). El Dev-Kit sólo conoce esta interfaz — nunca Neo4j/Graphiti, Git+SQLite ni ningún otro detalle de implementación. Formato de cada entrada: definición de tool MCP (name, description, inputSchema) más outputSchema informativo (no forma parte del protocolo MCP, pero fija el contrato para el mock y los tests).",
-  "contractVersion": "2.1.0",
+  "contractVersion": "2.2.0",
   "_nota_v2": "v2.0.0 agrega memoria estructurada de producto (obtener_producto, historial_producto, estado_fuentes) y la única vía de escritura real (aplicar_patch_memoria). targeted_sync queda deprecated (acuse degradado, no reprocesa nada) mientras agents/documentador.md y agents/documentador-klap.md migran; eliminación real prevista para 3.0.0 — no eliminar antes.",
   "_nota_v2_1": "v2.1.0 agrega producto_por_epica: tool de lectura, aditiva y retrocompatible (minor, no major) — resuelve determinísticamente qué producto corresponde a una épica Jira contra los cursores de sources.yaml, cerrando el gate de producto de fase 1 de /klap:trabajar-hu sin depender sólo de buscar_producto (heurístico por texto libre).",
+  "_nota_v2_2": "v2.2.0 agrega la operación update_identity al oneOf de aplicar_patch_memoria — aditiva y retrocompatible (minor, no major): ningún patch válido contra 2.1.0 deja de serlo. Habilita escribir product.name/aliases después de la creación (product.aliases ya existía en product.schema.json y en la lectura de obtener_producto desde 2.0.0, pero no tenía vía de escritura). Ver docs/contrato-v2.2-propuesta.md en klap-dev-kit-knowledge.",
   "no_lectura": ["targeted_sync", "aplicar_patch_memoria"],
   "tools": [
     {
@@ -423,6 +424,20 @@
                       "id": { "$ref": "#/$defs/entity_id" },
                       "name": { "type": "string", "minLength": 1 },
                       "status": { "type": "string", "enum": ["kickoff", "mvp", "fase-1", "mantencion", "deprecado"] }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "op": { "const": "update_identity" },
+                  "value": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "anyOf": [{ "required": ["name"] }, { "required": ["aliases"] }],
+                    "properties": {
+                      "name": { "type": "string", "minLength": 1 },
+                      "aliases": { "type": "array", "items": { "type": "string", "minLength": 1 } }
                     }
                   }
                 }
