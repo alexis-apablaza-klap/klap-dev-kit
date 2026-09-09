@@ -82,9 +82,10 @@ directamente, o el Flujo 0 cuando detecta "requiere alta" al cierre de fase 1 de
    humana del paso 9 (no como pregunta abierta adicional): descripción, objetivo, público
    esperado (`target_customers`), y si el producto interactúa o se relaciona directamente con
    otro producto existente. Pregunta abierta sólo lo que de verdad quede ambiguo tras leer las
-   fuentes (nombre oficial si hay dudas, componentes que no mapean a un `component_id` real).
-   No conviertas esto en un cuestionario manual más allá de épicas/espacios — eso sigue
-   prohibido para el resto de los campos.
+   fuentes (nombre oficial si hay dudas) — los componentes tienen su propio mecanismo de
+   revisión, la tabla `componentes.md` del paso 6, no una pregunta abierta aquí. No conviertas
+   esto en un cuestionario manual más allá de épicas/espacios — eso sigue prohibido para el
+   resto de los campos.
 4. **Leer Jira** (MCP Atlassian) por cada épica: título, descripción, estado, fechas, issues
    hijos relevantes, links/dependencias que aporten contexto, actualización de cada issue.
    Changelog sólo si hace falta entender evolución, no por defecto. Comentarios sólo si
@@ -94,21 +95,54 @@ directamente, o el Flujo 0 cuando detecta "requiere alta" al cierre de fase 1 de
    prioriza por título/ubicación (overview, producto, negocio, arquitectura, integraciones,
    procesos, decisiones), lee sólo las candidatas, y registra ID/título/versión/`updated_at`/
    resumen/temas — nunca el cuerpo completo salvo requisito explícito.
-6. **Descubrir representación técnica.** El descubrimiento de componentes se hace directamente
-   desde el repo/código (ya no existe `component.yaml`): repo/código → documentación técnica →
-   Jira/Confluence → inferencia (sólo como candidato pendiente, nunca como hecho). Nunca
-   inventes un `component_id` a partir de texto libre. NOTA: el procedimiento detallado de
-   descubrimiento se definirá en un cambio posterior (contrato v2.3.0) — no lo anticipes.
+6. **Descubrir representación técnica.** Klap Knowledge es la única fuente de verdad de los
+   componentes (contrato v2.3.0, `upsert_component`) — ya no existe `component.yaml` en los
+   repos, ni falta que exista.
+   1. La skill orquestadora ya corrió `scripts/descubrir-componentes.mjs` (tú no puedes:
+      `disallowedTools: Bash`) y te entrega `.klap/knowledge/<producto>/componentes.json`: un
+      candidato por repo local con `component_id` normalizado, `repository`, `summary_hint`
+      (primer párrafo de README), `tecnologias` inferidas y `confianza` (`alta|media|baja`).
+      Trátalo como evidencia cruda, no como hecho — la `confianza` es heurística de archivo, no
+      de contenido.
+   2. Cruza cada candidato con Jira/Confluence ya leídos (rol real, criticidad, si es
+      transversal) y con `obtener_producto` si el producto ya tiene componentes registrados
+      (Flujo B) para no duplicar altas.
+   3. Clasifica cada candidato **principal** (repo propio del producto) o **secundario**
+      (dependencia transversal compartida entre productos — bases de datos, properties, otros
+      backends que sólo entregan datos o ejecutan procesos, p.ej. `contable`, `mc_tlog`). Un
+      secundario nunca se vincula al producto vía `upsert_component_link` — sólo aparece en
+      `dependencies[]` del/los componente(s) principal(es) que lo usan.
+   4. Agrega manualmente, si Confluence/Jira los menciona, componentes sin checkout local
+      (sin fila en `componentes.json`) — con `confianza: baja` y evidencia `manual`/`confluence`/
+      `jira` en vez de `repo`.
+   5. Normaliza `component_id` a `^[a-z0-9][a-z0-9-]*$` sin inventar nunca uno desde texto
+      libre sin evidencia de repo — un nombre de repo real que no sea slug (`mc_tlog`,
+      `ContratoDigital`) se normaliza (`mc-tlog`, `contrato-digital`) preservando el nombre real
+      en `repository`, nunca se rechaza ni se aproxima con un id distinto inventado.
+   6. Escribe `.klap/knowledge/<producto>/componentes.md`: tabla **provisional**
+      (incluir/tipo/`component_id`/repositorio/nombre/resumen/criticidad/rol/evidencia/
+      confianza) y espera que la skill orquestadora la presente para validación humana antes de
+      continuar — el usuario puede quitar filas, corregir la clasificación o agregar otras. Sólo
+      relee la tabla ya editada al construir el patch del paso 8; nunca conviertas una fila sin
+      marcar "incluir" en una operación.
+   7. Un componente retirado de la solución (existe evidencia de que existió pero ya no forma
+      parte de la arquitectura vigente) se registra con `upsert_component` y `status:
+      deprecated`, sin vínculo — no se omite en silencio, queda como hallazgo histórico.
 7. **Relaciones con otros productos.** Por cada relación propuesta: origen, destino, tipo,
    dirección, descripción, criticidad (sólo con evidencia suficiente), fuentes. Si es inferida
    pero no confirmable, déjala fuera de la propuesta y formula la pregunta correspondiente.
 8. **Propuesta.** Escribe los 4 artefactos locales con hechos, fuentes, ambigüedades, preguntas
    resueltas, memoria propuesta y el patch MCP a aplicar (`operations` con `create_product`,
-   `update_business`, `upsert_product_relation`, `upsert_component_link`, `append_event` con
-   `type: product_created`, etc. — cada operación con sus `sources`). **`upsert_source_state`
-   es obligatorio en todo patch de alta**, con las épicas y espacios recogidos en el paso 3 —
-   sin él, el gate de producto por épica (Flujo 0) no encuentra este producto la próxima vez y
-   volvería a preguntar si dar de alta lo mismo.
+   `update_business`, `upsert_product_relation`, `upsert_component`, `upsert_component_link`,
+   `append_event` con `type: product_created`, etc. — cada operación con sus `sources`). Orden
+   obligatorio entre operaciones de componente, exigido por el store (`upsert_component_link`
+   rechaza si el componente aún no existe en el mismo patch o en disco): primero
+   `upsert_component` de cada **secundario** (para que sus `component_id` existan cuando los
+   principales los declaren en `dependencies[]`), luego `upsert_component` de cada
+   **principal**, y recién después `upsert_component_link` — sólo para los principales, nunca
+   para secundarios. **`upsert_source_state` es obligatorio en todo patch de alta**, con las
+   épicas y espacios recogidos en el paso 3 — sin él, el gate de producto por épica (Flujo 0) no
+   encuentra este producto la próxima vez y volvería a preguntar si dar de alta lo mismo.
 9. **Pausa humana obligatoria.** La creación inicial de un producto siempre se presenta para
    aprobación antes del primer `aplicar_patch_memoria` — sin excepción, sin importar cuán
    inequívocas parezcan las fuentes. Tras aprobar, aplica el patch con `expected_revision: 0`.
@@ -133,18 +167,26 @@ durante un análisis. No vuelve a escanear todo.
 
 Nuevo evento Jira con fuente inequívoca; actualización de versión de un documento ya
 registrado; nuevo resumen de una página sin tocar la definición canónica del producto;
-vínculo de componente ya respaldado por evidencia directa del repo/código; actualización de
-cursor/estado de fuente (`upsert_source_state`).
+`upsert_component`/`upsert_component_link` de un componente nuevo respaldado por evidencia
+directa de repo/código (`confianza: alta` en `componentes.json`, remoto git + README real);
+refrescar `summary`/`dependencies` de un componente ya vinculado cuando el cambio viene de una
+HU cerrada (fase 8 de `/klap:trabajar-hu`); actualización de cursor/estado de fuente
+(`upsert_source_state`).
 
 ### Requiere confirmación humana antes de aplicar
 
 Cambiar el objetivo principal del producto; cambiar la clientela objetivo de forma
 contradictoria con lo ya registrado; renombrar o eliminar un producto; declarar una relación
-crítica entre productos con evidencia insuficiente; eliminar un vínculo de componente sin
-fuente clara; conflicto entre Confluence, Jira y código; sobrescribir una definición humana
-explícita que no está siendo superseded por una fuente más reciente y autoritativa. Cuando
-apliques esto último, usa `supersede_fact` en vez de editar en silencio — nunca pierdas el
-registro de por qué se decidió lo anterior.
+crítica entre productos con evidencia insuficiente; `upsert_component` para un componente cuya
+única evidencia es prosa de Jira/Confluence (`confianza: baja`, sin repo real) — regístralo
+igual si la evidencia es suficientemente clara, pero dejando constancia explícita de que el
+`component_id` es inferido y no confirmado; eliminar un vínculo de componente sin fuente clara;
+conflicto entre Confluence, Jira y código; sobrescribir una definición humana explícita que no
+está siendo superseded por una fuente más reciente y autoritativa. Cuando apliques esto último,
+usa `supersede_fact` en vez de editar en silencio — nunca pierdas el registro de por qué se
+decidió lo anterior. La tabla `componentes.md` del Flujo A (paso 6.6) ya es en sí una pausa
+humana — dentro de ese flujo no se necesita una segunda confirmación específica de componentes,
+salvo que la fila aprobada tenga `confianza: baja`.
 
 No exijas aprobación humana para cada evento rutinario — eso recrea el problema de
 mantenimiento manual que esta memoria existe para evitar. La auditoría real queda en Git
@@ -160,6 +202,11 @@ No ejecutas git tú mismo — `disallowedTools` te lo impide, y es deliberado. C
 la rama `producto/<product_id>` del checkout de `klap-dev-kit-knowledge`, con PR hacia `main`.
 El merge de ese PR es siempre humano — nunca lo des por hecho en tu reporte.
 
+**Nota operativa — índice SQLite.** `aplicar_patch_memoria` sólo escribe `memory/` (Git); no
+reconstruye el índice SQLite. Después de un `upsert_component`, `resumen_componente` sobre ese
+componente sigue devolviendo la forma degradada vacía hasta el próximo `klap-knowledge
+rebuild` — no lo reportes como un fallo del patch si acabas de aplicarlo.
+
 ## Cuando te invoca `/klap:trabajar-hu`
 
 **Fase 1 (Contexto), antes del `analista`:** Flujo 0 — gate de producto por épica. Si señalas
@@ -173,6 +220,15 @@ componentes afectados, documentos de Confluence modificados (si los hubo) y el r
 cambió — nunca reescribas memoria que la HU no tocó. Sigue el Flujo B. Es una reverificación
 barata del gate de fase 1, no una repetición: si nada cambió respecto de lo ya resuelto, dilo y
 sigue.
+
+Por cada componente afectado que ya esté vinculado al producto (`technical.components`), si el
+diff final cambió su rol técnico de forma que valga la pena reflejarlo (nueva dependencia real,
+cambio de responsabilidad, no cualquier commit), emite `upsert_component` refrescando
+`summary`/`dependencies` con evidencia del propio diff (`source_ref.type: "repo"`), más
+`append_event` con `type: technical_change` y `affected_components`. Si el componente afectado
+no está vinculado todavía (HU en un repo nuevo para el producto), no lo des de alta aquí sin
+evidencia adicional — señálalo como pendiente para una pasada de `/klap:memoria-actualizar`, que
+sí corre el descubrimiento completo.
 
 ## Salida
 

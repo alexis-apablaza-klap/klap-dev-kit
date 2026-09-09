@@ -22,7 +22,15 @@ Si el argumento es un producto (p.ej. `abono-ya`):
 1. el agente consulta `estado_fuentes` para identificar qué cambió en Jira/Confluence desde la
    última sincronización;
 2. actualiza sólo esas fuentes — nunca reescanea todo el histórico por defecto;
-3. genera y aplica el patch resultante.
+3. corre `node scripts/descubrir-componentes.mjs --producto <producto>` (barato: sólo
+   filesystem local) y entrega su salida al agente junto con `obtener_producto().technical.
+   components` ya leído en el paso 1. El agente propone **sólo el delta**: un repo nuevo sin
+   `component_id` registrado → alta (`upsert_component` + `upsert_component_link`); un repo que
+   ya no aparece localmente → nunca lo retires en silencio, propón `upsert_component` con
+   `status: deprecated` y `remove_component_link` para revisión (puede ser que el repo se haya
+   movido o renombrado, no necesariamente que el componente murió). Sin cambios detectados, no
+   generes operaciones de componente en este patch;
+4. genera y aplica el patch resultante.
 
 Por defecto, esta skill **no pausa** para cambios de bajo riesgo (ver criterios en
 `agents/documentador-klap.md`) — sólo se detiene si el propio agente detecta ambigüedad,

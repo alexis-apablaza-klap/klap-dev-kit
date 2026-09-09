@@ -82,8 +82,12 @@ a la fase 8.
    fase 1, `analisis.md`, `diseno.md`, un resumen del diff final, los componentes afectados,
    los documentos de Confluence modificados (si hubo) y el resultado del `documentador`. Debe
    producir sólo el delta de memoria global que corresponde a esta HU — nunca reescanear todo
-   el producto. Si `documentador-klap` señala un conflicto o ambigüedad de alto impacto, repórtalo
-   igual que cualquier pregunta pendiente — no lo resuelvas por tu cuenta.
+   el producto. Si el diff cambió de forma relevante el rol técnico de un componente ya
+   vinculado, `documentador-klap` refresca su `summary`/`dependencies` en Klap Knowledge
+   (`upsert_component` con evidencia del propio diff) — es el punto donde la memoria de
+   componentes se mantiene fresca sin depender de ningún archivo en el repo. Si
+   `documentador-klap` señala un conflicto o ambigüedad de alto impacto, repórtalo igual que
+   cualquier pregunta pendiente — no lo resuelvas por tu cuenta.
 3. Si `aplicar_patch_memoria` se aplicó (`applied: true`), corre
    `node scripts/memoria-git.mjs --producto <product_id> --issue <ISSUE-KEY>`: deja el cambio
    en la rama `producto/<product_id>` del checkout de `klap-dev-kit-knowledge` con PR hacia
