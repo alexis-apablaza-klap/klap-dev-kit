@@ -2,11 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://klap.cl/schemas/knowledge-mcp/tools.json",
   "_descripcion": "Contrato de herramientas que el Dev-Kit espera de cualquier servidor MCP de Klap Knowledge (mock local o servicio real). El Dev-Kit sólo conoce esta interfaz — nunca Neo4j/Graphiti, Git+SQLite ni ningún otro detalle de implementación. Formato de cada entrada: definición de tool MCP (name, description, inputSchema) más outputSchema informativo (no forma parte del protocolo MCP, pero fija el contrato para el mock y los tests).",
-  "contractVersion": "2.3.0",
+  "contractVersion": "2.4.0",
   "_nota_v2": "v2.0.0 agrega memoria estructurada de producto (obtener_producto, historial_producto, estado_fuentes) y la única vía de escritura real (aplicar_patch_memoria). targeted_sync queda deprecated (acuse degradado, no reprocesa nada) mientras agents/documentador.md y agents/documentador-klap.md migran; eliminación real prevista para 3.0.0 — no eliminar antes.",
   "_nota_v2_1": "v2.1.0 agrega producto_por_epica: tool de lectura, aditiva y retrocompatible (minor, no major) — resuelve determinísticamente qué producto corresponde a una épica Jira contra los cursores de sources.yaml, cerrando el gate de producto de fase 1 de /klap:trabajar-hu sin depender sólo de buscar_producto (heurístico por texto libre).",
   "_nota_v2_2": "v2.2.0 agrega la operación update_identity al oneOf de aplicar_patch_memoria — aditiva y retrocompatible (minor, no major): ningún patch válido contra 2.1.0 deja de serlo. Habilita escribir product.name/aliases después de la creación (product.aliases ya existía en product.schema.json y en la lectura de obtener_producto desde 2.0.0, pero no tenía vía de escritura). Ver docs/contrato-v2.2-propuesta.md en klap-dev-kit-knowledge.",
   "_nota_v2_3": "v2.3.0 agrega la operación upsert_component al oneOf de aplicar_patch_memoria y el valor 'repo' a source_ref.type — aditiva y retrocompatible (minor, no major). Klap Knowledge pasa a ser la única fuente de verdad de los componentes: klap-dev-kit eliminó component.yaml (ver PR chore/eliminar-component-yaml), y hasta ahora ninguna operación de patch podía crear memory/components/<id>.yaml, dejando upsert_component_link permanentemente inutilizable. 'component-yaml' en source_ref.type queda deprecado (no eliminado) y se retira en 3.0.0. Ver docs/contrato-v2.3-propuesta.md en klap-dev-kit-knowledge.",
+  "_nota_v2_4": "v2.4.0 hace efectivas las bajas — aditiva y retrocompatible (minor, no major). Agrega al oneOf de aplicar_patch_memoria tres operaciones de baja (remove_identity_alias, remove_component_dependency y remove_component, esta última huerfanos-only: exige remove_component_link y remove_component_dependency previos porque un patch esta scoped a un solo product_id con su expected_revision). Cierra ademas la brecha de que el status 'deprecated' era decorativo: resumen_componente devuelve status, resumen_producto excluye deprecados salvo incluir_deprecados=true, y buscar declara el status de cada resultado sin excluirlo del indice (un deprecado sigue siendo respuesta valida a una pregunta historica). documentos_relevantes puebla razon, declarada desde 2.0.0 y nunca llenada, y buscar.tipos acepta 'evento': hasta 2.3 solo se indexaban los eventos de tipo decision, dejando 11 de los 12 tipos del timeline invisibles a la busqueda.",
   "no_lectura": ["targeted_sync", "aplicar_patch_memoria"],
   "tools": [
     {
@@ -59,12 +60,13 @@
     },
     {
       "name": "resumen_producto",
-      "description": "Memoria resumida y condensada de un producto Klap: capacidades, componentes asociados, clientes, procesos.",
+      "description": "Memoria resumida y condensada de un producto Klap: capacidades, componentes asociados, clientes, procesos. Desde 2.4.0 `componentes` omite los que tienen status 'deprecated' salvo que se pida incluir_deprecados.",
       "inputSchema": {
         "type": "object",
         "required": ["producto"],
         "properties": {
-          "producto": { "type": "string" }
+          "producto": { "type": "string" },
+          "incluir_deprecados": { "type": "boolean", "default": false, "description": "Incluye en `componentes` los de status 'deprecated'. Por defecto se omiten: son parte del historial del producto, no de su composición vigente." }
         }
       },
       "outputSchema": {
@@ -95,6 +97,7 @@
         "properties": {
           "componente": { "type": "string" },
           "resumen": { "type": ["string", "null"] },
+          "status": { "type": "string", "enum": ["active", "deprecated", "planned"], "description": "Nuevo en 2.4.0. Un componente 'deprecated' sigue siendo consultable, pero no debe tratarse como parte vigente del producto." },
           "productos": { "type": "array", "items": { "type": "string" } },
           "dependencias": { "type": "array", "items": { "type": "string" } },
           "actualizado_en": { "type": ["string", "null"], "format": "date-time" }
@@ -111,7 +114,7 @@
           "consulta": { "type": "string" },
           "tipos": {
             "type": "array",
-            "items": { "type": "string", "enum": ["producto", "componente", "decision", "api", "proceso", "documento"] }
+            "items": { "type": "string", "enum": ["producto", "componente", "decision", "evento", "api", "proceso", "documento"] }
           },
           "limite": { "type": "integer", "minimum": 1, "maximum": 50, "default": 10 }
         }
@@ -129,7 +132,8 @@
                 "tipo": { "type": "string" },
                 "titulo": { "type": "string" },
                 "extracto": { "type": "string" },
-                "relevancia": { "type": "number", "minimum": 0, "maximum": 1 }
+                "relevancia": { "type": "number", "minimum": 0, "maximum": 1 },
+                "status": { "type": "string", "description": "Nuevo en 2.4.0. Presente cuando la entidad tiene estado propio (componente/producto: su status; evento o documento superseded: 'superseded'). Un resultado deprecado no se excluye del índice — sigue respondiendo preguntas históricas — pero debe declararse." }
               }
             }
           }
@@ -445,6 +449,17 @@
               },
               {
                 "properties": {
+                  "op": { "const": "remove_identity_alias" },
+                  "value": {
+                    "type": "object",
+                    "required": ["alias"],
+                    "additionalProperties": false,
+                    "properties": { "alias": { "type": "string", "minLength": 1 } }
+                  }
+                }
+              },
+              {
+                "properties": {
                   "op": { "const": "update_business" },
                   "value": {
                     "type": "object",
@@ -528,6 +543,21 @@
               },
               {
                 "properties": {
+                  "op": { "const": "remove_component_dependency" },
+                  "value": {
+                    "type": "object",
+                    "required": ["component_id", "depends_on_component_id", "type"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "component_id": { "$ref": "#/$defs/entity_id" },
+                      "depends_on_component_id": { "$ref": "#/$defs/entity_id" },
+                      "type": { "type": "string", "minLength": 1 }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
                   "op": { "const": "upsert_component_link" },
                   "value": {
                     "type": "object",
@@ -546,6 +576,17 @@
               {
                 "properties": {
                   "op": { "const": "remove_component_link" },
+                  "value": {
+                    "type": "object",
+                    "required": ["component_id"],
+                    "additionalProperties": false,
+                    "properties": { "component_id": { "$ref": "#/$defs/entity_id" } }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "op": { "const": "remove_component" },
                   "value": {
                     "type": "object",
                     "required": ["component_id"],
@@ -710,6 +751,7 @@
           "previous_revision": { "type": "integer" },
           "new_revision": { "type": "integer" },
           "changed_files": { "type": "array", "items": { "type": "string" } },
+          "operaciones_sin_efecto": { "type": "array", "items": { "type": "string" }, "description": "Nuevo en 2.4.0. Presente sólo si el patch se aplicó pero alguna operación de baja no encontró nada que borrar. La revisión sube igual (un patch aplicado = una revisión), así que sin esta señal el llamador no puede distinguir 'borré' de 'no había nada'." },
           "rejected_reason": { "type": "string" }
         }
       }

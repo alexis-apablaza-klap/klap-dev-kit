@@ -5,6 +5,16 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Contrato Klap Knowledge MCP `2.3.0` → `2.4.0`** (aditivo, retrocompatible). Espeja en
+  `schemas/knowledge-mcp/tools.json` las tres operaciones de baja del servicio
+  (`remove_identity_alias`, `remove_component_dependency`, `remove_component`), el
+  `incluir_deprecados` de `resumen_producto`, el `status` de `resumen_componente` y de cada
+  resultado de `buscar`, el tipo `evento` en `buscar.tipos`, y `operaciones_sin_efecto` en la
+  salida de `aplicar_patch_memoria`. `config/klap.yaml → contratos.knowledge_mcp` acompaña. La
+  versión del plugin no se mueve: el contrato es un eje aparte (ver README).
+
 ## [0.1.0-alpha] - 2026-09-10
 
 Primera versión con tag del plugin. Arranca el versionado formal: `plugin.json` y `package.json`
