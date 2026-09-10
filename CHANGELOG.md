@@ -5,6 +5,21 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.1.1-alpha] - 2026-09-10
+
+### Added
+
+- **El productor de documentos existe.** `agents/documentador-klap.md` emite, por cada página de
+  Confluence que lee, un `upsert_document` (`document_id: "confluence:<id>"`, con `topics` que
+  alimentan la `razon` de `documentos_relevantes`) y el cursor correspondiente en
+  `upsert_source_state → confluence.pages`. Antes `grep -rn "upsert_document" agents/ skills/`
+  devolvía cero: lo leído quedaba en el artefacto local (gitignored) y la pasada siguiente releía
+  el espacio completo. Documentadas las dos asimetrías que se pagan al equivocarse:
+  `upsert_document` **reemplaza** la fila (no mergea, al revés que `upsert_component`), y
+  documento y cursor van juntos o el delta-sync no converge.
+- `skills/memoria-inicializar` y `skills/memoria-actualizar` exigen ambas operaciones en el flujo,
+  igual que ya exigían `upsert_source_state` para las épicas.
+
 ### Changed
 
 - **Contrato Klap Knowledge MCP `2.3.0` → `2.4.0`** (aditivo, retrocompatible). Espeja en
@@ -13,7 +28,21 @@ Versionado según [SemVer](https://semver.org/lang/es/).
   `incluir_deprecados` de `resumen_producto`, el `status` de `resumen_componente` y de cada
   resultado de `buscar`, el tipo `evento` en `buscar.tipos`, y `operaciones_sin_efecto` en la
   salida de `aplicar_patch_memoria`. `config/klap.yaml → contratos.knowledge_mcp` acompaña. La
-  versión del plugin no se mueve: el contrato es un eje aparte (ver README).
+  versión del plugin no se mueve por el contrato: son ejes aparte (ver README).
+- **El mock local alcanza al contrato 2.4.0**: `resumen_producto` omite los deprecados salvo
+  `incluir_deprecados`, `resumen_componente` y `buscar` declaran `status`, y las bajas reflejan el
+  archivo borrado en `changed_files`. No emite `operaciones_sin_efecto`: el mock no tiene el
+  contenido de la memoria, así que no puede saber si había algo que borrar — declararlo vacío
+  afirmaría que sí lo sabe. Un agente desarrollado contra el mock ahora ve las mismas superficies
+  que contra el servicio real.
+
+### Fixed
+
+- El mock reportaba `products/<id>/documents.yaml` en `changed_files`: esa ruta **nunca existió**,
+  la memoria real usa `documents.ndjson`.
+- El fixture de componentes del mock declaraba `mc_tlog` como id de dependencia, imposible bajo
+  `^[a-z0-9][a-z0-9-]*$` — es `mc-tlog`, exactamente la normalización que el propio agente
+  documenta.
 
 ## [0.1.0-alpha] - 2026-09-10
 

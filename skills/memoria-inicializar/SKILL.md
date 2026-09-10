@@ -32,9 +32,12 @@ No implementa lógica de negocio por sí mismo — sólo orquesta al agente:
    (p.ej. mencionados sólo en Confluence) antes de continuar. El agente relee la tabla editada;
    si la dejas vacía a propósito, el alta continúa sin componentes;
 4. presentar la propuesta (`.klap/knowledge/<producto>/proposal.md` y `patch.json`) — el patch
-   debe incluir `upsert_source_state` con las épicas/espacios recogidos, sin excepción, y las
+   debe incluir `upsert_source_state` con las épicas/espacios recogidos, sin excepción, las
    operaciones de componente que resulten de la tabla validada en el paso 3 (si quedó alguna
-   fila incluida);
+   fila incluida), y **un `upsert_document` por cada página de Confluence que el agente leyó**,
+   más esa misma página como cursor en `confluence.pages` del `upsert_source_state`. Un alta que
+   leyó Confluence y no deja documentos registrados nace ciega: el resumen queda en el artefacto
+   local (gitignored) y la próxima pasada relee el espacio completo;
 5. **pausa humana obligatoria** antes de aplicar — sin excepción para creación inicial;
 6. tras aprobar, aplicar el patch y reportar `product_id`/`new_revision`/`changed_files`;
 7. correr `node scripts/memoria-git.mjs --producto <product_id>` para dejar el alta en una

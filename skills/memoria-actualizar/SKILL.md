@@ -20,8 +20,13 @@ Si el argumento es un issue Jira (p.ej. `SVA-1925`):
 Si el argumento es un producto (p.ej. `abono-ya`):
 
 1. el agente consulta `estado_fuentes` para identificar qué cambió en Jira/Confluence desde la
-   última sincronización;
-2. actualiza sólo esas fuentes — nunca reescanea todo el histórico por defecto;
+   última sincronización. Si `confluence.pages` viene vacío, no hay cursor contra el que
+   comparar: la primera pasada tendrá que leer el espacio, y debe dejarlo poblado para que la
+   siguiente sí sea incremental;
+2. actualiza sólo esas fuentes — nunca reescanea todo el histórico por defecto. Cada página
+   releída se registra con `upsert_document` **y** avanza su entrada en `confluence.pages`; las
+   dos van juntas o el delta-sync no converge (ver `agents/documentador-klap.md`, Flujo A paso
+   5);
 3. corre `node scripts/descubrir-componentes.mjs --producto <producto>` (barato: sólo
    filesystem local) y entrega su salida al agente junto con `obtener_producto().technical.
    components` ya leído en el paso 1. El agente propone **sólo el delta**: un repo nuevo sin

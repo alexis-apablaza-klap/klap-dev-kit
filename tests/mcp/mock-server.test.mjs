@@ -315,3 +315,129 @@ test("caso negativo: llamar una tool desconocida se rechaza", async () => {
     cliente.cerrar();
   }
 });
+
+test("resumen_producto: omite los componentes deprecados por defecto y los incluye con incluir_deprecados", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const porDefecto = await cliente.llamarTool("resumen_producto", { producto: "abono-ya" });
+    validarContraOutputSchema("resumen_producto", porDefecto.structuredContent);
+    assert.ok(!porDefecto.structuredContent.componentes.includes("mcs-anticipo-batch-nocturno"));
+
+    const conDeprecados = await cliente.llamarTool("resumen_producto", {
+      producto: "abono-ya",
+      incluir_deprecados: true,
+    });
+    validarContraOutputSchema("resumen_producto", conDeprecados.structuredContent);
+    assert.ok(conDeprecados.structuredContent.componentes.includes("mcs-anticipo-batch-nocturno"));
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("resumen_componente: declara el status del componente (2.4.0)", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const vigente = await cliente.llamarTool("resumen_componente", { componente: "ms-central-sva-anticipo-calculos" });
+    validarContraOutputSchema("resumen_componente", vigente.structuredContent);
+    assert.equal(vigente.structuredContent.status, "active");
+
+    const retirado = await cliente.llamarTool("resumen_componente", { componente: "mcs-anticipo-batch-nocturno" });
+    validarContraOutputSchema("resumen_componente", retirado.structuredContent);
+    assert.equal(retirado.structuredContent.status, "deprecated");
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("buscar: un resultado deprecado se declara pero no se excluye del índice", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const r = await cliente.llamarTool("buscar", { consulta: "batch nocturno anticipo" });
+    validarContraOutputSchema("buscar", r.structuredContent);
+    const retirado = r.structuredContent.resultados.find((res) => res.titulo.includes("Batch nocturno"));
+    assert.ok(retirado, "el componente retirado debe seguir apareciendo en la búsqueda");
+    assert.equal(retirado.status, "deprecated");
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("aplicar_patch_memoria: upsert_document toca documents.ndjson y el cursor toca sources.yaml", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const antes = await cliente.llamarTool("obtener_producto", { producto: "abono-ya" });
+    const r = await cliente.llamarTool("aplicar_patch_memoria", {
+      product_id: "abono-ya",
+      expected_revision: antes.structuredContent.metadata.revision,
+      generated_by: { agent: "documentador-klap" },
+      operations: [
+        {
+          op: "upsert_document",
+          value: {
+            document_id: "confluence:3240263803",
+            source_type: "confluence",
+            source_ref: "CONFLUENCE-SPACE-ABY-101",
+            title: "Definición de negocio: Abono Ya",
+            summary: "Resumen de la definición de negocio.",
+            topics: ["negocio", "anticipo"],
+            source_version: "4",
+            source_updated_at: "2026-09-01T00:00:00Z",
+            last_processed_at: "2026-09-10T00:00:00Z",
+          },
+        },
+        {
+          op: "upsert_source_state",
+          value: {
+            confluence: {
+              pages: { "CONFLUENCE-SPACE-ABY-101": { version: "4", updated_at: "2026-09-01T00:00:00Z" } },
+            },
+          },
+        },
+      ],
+    });
+    validarContraOutputSchema("aplicar_patch_memoria", r.structuredContent);
+    assert.equal(r.structuredContent.applied, true);
+    // La memoria real nunca tuvo documents.yaml: el mock reportaba una ruta inexistente.
+    assert.ok(r.structuredContent.changed_files.includes("products/abono-ya/documents.ndjson"));
+    assert.ok(r.structuredContent.changed_files.includes("products/abono-ya/sources.yaml"));
+  } finally {
+    cliente.cerrar();
+  }
+});
+
+test("aplicar_patch_memoria: las tres operaciones de baja del contrato 2.4.0 se aceptan", async () => {
+  const cliente = new ClienteMcpStdio(["node", serverPath]);
+  try {
+    await cliente.iniciar();
+    const antes = await cliente.llamarTool("obtener_producto", { producto: "abono-ya" });
+    const r = await cliente.llamarTool("aplicar_patch_memoria", {
+      product_id: "abono-ya",
+      expected_revision: antes.structuredContent.metadata.revision,
+      generated_by: { agent: "documentador-klap" },
+      operations: [
+        { op: "remove_identity_alias", value: { alias: "abonoya" } },
+        {
+          op: "remove_component_dependency",
+          value: {
+            component_id: "ms-central-sva-anticipo-calculos",
+            depends_on_component_id: "mc-tlog",
+            type: "depends_on",
+          },
+        },
+        { op: "remove_component_link", value: { component_id: "mcs-anticipo-batch-nocturno" } },
+        { op: "remove_component", value: { component_id: "mcs-anticipo-batch-nocturno" } },
+      ],
+    });
+    validarContraOutputSchema("aplicar_patch_memoria", r.structuredContent);
+    assert.equal(r.structuredContent.applied, true);
+    // El archivo del componente desaparece: la baja se refleja en changed_files igual que el alta.
+    assert.ok(r.structuredContent.changed_files.includes("components/mcs-anticipo-batch-nocturno.yaml"));
+    assert.ok(r.structuredContent.changed_files.includes("catalog.yaml"));
+  } finally {
+    cliente.cerrar();
+  }
+});
