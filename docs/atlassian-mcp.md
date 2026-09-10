@@ -174,9 +174,10 @@ evidencia nueva.
 Se registran cerrados, no borrados: son las razones por las que el kit quedó como quedó.
 
 1. **`.mcp.json` → `klap-knowledge` tenía rutas absolutas de una máquina concreta**, además
-   Windows-only. Ahora usa `${KLAP_KNOWLEDGE_PYTHON:-python}` y `${KLAP_KNOWLEDGE_HOME}`
-   (configuración en `docs/installation.md`, paso 4), y `scripts/validar-plugin.mjs` rechaza
-   cualquier ruta absoluta en `.mcp.json` para que no vuelva a colarse.
+   Windows-only. Ahora invoca `scripts/klap-knowledge-launch.mjs`, que deriva el intérprete de
+   `${KLAP_KNOWLEDGE_HOME}` (configuración en `docs/installation.md`, paso 4), y
+   `scripts/validar-plugin.mjs` rechaza cualquier ruta absoluta en `.mcp.json` para que no vuelva
+   a colarse.
 2. **`config/klap.yaml` → `hosting` describía mal la realidad**: decía `proveedor_actual: github`
    con `migracion_planificada: bitbucket`, lo que hacía leer Bitbucket como futuro cuando ya es
    el presente de todos los repos de producto (`git@bitbucket.org:multicaja-cloud/…`). Ahora el

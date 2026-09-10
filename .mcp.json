@@ -6,9 +6,8 @@
   },
   "klap-knowledge": {
     "type": "stdio",
-    "command": "${KLAP_KNOWLEDGE_PYTHON:-python}",
-    "args": ["-m", "klap_knowledge.server"],
-    "cwd": "${KLAP_KNOWLEDGE_HOME}"
+    "command": "node",
+    "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/klap-knowledge-launch.mjs"]
   },
   "atlassian": {
     "type": "http",

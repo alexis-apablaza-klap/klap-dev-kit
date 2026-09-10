@@ -60,26 +60,27 @@ verificar el Quality Gate. Detalle en `docs/conexiones.md`.
 
 El plugin trae el **mock** de Klap Knowledge, que se activa solo y basta para probar el flujo
 completo. Para apuntar al **servicio real** hace falta tener clonado e instalado el repo
-`klap-dev-kit-knowledge` (privado, separado) y declarar dos variables de entorno — el plugin no
-puede saber dónde lo clonaste ni qué intérprete de Python usas:
+`klap-dev-kit-knowledge` (privado, separado) y declarar **una sola** variable de entorno — el
+plugin no puede saber dónde lo clonaste:
 
 | Variable | Qué es | Default |
 |---|---|---|
 | `KLAP_KNOWLEDGE_HOME` | Ruta al checkout de `klap-dev-kit-knowledge` | — (obligatoria) |
-| `KLAP_KNOWLEDGE_PYTHON` | Intérprete con el paquete instalado, normalmente el del venv | `python` |
+
+El intérprete **no se configura**: `scripts/klap-knowledge-launch.mjs` lo deriva del checkout
+(`<HOME>/.venv/Scripts/python.exe` en Windows, `<HOME>/.venv/bin/python` en Linux/Mac) y cae al
+`python` del `PATH` si ese checkout no tiene venv. Basta con haber instalado el paquete —
+`pip install -e .` dentro del repo, como indica su README.
 
 La forma recomendada es el bloque `env` de tu `settings.json` de Claude Code:
 
 ```json
 {
   "env": {
-    "KLAP_KNOWLEDGE_HOME": "/ruta/a/klap-dev-kit-knowledge",
-    "KLAP_KNOWLEDGE_PYTHON": "/ruta/a/klap-dev-kit-knowledge/.venv/bin/python"
+    "KLAP_KNOWLEDGE_HOME": "/ruta/a/klap-dev-kit-knowledge"
   }
 }
 ```
-
-En Windows el intérprete del venv es `…\.venv\Scripts\python.exe`.
 
 Si no las defines, `plugin:klap:klap-knowledge` aparece como `✘ Failed to connect` en
 `claude mcp list` — **sólo ese servidor**; el mock y el resto de las conexiones siguen
