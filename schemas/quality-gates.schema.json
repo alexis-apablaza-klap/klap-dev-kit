@@ -14,7 +14,8 @@
         "minimo_porcentaje": { "type": "number", "minimum": 0, "maximum": 100 },
         "alcance": { "type": "string", "enum": ["unit"], "description": "Nunca mezclar con integration/functional en el mismo número — ver standards/testing/estrategia-y-coverage.md." },
         "herramienta": { "type": "string" },
-        "no_optimizar_ciegamente": { "type": "boolean" }
+        "no_optimizar_ciegamente": { "type": "boolean" },
+        "precedencia_sobre_sonar": { "type": "boolean", "description": "true: este umbral manda sobre el coverage del Quality Gate de SonarCloud, que mide cobertura global del proyecto y no unit del cambio. Ver el comentario en config/quality-gates.yaml." }
       }
     },
     "mutacion": {

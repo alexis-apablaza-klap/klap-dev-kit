@@ -98,3 +98,35 @@ test("config/klap.yaml real del repo es válida contra su propio schema", () => 
   const { valido, errores } = validar(schemaPath, real);
   assert.equal(valido, true, JSON.stringify(errores));
 });
+
+// --- Resolución de project key de SonarQube ---------------------------------------------
+//
+// Una key errónea devuelve métricas de OTRO proyecto en silencio, con el mismo shape y valores
+// plausibles. La convención vive en config/klap.yaml y no puede quedar a criterio del agente.
+
+test("config/klap.yaml declara cómo resolver la project key de SonarQube", () => {
+  const real = readYaml(resolveFromRoot("config", "klap.yaml"));
+  const pk = real.mcp?.sonarqube?.project_key;
+  assert.ok(pk, "falta mcp.sonarqube.project_key en config/klap.yaml");
+  assert.equal(pk.resolver_con, "search_my_sonarqube_projects");
+  assert.ok(pk.ambientes.includes(pk.ambiente_por_defecto), "el ambiente por defecto debe estar en la lista");
+  const { valido, errores } = validar(schemaPath, real);
+  assert.equal(valido, true, JSON.stringify(errores));
+});
+
+test("project_key sin resolver_con falla el schema", () => {
+  const invalido = {
+    ...configMinima,
+    mcp: {
+      ...configMinima.mcp,
+      sonarqube: {
+        server: "plugin_klap_sonarqube",
+        auth: "token",
+        project_key: { ambiente_por_defecto: "desa", ambientes: ["desa"] },
+      },
+    },
+  };
+  const { valido } = validar(schemaPath, invalido);
+  assert.equal(valido, false);
+});
+

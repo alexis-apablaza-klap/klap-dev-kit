@@ -44,6 +44,33 @@ mcp:
     # El análisis lo produce Jenkins al correr el pipeline del repo (desa o qa); el kit sólo lee
     # métricas ya publicadas. Un proyecto sin análisis reciente no devuelve métricas aunque el
     # token sea válido — ver docs/conexiones.md.
+    project_key:
+      # La project key NO es descubrible desde el repo. Verificado en
+      # CUOTA-COMERCIO/ms-central-sva-consultas-cuota-comercio e
+      # IMPULSO-KLAP/ms-central-fasf-r2-reportes: sólo hay build.gradle, sin bloque `sonar`, sin
+      # sonar-project.properties, sin .sonarlint/connectedMode.json y sin Jenkinsfile. Vive en la
+      # configuración de Jenkins, fuera del alcance de lectura del kit.
+      #
+      # Por eso se RESUELVE, nunca se construye por concatenación: una key errónea devuelve
+      # métricas de otro proyecto **en silencio** — mismo shape, valores plausibles — y el
+      # veredicto de certificación queda firmado con datos ajenos. Ver agents/certificador.md.
+      resolver_con: search_my_sonarqube_projects
+      ambiente_por_defecto: desa
+      ambientes: [desa, qa, test, preprod, prod]
+      # Los prefijos y sufijos de abajo son OBSERVADOS en la organización (76 proyectos al
+      # 2026-09-10), no un formato garantizado: sirven para reconocer y elegir entre candidatos,
+      # nunca para armar una key. Cinco proyectos no llevan prefijo de ambiente en absoluto
+      # (`ms-pci-smv-*`, `srv-pci-smv-*`, `datalake-*`, `mcs-central-be-envia-fe-sii`).
+      # REQUIERE-USUARIO: confirmar qué designa cada prefijo de tipo — se infiere del patrón,
+      # no está documentado en ninguna parte legible desde los repos.
+      prefijos_tipo: [mcs, mcf, lbd, ms, pci, ret, cnsr]
+      # Sufijos que la key arrastra y el nombre del repo no tiene. Un mismo repo puede tener
+      # varias keys que difieren SÓLO en el sufijo (p.ej. la marca de tarjeta:
+      # `...presenta-cc-clearing-jdk17-visa`), así que el sufijo no es ruido descartable.
+      sufijos_observados: ["-jdk17", "-2", "-3", "-4", "-bk", "-visa"]
+      # Productos sin proyecto en SonarCloud: una HU de estos repos no puede ejercer el gate de
+      # Sonar y el bloque se omite con advertencia, no se reprueba.
+      sin_proyecto: [abono-ya] # 0 resultados para "anticipo" entre los 76 proyectos
   context7:
     # Documentación oficial de librerías/frameworks en vivo — nunca hardcodear guías estáticas de
     # contenido que caduca con cada release. Endpoint público: sin credencial ni configuración.
