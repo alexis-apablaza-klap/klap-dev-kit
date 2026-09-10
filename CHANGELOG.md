@@ -5,6 +5,26 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.1.4-alpha] - 2026-09-10
+
+### Changed
+
+- **Sonar y cobertura se leen sólo del ambiente `desa`** (decisión del Tech Lead, 2026-09-10).
+  `mcp.sonarqube.project_key.ambiente_por_defecto` + `ambientes` se reemplazan por
+  `ambiente_unico: desa` + `ambientes_observados` (informativo). El nombre viejo implicaba
+  respaldos que no existen: si un repo no tiene proyecto en `desa`, **no tiene gate de Sonar** —
+  no se cae a `qa`. Certificar contra otro ambiente responde una pregunta distinta de la que hace
+  la HU. Como efecto lateral útil, filtrar a `desa` reduce la ambigüedad de la resolución de la
+  key, que es su modo de fallo real: el ejemplo de `q: "cuota-comercio"` baja de 4 candidatos a 2.
+- `agents/certificador.md` paso 4b: todas las medidas salen del proyecto de `desa` resuelto en 4a.
+  Mezclar un número de `desa` con otro de `qa` en el mismo reporte no es un veredicto.
+
+### Removed
+
+- **REQUIERE-USUARIO sobre `prefijos_tipo` retirado sin responderse**, porque la pregunta no
+  cambiaba ninguna decisión: la key **se resuelve vía MCP y nunca se construye**, así que los
+  prefijos sólo sirven para reconocer candidatos y no hace falta saber qué designa cada uno.
+
 ## [0.1.3-alpha] - 2026-09-10
 
 ### Added

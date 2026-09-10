@@ -109,7 +109,11 @@ test("config/klap.yaml declara cómo resolver la project key de SonarQube", () =
   const pk = real.mcp?.sonarqube?.project_key;
   assert.ok(pk, "falta mcp.sonarqube.project_key en config/klap.yaml");
   assert.equal(pk.resolver_con, "search_my_sonarqube_projects");
-  assert.ok(pk.ambientes.includes(pk.ambiente_por_defecto), "el ambiente por defecto debe estar en la lista");
+  // Un solo ambiente, no un default con respaldos: certificar contra `qa` o `prod` responde una
+  // pregunta distinta de la que hace la HU. Ver agents/certificador.md paso 4a.
+  assert.equal(pk.ambiente_unico, "desa");
+  assert.equal(pk.ambiente_por_defecto, undefined, "ambiente_por_defecto quedó obsoleto: implicaba respaldos");
+  assert.ok(pk.ambientes_observados.includes(pk.ambiente_unico));
   const { valido, errores } = validar(schemaPath, real);
   assert.equal(valido, true, JSON.stringify(errores));
 });
@@ -122,7 +126,7 @@ test("project_key sin resolver_con falla el schema", () => {
       sonarqube: {
         server: "plugin_klap_sonarqube",
         auth: "token",
-        project_key: { ambiente_por_defecto: "desa", ambientes: ["desa"] },
+        project_key: { ambiente_unico: "desa", ambientes_observados: ["desa"] },
       },
     },
   };
