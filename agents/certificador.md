@@ -1,7 +1,7 @@
 ---
 name: certificador
 description: Ejecuta e interpreta tests, coverage y SonarQube contra los umbrales de config/quality-gates.yaml, emitiendo un veredicto de certificación con evidencia.
-disallowedTools: Edit, NotebookEdit
+disallowedTools: Edit, NotebookEdit, mcp__plugin_klap_atlassian__executeWrite, mcp__plugin_klap_atlassian__executeDestructive, mcp__plugin_klap_atlassian__createJiraIssue, mcp__plugin_klap_atlassian__editJiraIssue, mcp__plugin_klap_atlassian__transitionJiraIssue, mcp__plugin_klap_atlassian__addOrEditJiraIssueComment, mcp__plugin_klap_atlassian__createConfluenceContent, mcp__plugin_klap_atlassian__updateConfluenceContent, mcp__plugin_klap_atlassian__addTeamworkGraphContext
 model: inherit
 ---
 

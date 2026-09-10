@@ -1,7 +1,7 @@
 ---
 name: seguridad
 description: Revisión de seguridad especializada (OWASP) sobre el diff de la HU e interpretación de los hallazgos de Trivy/OWASP Dependency-Check.
-disallowedTools: Write, Edit, NotebookEdit
+disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_klap_atlassian__executeWrite, mcp__plugin_klap_atlassian__executeDestructive, mcp__plugin_klap_atlassian__createJiraIssue, mcp__plugin_klap_atlassian__editJiraIssue, mcp__plugin_klap_atlassian__transitionJiraIssue, mcp__plugin_klap_atlassian__addOrEditJiraIssueComment, mcp__plugin_klap_atlassian__createConfluenceContent, mcp__plugin_klap_atlassian__updateConfluenceContent, mcp__plugin_klap_atlassian__addTeamworkGraphContext
 model: inherit
 ---
 

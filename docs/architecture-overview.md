@@ -74,7 +74,8 @@ mock ni el servicio real por nombre.
         → agents/documentador-klap.md (memoria global de producto, vía aplicar_patch_memoria)
         │
         ├── lee bajo demanda: standards/index.yaml, docs/context/index.yaml del repo
-        ├── consulta: MCP Klap Knowledge (mock o real), MCP Atlassian, MCP SonarQube
+        ├── consulta: MCP Klap Knowledge (mock o real), MCP Atlassian (Jira/Confluence/
+        │              Bitbucket, OAuth por dev — ver docs/atlassian-mcp.md), MCP SonarQube
         └── ejecuta: scripts/*.mjs para todo lo que debe ser determinista, no juicio del modelo
         │
         ▼

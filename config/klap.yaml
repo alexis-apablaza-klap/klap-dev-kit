@@ -15,7 +15,16 @@ mcp:
     # (usado por scripts/targeted-sync.mjs y por tests). No aplica en modo produccion.
     mock_launch: ["node", "mocks/klap-knowledge-mcp/server.mjs"]
   atlassian:
-    server: claude_ai_Atlassian # Rovo MCP conectado en sesión (Jira + Confluence)
+    # Servidor declarado por el propio plugin en .mcp.json — llega con la instalación, igual
+    # para todo el equipo. `server` es el segmento que Claude Code usa al nombrar sus tools
+    # (mcp__<server>__<tool>). No confundir con el conector personal `claude_ai_Atlassian`,
+    # que apunta al endpoint v1 y no expone Bitbucket (ver docs/atlassian-mcp.md).
+    server: plugin_klap_atlassian
+    endpoint: https://mcp.atlassian.com/v2/mcp
+    # Cada dev autentica con su propia cuenta corporativa vía /mcp. El kit nunca almacena
+    # credenciales ni admite un token compartido — por eso `auth` sólo acepta `oauth`.
+    auth: oauth
+    productos: [jira, confluence, bitbucket] # verificados read-write el 2026-09-10
   sonarqube:
     server: sonarqube # nombre esperado del MCP de SonarQube cuando esté disponible
   context7:

@@ -15,11 +15,29 @@ que clonar ni compilar nada manualmente para usarlo dentro de Claude Code.
 /plugin install klap@klap-dev-kit
 ```
 
-Esto registra los 11 comandos `/klap:*`, los 7 agentes, los hooks de validación y el servidor
-MCP mock de Klap Knowledge (se activa solo, no requiere configuración adicional para empezar
-a probar el flujo).
+Esto registra los 11 comandos `/klap:*`, los 7 agentes, los hooks de validación, el servidor
+MCP mock de Klap Knowledge y **el servidor MCP de Atlassian** (se activan solos, sin
+configuración adicional).
 
-## 3. Actualizar
+## 3. Autenticar Atlassian (una vez por persona)
+
+El plugin trae declarado el servidor Atlassian —el mismo endpoint para todo el equipo—, pero la
+identidad es tuya:
+
+```
+/mcp
+```
+
+Elige **`atlassian`** (el del plugin, no el conector `claude.ai Atlassian`) → **Authenticate** →
+completa OAuth con tu cuenta corporativa Klap. Verifica con `claude mcp list` que quede
+`plugin:klap:atlassian … ✔ Connected`.
+
+Sin este paso, Jira, Confluence y Bitbucket no están disponibles y las fases que los usan lo
+declaran explícitamente. No se comparten ni se crean API tokens: cada quien usa su cuenta, y ve
+exactamente lo que sus permisos en Atlassian le permiten. Detalle, modos de fallo y evidencia de
+la verificación: `docs/atlassian-mcp.md`.
+
+## 4. Actualizar
 
 ```
 /plugin update klap@klap-dev-kit
@@ -33,9 +51,10 @@ publica una nueva versión — no en cada push al repo.
 - Claude Code con soporte de plugins.
 - Node.js ≥ 18 (los scripts y hooks del kit son `.mjs` puros de Node).
 - Git.
-- Acceso a los MCP externos que uses en cada fase: Atlassian (Jira/Confluence) para
-  `/klap:trabajar-hu` y `/klap:analizar`; SonarQube para `/klap:certificar`. Si no están
-  conectados, esas fases lo declaran explícitamente en vez de fallar en silencio.
+- Cuenta corporativa Atlassian, autenticada según el paso 3 — el MCP de Atlassian
+  (Jira/Confluence/Bitbucket) lo trae el plugin, no hay que conseguirlo aparte. SonarQube
+  (`/klap:certificar`) sigue dependiendo de que esté conectado en tu sesión. Si alguno no está
+  disponible, esas fases lo declaran explícitamente en vez de fallar en silencio.
 - Para certificación completa en el propio repo de trabajo: el wrapper de build del proyecto
   (`gradlew`/`mvnw`/`npm`), y opcionalmente Trivy / OWASP Dependency-Check para el escaneo de
   dependencias (`scripts/deps-scan.mjs` detecta si no están instalados y lo informa, no falla

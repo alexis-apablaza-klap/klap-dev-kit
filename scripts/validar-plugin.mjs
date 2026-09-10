@@ -164,6 +164,24 @@ export function validarPlugin(root = resolveFromRoot()) {
           problemas.push(`agents/${entry.name}: declara "${campo}", que se ignora en silencio para agentes de plugin`);
         }
       }
+      // 7b. El frontmatter es la única excepción a "nunca hardcodees el nombre de un servidor
+      // MCP" (CLAUDE.md): se evalúa antes de que el agente pueda leer config/klap.yaml, así que
+      // una tool MCP sólo puede nombrarse literalmente. Este chequeo mantiene la fuente de
+      // verdad: si mcp.atlassian.server cambia en config/klap.yaml, los agentes fallan aquí en
+      // vez de quedarse con un disallowedTools que ya no matchea nada — un permiso muerto que
+      // no rompe nada visible y deja escritura abierta en un agente de sólo lectura.
+      // Sin config/klap.yaml no hay fuente de verdad contra la cual cruzar — ese caso ya lo
+      // reporta el chequeo 3, no tiene sentido acusar además a cada agente.
+      const serverAtlassian = config?.mcp?.atlassian?.server;
+      const declaradas = serverAtlassian ? String(fm.disallowedTools ?? fm.tools ?? "") : "";
+      for (const tool of declaradas.split(",").map((t) => t.trim())) {
+        const match = /^mcp__(.+?)__/.exec(tool);
+        if (match && match[1] !== serverAtlassian && match[1] !== config?.mcp?.knowledge?.server) {
+          problemas.push(
+            `agents/${entry.name}: la tool "${tool}" nombra el servidor MCP "${match[1]}", que no coincide con config/klap.yaml (mcp.atlassian.server=${serverAtlassian})`
+          );
+        }
+      }
     }
   }
 

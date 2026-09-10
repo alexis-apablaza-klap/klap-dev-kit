@@ -6,7 +6,9 @@ fase que estás ejecutando.
 ## Fase 1 — Contexto
 
 **Paso 0 — gate de producto (bloqueante).** Antes de invocar al `analista`, trae de Jira (MCP
-Atlassian) el `<ISSUE-KEY>` con su épica/`parent`, e invoca `documentador-klap` en su
+Atlassian — si no está autenticado, detente y pide al usuario que corra `/mcp`: este gate no
+puede resolverse sin la épica real, y adivinarla arruina el resto del flujo; ver
+`docs/atlassian-mcp.md`) el `<ISSUE-KEY>` con su épica/`parent`, e invoca `documentador-klap` en su
 **Flujo 0** (`agents/documentador-klap.md`) con el ISSUE-KEY y esa épica. Tres desenlaces:
 - **Producto resuelto** (por `producto_por_epica` o, si la épica no está sincronizada aún, por
   `buscar_producto` confirmando un producto existente) → continúa al paso siguiente con ese

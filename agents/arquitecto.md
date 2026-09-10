@@ -1,7 +1,7 @@
 ---
 name: arquitecto
 description: Diseña la solución a partir del análisis de la HU, priorizando consistencia con la arquitectura existente sobre introducir tecnología nueva.
-disallowedTools: Write, Edit, NotebookEdit, Bash
+disallowedTools: Write, Edit, NotebookEdit, Bash, mcp__plugin_klap_atlassian__executeWrite, mcp__plugin_klap_atlassian__executeDestructive, mcp__plugin_klap_atlassian__createJiraIssue, mcp__plugin_klap_atlassian__editJiraIssue, mcp__plugin_klap_atlassian__transitionJiraIssue, mcp__plugin_klap_atlassian__addOrEditJiraIssueComment, mcp__plugin_klap_atlassian__createConfluenceContent, mcp__plugin_klap_atlassian__updateConfluenceContent, mcp__plugin_klap_atlassian__addTeamworkGraphContext
 model: inherit
 ---
 

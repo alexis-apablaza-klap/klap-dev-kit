@@ -43,7 +43,7 @@ function escribirConfigYContrato(root, { versionContrato, versionRegistrada }) {
     version: 1,
     mcp: {
       knowledge: { server: "klap-knowledge-local-mock", modo: "mock" },
-      atlassian: { server: "claude_ai_Atlassian" },
+      atlassian: { server: "plugin_klap_atlassian", auth: "oauth" },
     },
     stack_soportado: {},
     rutas: {
@@ -122,6 +122,37 @@ test("agente que declara mcpServers/hooks/permissionMode reporta que se ignoran 
     assert.ok(problemas.some((p) => p.includes("mcpServers")));
     assert.ok(problemas.some((p) => p.includes("hooks")));
     assert.ok(problemas.some((p) => p.includes("permissionMode")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("agente que nombra un servidor MCP distinto al de config/klap.yaml lo reporta", () => {
+  const root = crearRootTemporal();
+  try {
+    mkdirSync(path.join(root, "config"), { recursive: true });
+    copyFileSync(resolveFromRoot("schemas", "klap-config.schema.json"), path.join(root, "schemas", "klap-config.schema.json"));
+    escribirConfigYContrato(root, { versionContrato: "1.0.0", versionRegistrada: "1.0.0" });
+    escribirAgente(root, "servidor-viejo.md", "disallowedTools: Bash, mcp__claude_ai_Atlassian__executeWrite\n");
+    const { problemas } = validarPlugin(root);
+    assert.ok(
+      problemas.some((p) => p.includes("servidor-viejo.md") && p.includes("claude_ai_Atlassian")),
+      JSON.stringify(problemas)
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("agente que nombra el servidor MCP vigente no reporta problema", () => {
+  const root = crearRootTemporal();
+  try {
+    mkdirSync(path.join(root, "config"), { recursive: true });
+    copyFileSync(resolveFromRoot("schemas", "klap-config.schema.json"), path.join(root, "schemas", "klap-config.schema.json"));
+    escribirConfigYContrato(root, { versionContrato: "1.0.0", versionRegistrada: "1.0.0" });
+    escribirAgente(root, "servidor-vigente.md", "disallowedTools: Bash, mcp__plugin_klap_atlassian__executeWrite\n");
+    const { problemas } = validarPlugin(root);
+    assert.ok(!problemas.some((p) => p.includes("servidor-vigente.md")));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

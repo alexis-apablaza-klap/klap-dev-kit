@@ -7,6 +7,41 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ### Added
 
+- **Conexión Atlassian distribuida por el plugin.** `.mcp.json` declara el servidor `atlassian`
+  contra el Rovo MCP oficial (`https://mcp.atlassian.com/v2/mcp`, transporte HTTP, sin headers
+  ni variables de entorno): quien instala el plugin recibe la misma conexión que todo el equipo
+  y sólo autentica con `/mcp` → Authenticate usando su cuenta corporativa. OAuth con Dynamic
+  Client Registration lo resuelve Claude Code; el repositorio no contiene ninguna credencial y
+  no existe token compartido ni fallback a uno. Verificado end-to-end el 2026-09-10 sobre Jira,
+  Confluence y Bitbucket — evidencia, nombres reales de tools y modos de fallo en
+  `docs/atlassian-mcp.md` (nuevo).
+- **Bitbucket queda cubierto por el MCP.** El endpoint v2 expone `bitbucket: read-write` y ~18
+  operaciones (repos, PRs, branches, commits, pipelines, deployments). Esto **corrige la
+  conclusión previa** de que Atlassian no llegaba a Bitbucket: aquella prueba fue contra el
+  endpoint v1 del conector personal `claude_ai_Atlassian`. Ya no hace falta el API token con
+  Basic Auth que se había usado como salida puntual.
+- `scripts/validar-plugin.mjs` cruza los nombres de tools MCP declarados en el frontmatter de
+  `agents/*.md` contra `config/klap.yaml` → `mcp.atlassian.server`. El frontmatter es la única
+  excepción a "nunca hardcodees un nombre de servidor MCP" (se evalúa antes de que el agente
+  pueda leer la config), así que el chequeo evita que un rename deje `disallowedTools` apuntando
+  a un servidor inexistente — un permiso muerto que reabriría escritura en un agente de sólo
+  lectura sin romper nada visible.
+
+### Changed
+
+- `config/klap.yaml` → `mcp.atlassian`: `server` pasa de `claude_ai_Atlassian` (conector
+  personal, endpoint v1, sin Bitbucket) a `plugin_klap_atlassian`, el servidor del plugin.
+  Se agregan `endpoint`, `auth` y `productos`. `schemas/klap-config.schema.json` exige `auth` y
+  lo restringe a `oauth` — un enum de un solo valor a propósito: abrirlo a tokens debe ser un
+  cambio explícito y revisable, no un descuido.
+- Mínimo privilegio: `analista`, `arquitecto`, `seguridad` y `certificador` pasan a negar
+  explícitamente las tools de escritura de Atlassian (`executeWrite`, `executeDestructive` y las
+  primarias de creación/edición de Jira y Confluence). `documentador` y `documentador-klap`
+  conservan escritura porque la necesitan para Confluence.
+- Los agentes y `skills/trabajar-hu` ahora distinguen **MCP no autenticado** de **MCP conectado
+  sin permisos**, y advierten que una búsqueda JQL vacía puede ser falta de acceso, no ausencia
+  de datos — Jira devuelve `issues: []` sin error en ese caso.
+
 - Contrato Klap Knowledge MCP `2.3.0`: nueva operación `upsert_component` en
   `aplicar_patch_memoria` para crear/actualizar `memory/components/<id>.yaml` — hasta ahora
   `upsert_component_link` no tenía forma de que ese archivo llegara a existir, así que ningún

@@ -14,7 +14,11 @@ Eres el agente **documentador** del Klap Dev-Kit. Cubres la fase 7 (Documentaci�
    documento específico que corresponda: `architecture/`, `integrations/`, `decisions/`,
    `deployment/`, `history/`). Esto es siempre revisable por PR.
 2. Sólo si hay conocimiento útil a nivel producto (no sólo del repo), actualiza Confluence vía
-   MCP Atlassian.
+   MCP Atlassian (`config/klap.yaml` → `mcp.atlassian`). Eres uno de los dos agentes con
+   escritura sobre Atlassian, así que la pausa humana previa no es opcional. Si el MCP no está
+   autenticado o Confluence deniega la escritura, reporta cuál de los dos casos es
+   (`docs/atlassian-mcp.md` → "Cómo distinguir los modos de fallo") y deja el cambio del repo
+   entregado igual — nunca lo abandones porque falló Confluence.
 3. Después de finalizar (repo y, si aplicó, Confluence), entrega al agente `documentador-klap`
    (ver `agents/documentador-klap.md`) las fuentes realmente modificadas y el contexto
    compacto: qué cambió en `docs/`, qué página(s) de Confluence se tocaron (si
