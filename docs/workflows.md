@@ -1,6 +1,6 @@
 # El flujo de `/klap:trabajar-hu`
 
-Vista para developers de las 8 fases (el detalle técnico exacto que sigue Claude está en
+Vista para developers de las 9 fases (el detalle técnico exacto que sigue Claude está en
 `skills/trabajar-hu/references/fases.md`, pensado para el modelo, no para leer a mano).
 
 ```
@@ -12,6 +12,7 @@ Vista para developers de las 8 fases (el detalle técnico exacto que sigue Claud
 6. Certificación   → (gate) si no aprueba, el flujo se detiene acá
 7. Documentación   → (pausa antes de Confluence) se actualiza la memoria del repo y, si aplica, Confluence
 8. Finalización    → resumen y memoria del componente al día
+9. Retroalimentación → no bloqueante; consolida qué mejorar del *flujo* en docs/mejoras-sugeridas.md
 ```
 
 ## Por qué hay pausas justo ahí
@@ -38,6 +39,25 @@ No es una sugerencia del modelo — es un veredicto que produce un script determ
 `config/quality-gates.yaml`. Si el veredicto es negativo, el flujo no continúa a
 Documentación, y además el hook de `git push` bloqueará el push en la rama de esa HU hasta que
 exista una certificación aprobada (ver `docs/troubleshooting.md`).
+
+## Qué hace la fase 9, y qué no
+
+No es un gate y no pausa: corre después de que la HU ya cerró, y lo único que produce es
+`docs/mejoras-sugeridas.md` — una lista de propuestas **al kit**, no a tu código.
+
+Su insumo es `.klap/hu/<ISSUE-KEY>/traza.jsonl`, que va escribiendo `hooks/registrar-traza.mjs`
+mientras corren las fases anteriores. Ahí queda lo que los artefactos finales borran: los
+reintentos, y los gates que reprobaron y se corrigieron. Un `certificacion.json` en verde no
+distingue "pasó de primera" de "pasó a la tercera" — la traza sí, y esa diferencia es
+exactamente la fricción que vale la pena arreglar.
+
+Dos límites por diseño: el agente **propone y nada más** (aplicar una mejora es un cambio al kit,
+con su rama y su PR), y `mejoras-sugeridas.md` **se consolida en vez de crecer** — techo de 12
+entradas activas, las ya aplicadas se retiran. Sin ese techo el archivo se vuelve el mismo bloat
+que viene a señalar.
+
+La traza es local: `.klap/` está gitignoreado. En un checkout limpio o en la máquina de otro dev
+no hay nada que leer, y la fase lo dice en vez de inventar hallazgos.
 
 ## Retomar un flujo interrumpido
 
