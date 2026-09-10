@@ -116,13 +116,12 @@ con todos sus `path` existentes, cada `SKILL.md`/`agents/*.md` con frontmatter c
 `hooks/hooks.json` no referencie scripts inexistentes) con mensajes más específicos sobre cuál
 archivo y qué campo está mal.
 
-## `npm run eval` dice ``` `plugin eval` is currently in early access ```
+## `claude plugin eval` dice ``` `plugin eval` is currently in early access ```
 
-`claude plugin eval` (usado por `evals/`) es una función en early access de Claude Code — el
-flag se habilita del lado de Anthropic a nivel de organización, no hay setting local que lo
-active. Detalle completo (qué hace, estado de la solicitud, por qué no bloquea nada) en
-`docs/claude-plugin-eval.md`. Auto-test rápido: en un directorio sin casos, `No eval cases
-found` significa que ya está habilitado; si sigues viendo el mensaje de early access, no.
+Es lo esperado: el flag se habilita del lado de Anthropic **a nivel de organización** y no hay
+setting local que lo active, así que el kit no declara `experimental.evals` ni trae un script
+`eval`. Los casos están conservados en `docs/futuro/evals/`; la ficha de reactivación y el probe
+sin costo para detectar la habilitación están en `docs/claude-plugin-eval.md`.
 
 ## `/klap:trabajar-hu` no muestra los 8 comandos tras instalar
 

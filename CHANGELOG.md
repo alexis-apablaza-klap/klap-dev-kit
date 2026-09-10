@@ -5,8 +5,18 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha] - 2026-09-10
+
+Primera versión con tag del plugin. Arranca el versionado formal: `plugin.json` y `package.json`
+declaran la misma cadena y `scripts/validar-plugin.mjs` lo verifica. La entrada histórica del
+2026-08-26, que numeraba el cierre de Etapa 1, quedó renumerada como `0.0.1`.
+
 ### Added
 
+- **Versionado formal del plugin.** `plugin.json` y `package.json` declaran la misma cadena y
+  `scripts/validar-plugin.mjs` cruza ambas contra una entrada del CHANGELOG — antes derivaban en
+  silencio (`0.3.0` vs `0.1.0`, sin ningún tag). El README documenta los tres ejes de versión
+  (plugin, `contractVersion` del contrato, servicio `klap-knowledge`) y que no se mueven juntos.
 - **Las cinco conexiones del kit llegan con el plugin.** Además de Atlassian, `.mcp.json` declara
   ahora `context7` (`https://mcp.context7.com/mcp`, endpoint público sin credencial) y
   `sonarqube` (`https://api.sonarcloud.io/mcp`, org `multicaja-cloud`, `SONARQUBE_READ_ONLY`).
@@ -39,6 +49,14 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ### Removed
 
+- **Las evals salen del plugin.** `experimental.evals` y el script `npm run eval` se eliminan:
+  `claude plugin eval` está en early access habilitado **por organización** y no hay flag local
+  que lo active, así que el plugin dejaba declarada una capacidad que no puede ejercer. Los 6
+  casos y sus 17 graders se conservan intactos en `docs/futuro/evals/`, y
+  `docs/claude-plugin-eval.md` pasa a ser la ficha de reactivación — con el checklist que faltaba:
+  `--no-publish` obligatorio (el default publica el reporte HTML en claude.ai), el modelo-juez
+  recibe las transcripciones completas, y los defaults `--runs 3` × `--ablation with-without` son
+  36 corridas de agente para 6 casos.
 - `PLAN_ATLASSIAN_CLAUDE_CODE.md`: sus 20 criterios de aceptación se cumplen y su contenido vive
   en `docs/atlassian-mcp.md` y este changelog. Las dos validaciones que requerían una segunda
   persona quedaron anotadas en `docs/atlassian-mcp.md`.
@@ -143,7 +161,7 @@ Versionado según [SemVer](https://semver.org/lang/es/).
   bloqueaba todo enlace producto-componente en Klap Knowledge. `docs/context/index.yaml` (memoria
   técnica del repo) no se ve afectado — es un concepto distinto.
 
-## [0.1.0] - 2026-08-26
+## [0.0.1] - 2026-08-26
 
 ### Added
 
