@@ -156,15 +156,46 @@ duplica servidores. No lo agregues.
 
 ---
 
-## Dos validaciones que faltan (necesitan una segunda persona)
+## Las dos validaciones que necesitan una segunda persona
 
 Todo lo anterior se verificó con una sola cuenta. Quedan dos comprobaciones que por definición no
-puede hacer un solo dev, y que se cumplirán solas cuando el primer compañero instale el plugin:
+puede hacer un solo dev.
 
-1. **Instalación limpia**: que alguien que nunca configuró nada instale el plugin, vea
-   `atlassian` en `/mcp` y **no** tenga acceso antes de autenticarse.
-2. **Aislamiento entre identidades**: que dos devs autenticados vean cada uno sólo los recursos
-   que sus permisos de Atlassian les permiten.
+### 1. Instalación limpia — parcialmente cerrada (2026-09-10)
+
+Un segundo dev instaló el plugin y **funcionó de entrada**: `atlassian` aparece en `/mcp` y el
+OAuth completa con la cuenta corporativa, sin configurar endpoints ni credenciales. Eso confirma
+la mitad positiva.
+
+**Lo que sigue abierto es la mitad negativa** — que *antes* de autenticar no haya acceso — porque
+sólo se puede observar en la ventana previa al primer Authenticate, y esa ventana ya se cerró para
+ese dev. Se cierra con el próximo que instale.
+
+Las cuatro comprobaciones para el próximo dev, en orden de valor:
+
+1. **Antes de darle Authenticate:** que `claude mcp list` muestre `atlassian` sin conectar y que
+   una lectura de Jira falle. (Se puede recuperar con `/mcp` → logout.)
+2. **El aviso de conexiones al iniciar sesión:** el hook `SessionStart` debería listar las
+   variables `KLAP_*` que le faltan (`KLAP_KNOWLEDGE_HOME`, `KLAP_SONARQUBE_TOKEN`) con dónde
+   obtenerlas. Es la **primera ejecución de `scripts/verificar-conexiones.mjs` en una máquina que
+   no es la de quien lo escribió**; si no aparece nada, o aparece incompleto, es un bug real de
+   onboarding.
+3. **El mismo `cloudId`** que devuelve `getAccessibleAtlassianResources`
+   (`db4dd528-0e0b-4bdf-b3dd-1e2e4e792a43`).
+4. **Si aparece `Invalid context provided`** y la autenticación igual quedó completa. Una segunda
+   observación confirma que es cosmético y no una condición de carrera.
+
+### 2. Aislamiento entre identidades — abierta
+
+Que dos devs autenticados vean cada uno sólo los recursos que sus permisos de Atlassian les
+permiten.
+
+**Cómo diseñarla, porque el modo de fallo y el resultado esperado se ven idénticos:** un JQL
+vacío puede ser "no hay nada" o "no tienes permisos" (ver la trampa documentada más arriba). Una
+prueba que sólo mire un resultado vacío **no falsea nada**. Sirve únicamente un **par
+positivo/negativo** sobre un recurso cuya visibilidad se verificó antes en la consola de
+Atlassian: un proyecto Jira o espacio Confluence que una persona ve y la otra no, comprobando que
+cada una obtiene la respuesta que le corresponde.
 
 Si al hacerlas aparece algo distinto de lo documentado aquí, corregir este archivo con la
 evidencia nueva.

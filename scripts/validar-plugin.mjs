@@ -41,6 +41,33 @@ export function validarPlugin(root = resolveFromRoot()) {
     }
   }
 
+  // 1b. Versión del plugin: `.claude-plugin/plugin.json` y `package.json` deben declarar la
+  // misma cadena, y el CHANGELOG debe tener una entrada para ella. Sin este chequeo las dos
+  // versiones derivan en silencio — que fue exactamente lo que pasó (plugin.json=0.3.0 mientras
+  // package.json=0.1.0, sin ningún tag). Es el mismo patrón del chequeo 3b para el contrato: dos
+  // archivos que declaran lo mismo se cruzan, no se confía en que alguien los mueva juntos.
+  // Ojo: esta versión es el eje del *plugin*, independiente del contractVersion de Klap Knowledge
+  // (3b) y de la versión del servicio klap-dev-kit-knowledge. Ver docs/installation.md.
+  const pluginJsonPath = path.join(root, ".claude-plugin", "plugin.json");
+  const packageJsonPath = path.join(root, "package.json");
+  if (existsSync(pluginJsonPath) && existsSync(packageJsonPath) && jsonValido(pluginJsonPath) && jsonValido(packageJsonPath)) {
+    const versionPlugin = JSON.parse(readFileSync(pluginJsonPath, "utf8")).version;
+    const versionPaquete = JSON.parse(readFileSync(packageJsonPath, "utf8")).version;
+    if (!versionPlugin) problemas.push('plugin.json: falta "version"');
+    else if (!versionPaquete) problemas.push('package.json: falta "version"');
+    else if (versionPlugin !== versionPaquete) {
+      problemas.push(
+        `versión desalineada: .claude-plugin/plugin.json=${versionPlugin}, package.json=${versionPaquete}`
+      );
+    } else {
+      const changelogPath = path.join(root, "CHANGELOG.md");
+      if (!existsSync(changelogPath)) problemas.push("Falta CHANGELOG.md");
+      else if (!readFileSync(changelogPath, "utf8").includes(`## [${versionPlugin}]`)) {
+        problemas.push(`CHANGELOG.md: no tiene entrada "## [${versionPlugin}]" para la versión declarada`);
+      }
+    }
+  }
+
   // 2. .mcp.json — además de existir y parsear, no puede contener rutas absolutas: el archivo
   // viaja con el plugin a la máquina de cada dev, así que una ruta como C:\...\python.exe o
   // /home/alguien/... sólo funciona en el equipo de quien la escribió. Lo portable es

@@ -63,6 +63,19 @@ Tabla completa con cuándo usar cada uno: `docs/commands.md`.
 - Opcional para certificación completa en el propio repo: Trivy y/o OWASP Dependency-Check
   (`bootstrap/` ayuda a instalarlos).
 
+## Versiones — tres ejes que no se mueven juntos
+
+| Eje | Dónde se declara | Qué versiona |
+|---|---|---|
+| **Plugin `klap`** | `.claude-plugin/plugin.json` + `package.json` (idénticos, `npm run validate` lo exige) | Este repo: skills, agentes, scripts, standards |
+| **Contrato Knowledge MCP** | `schemas/knowledge-mcp/tools.json` → `contractVersion`, registrado en `config/klap.yaml` → `contratos.knowledge_mcp` | La superficie de tools que el kit consume del servicio de memoria |
+| **Servicio `klap-knowledge`** | `pyproject.toml` del repo `klap-dev-kit-knowledge` | La implementación del servicio, aparte del contrato que expone |
+
+Un cambio de contrato no obliga a subir la versión del plugin, ni al revés. `npm run validate`
+falla si los dos manifests del plugin discrepan, si la versión no tiene entrada en el
+`CHANGELOG.md`, o si el `contractVersion` del schema no coincide con el registrado en
+`config/klap.yaml` — tres desalineaciones que de otro modo pasan inadvertidas.
+
 ## Qué hay en este repo
 
 | Carpeta | Qué es |

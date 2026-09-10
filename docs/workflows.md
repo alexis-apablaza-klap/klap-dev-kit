@@ -48,9 +48,10 @@ quedan ahí — puedes retomar sin repetir fases ya completadas.
 ## Evaluar el criterio de los agentes
 
 `npm test` valida el andamiaje determinista (schemas, scripts, hooks) — no si un agente
-razona bien. `evals/` tiene casos de `claude plugin eval` para eso (¿`analista` reporta una
-ambigüedad real como pregunta pendiente en vez de resolverla por su cuenta?, ¿`arquitecto`
-prioriza el patrón existente del componente?, ¿`seguridad` detecta una inyección SQL real?).
-Corre `npm run eval` como paso manual antes de publicar una versión — gasta tokens de API
-reales, por eso no está en CI. Detalle en `evals/README.md` y en `docs/claude-plugin-eval.md`
-(qué hace exactamente, estado actual del early access).
+razona bien. Para eso hay 6 casos de `claude plugin eval` (¿`analista` reporta una ambigüedad
+real como pregunta pendiente en vez de resolverla por su cuenta?, ¿`arquitecto` prioriza el
+patrón existente del componente?, ¿`seguridad` detecta una inyección SQL real?).
+
+**Hoy no es un paso del flujo:** `claude plugin eval` está en early access habilitado por
+organización, así que el kit no lo declara y los casos viven en `docs/futuro/evals/`. Ficha de
+reactivación y checklist en `docs/claude-plugin-eval.md`.
