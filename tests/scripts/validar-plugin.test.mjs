@@ -258,9 +258,8 @@ test(".mcp.json parametrizado con variables de entorno no reporta problema de po
   try {
     escribirMcpJson(root, {
       type: "stdio",
-      command: "${KLAP_KNOWLEDGE_PYTHON:-python}",
-      args: ["-m", "algo"],
-      cwd: "${KLAP_KNOWLEDGE_HOME}",
+      command: "node",
+      args: ["${CLAUDE_PLUGIN_ROOT}/scripts/algo.mjs"],
     });
     const { problemas } = validarPlugin(root);
     assert.ok(!problemas.some((p) => p.includes("ruta absoluta")), JSON.stringify(problemas));

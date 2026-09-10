@@ -12,7 +12,9 @@ mcp:
     modo: produccion # mock | produccion
     fallback_si_no_disponible: true
     # El servicio real vive en un repo aparte (klap-dev-kit-knowledge); el plugin no puede saber
-    # dónde lo clonó cada quien. KLAP_KNOWLEDGE_PYTHON es opcional (default `python`).
+    # dónde lo clonó cada quien. KLAP_KNOWLEDGE_HOME es la única variable: el intérprete se
+    # deriva de ella en scripts/klap-knowledge-launch.mjs (<HOME>/.venv/{Scripts|bin}/python
+    # según plataforma, con fallback al `python` del PATH). No hay KLAP_KNOWLEDGE_PYTHON.
     requiere_env: [KLAP_KNOWLEDGE_HOME]
     obtener_credencial: docs/installation.md # no es una credencial: es el checkout del repo
     # Comando para levantar el mock como proceso stdio independiente de Claude Code

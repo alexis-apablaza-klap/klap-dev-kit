@@ -48,10 +48,15 @@ menciona ambas:
 
 ## `plugin:klap:klap-knowledge` dice `✘ Failed to connect`
 
-Casi siempre falta `KLAP_KNOWLEDGE_HOME` (y a veces `KLAP_KNOWLEDGE_PYTHON`). El plugin declara
-el servidor real de forma portable —con variables de entorno, no con la ruta de una máquina
-concreta—, así que sin ellas intenta un `python` genérico en un directorio que no corresponde y
-el proceso muere al arrancar. Cómo definirlas: `docs/installation.md`, paso 4.
+Casi siempre falta `KLAP_KNOWLEDGE_HOME`, la única variable que este servidor necesita. El
+plugin lo declara de forma portable —vía `scripts/klap-knowledge-launch.mjs`, no con la ruta de
+una máquina concreta—, así que sin ella el launcher aborta con un mensaje explícito en stderr.
+Cómo definirla: `docs/installation.md`, paso 4.
+
+La otra causa posible es que el checkout exista pero **el paquete no esté instalado**: el
+launcher cae al `python` del `PATH` cuando `<HOME>/.venv` no existe, y ese intérprete no resuelve
+`klap_knowledge` (el paquete usa layout `src/`, así que el `cwd` no alcanza). Verifícalo con
+`python -c "import klap_knowledge"` dentro del checkout.
 
 Es un fallo aislado: el mock de Klap Knowledge y Atlassian siguen conectados.
 

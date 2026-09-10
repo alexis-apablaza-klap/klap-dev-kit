@@ -65,12 +65,25 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ### Fixed
 
+- **`klap-knowledge` arranca con una sola variable: `KLAP_KNOWLEDGE_HOME`.** La entrada exigía
+  además `KLAP_KNOWLEDGE_PYTHON`, que duplicaba información ya contenida en `HOME` y era la causa
+  real del `✘ Failed to connect` más común: el default `python` no resuelve `klap_knowledge`
+  porque el paquete usa layout `src/`, así que fijar `cwd` en el checkout no alcanza — sin la
+  segunda variable el servidor moría al arrancar aunque `HOME` estuviera bien puesta.
+  `config/klap.yaml` la documentaba como "opcional", lo que era falso. Ahora `.mcp.json` invoca
+  `scripts/klap-knowledge-launch.mjs`, que deriva el intérprete del checkout
+  (`<HOME>/.venv/Scripts/python.exe` en Windows, `<HOME>/.venv/bin/python` en POSIX) y cae al
+  `python` del `PATH` si no hay venv. Un `.mcp.json` es estático y no puede ramificar por
+  plataforma; el launcher es lo que permite derivarlo sin reintroducir una ruta Windows-only ni
+  una ruta absoluta. Si falta `HOME`, aborta con un mensaje accionable en **stderr** (nunca en
+  stdout, que es el canal JSON-RPC del MCP).
+
 - **`.mcp.json` deja de depender de la máquina de una persona.** La entrada `klap-knowledge`
   apuntaba a `C:\klap-workspace\klap-dev-kit-knowledge\.venv\Scripts\python.exe`: una ruta
   absoluta, además de Windows-only, que hacía fallar ese servidor en el equipo de cualquier otro
-  dev. Ahora se resuelve con `${KLAP_KNOWLEDGE_PYTHON:-python}` y `${KLAP_KNOWLEDGE_HOME}`
-  (documentado en `docs/installation.md`, paso 4). Si faltan, falla **sólo** ese servidor: el
-  mock y Atlassian siguen conectados. `scripts/validar-plugin.mjs` ahora rechaza cualquier ruta
+  dev. Ahora se resuelve desde `${KLAP_KNOWLEDGE_HOME}` (documentado en `docs/installation.md`,
+  paso 4; ver la entrada anterior para cómo se deriva el intérprete). Si falta, falla **sólo** ese
+  servidor: el mock y Atlassian siguen conectados. `scripts/validar-plugin.mjs` ahora rechaza cualquier ruta
   absoluta en `.mcp.json`, para que el problema no pueda reaparecer.
 
 - **`config/klap.yaml` → `hosting` describía mal la realidad.** Decía `proveedor_actual: github`

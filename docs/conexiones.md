@@ -9,7 +9,7 @@ Lo que sí es personal es la identidad — quién se autentica y con qué creden
 | **atlassian** | Endpoint Rovo MCP v2 | OAuth vía `/mcp` (una vez) | Fase 1 se detiene: sin Jira no hay HU |
 | **context7** | Endpoint público | **Nada** | Fase 3 usa documentación oficial como respaldo |
 | **sonarqube** | Endpoint SonarCloud + org | `KLAP_SONARQUBE_TOKEN` | `/klap:certificar` aprueba **con advertencia**, sin verificar el Quality Gate |
-| **klap-knowledge** | Comando y args portables | `KLAP_KNOWLEDGE_HOME` (y opcionalmente `KLAP_KNOWLEDGE_PYTHON`) | Fases 1 y 8 degradan; `/klap:memoria-inicializar` se detiene |
+| **klap-knowledge** | Launcher Node que deriva el intérprete del checkout | `KLAP_KNOWLEDGE_HOME` | Fases 1 y 8 degradan; `/klap:memoria-inicializar` se detiene |
 | **klap-knowledge-local-mock** | Servidor mock completo | Nada | — (es el respaldo para probar el flujo) |
 
 No hace falta memorizar esta tabla: si falta una variable, el kit **te avisa solo** al iniciar la
