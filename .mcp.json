@@ -13,5 +13,18 @@
   "atlassian": {
     "type": "http",
     "url": "https://mcp.atlassian.com/v2/mcp"
+  },
+  "context7": {
+    "type": "http",
+    "url": "https://mcp.context7.com/mcp"
+  },
+  "sonarqube": {
+    "type": "http",
+    "url": "https://api.sonarcloud.io/mcp",
+    "headers": {
+      "Authorization": "Bearer ${KLAP_SONARQUBE_TOKEN}",
+      "SONARQUBE_ORG": "multicaja-cloud",
+      "SONARQUBE_READ_ONLY": "true"
+    }
   }
 }

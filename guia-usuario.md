@@ -47,9 +47,9 @@ comandos.
 
 - Claude Code con soporte de plugins.
 - Node.js ≥ 18 y Git.
-- Cuenta corporativa Atlassian (el MCP viene con el plugin; sólo hay que autenticarse) y MCP
-  SonarQube para certificación — si no están conectados, el kit lo declara en vez de fallar en
-  silencio.
+- Cuenta corporativa Atlassian y un token de SonarCloud (`KLAP_SONARQUBE_TOKEN`). Los servidores
+  MCP vienen con el plugin; sólo hay que poner la identidad. Si falta alguno, el kit te avisa al
+  iniciar la sesión y lo declara en vez de fallar en silencio. Ver `docs/conexiones.md`.
 - Opcional, para certificación completa: Trivy y/o OWASP Dependency-Check. El script
   `bootstrap/install.ps1` (Windows) / `install.sh` (Linux/Mac) revisa qué falta e indica dónde
   instalarlo — no instala nada por sí solo.

@@ -15,9 +15,9 @@ que clonar ni compilar nada manualmente para usarlo dentro de Claude Code.
 /plugin install klap@klap-dev-kit
 ```
 
-Esto registra los 11 comandos `/klap:*`, los 7 agentes, los hooks de validación, el servidor
-MCP mock de Klap Knowledge y **el servidor MCP de Atlassian** (se activan solos, sin
-configuración adicional).
+Esto registra los 11 comandos `/klap:*`, los 7 agentes, los hooks de validación y **las cinco
+conexiones MCP** del kit (Atlassian, Context7, SonarQube, Klap Knowledge y su mock). Los
+endpoints llegan configurados; sólo faltan las credenciales personales de los pasos 3 a 5.
 
 ## 3. Autenticar Atlassian (una vez por persona)
 
@@ -37,7 +37,26 @@ declaran explícitamente. No se comparten ni se crean API tokens: cada quien usa
 exactamente lo que sus permisos en Atlassian le permiten. Detalle, modos de fallo y evidencia de
 la verificación: `docs/atlassian-mcp.md`.
 
-## 4. Klap Knowledge en modo producción (opcional)
+## 4. Token de SonarQube
+
+Necesario para `/klap:certificar`. Es la única conexión del kit que pide un token en vez de
+OAuth: el MCP oficial de SonarSource no ofrece otra cosa.
+
+1. Genera un token en **https://sonarcloud.io/account/access-tokens**.
+2. Guárdalo como variable de **usuario** (persiste entre sesiones):
+
+```
+Windows    setx KLAP_SONARQUBE_TOKEN "tu-token"     (abre una terminal nueva después)
+Linux/Mac  export KLAP_SONARQUBE_TOKEN="tu-token"   en ~/.bashrc o ~/.zshrc
+```
+
+3. Reinicia Claude Code y confirma con `claude mcp list` que `plugin:klap:sonarqube` diga
+   `✔ Connected`.
+
+Sin el token, `/klap:certificar` **no se bloquea**: certifica igual pero advierte que no pudo
+verificar el Quality Gate. Detalle en `docs/conexiones.md`.
+
+## 5. Klap Knowledge en modo producción (opcional)
 
 El plugin trae el **mock** de Klap Knowledge, que se activa solo y basta para probar el flujo
 completo. Para apuntar al **servicio real** hace falta tener clonado e instalado el repo
@@ -63,10 +82,14 @@ La forma recomendada es el bloque `env` de tu `settings.json` de Claude Code:
 En Windows el intérprete del venv es `…\.venv\Scripts\python.exe`.
 
 Si no las defines, `plugin:klap:klap-knowledge` aparece como `✘ Failed to connect` en
-`claude mcp list` — **sólo ese servidor**; el mock y Atlassian siguen funcionando, y las fases
-que usan Klap Knowledge lo declaran en vez de inventar contexto.
+`claude mcp list` — **sólo ese servidor**; el mock y el resto de las conexiones siguen
+funcionando, y las fases que usan Klap Knowledge lo declaran en vez de inventar contexto.
 
-## 5. Actualizar
+No tienes que acordarte de nada de esto: si falta alguna variable `KLAP_*`, el kit te lo avisa
+al iniciar la sesión, con el impacto y dónde obtener la credencial. Tabla completa de las cinco
+conexiones: `docs/conexiones.md`.
+
+## 6. Actualizar
 
 ```
 /plugin update klap@klap-dev-kit
@@ -80,10 +103,10 @@ publica una nueva versión — no en cada push al repo.
 - Claude Code con soporte de plugins.
 - Node.js ≥ 18 (los scripts y hooks del kit son `.mjs` puros de Node).
 - Git.
-- Cuenta corporativa Atlassian, autenticada según el paso 3 — el MCP de Atlassian
-  (Jira/Confluence/Bitbucket) lo trae el plugin, no hay que conseguirlo aparte. SonarQube
-  (`/klap:certificar`) sigue dependiendo de que esté conectado en tu sesión. Si alguno no está
-  disponible, esas fases lo declaran explícitamente en vez de fallar en silencio.
+- Cuenta corporativa Atlassian (paso 3) y token de SonarCloud (paso 4). Los servidores MCP los
+  trae el plugin; lo que pones tú es la identidad. Si alguna conexión no está disponible, las
+  fases que la usan lo declaran explícitamente en vez de fallar en silencio. Tabla completa:
+  `docs/conexiones.md`.
 - Para certificación completa en el propio repo de trabajo: el wrapper de build del proyecto
   (`gradlew`/`mvnw`/`npm`), y opcionalmente Trivy / OWASP Dependency-Check para el escaneo de
   dependencias (`scripts/deps-scan.mjs` detecta si no están instalados y lo informa, no falla

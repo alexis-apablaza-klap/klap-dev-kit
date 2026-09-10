@@ -156,6 +156,19 @@ duplica servidores. No lo agregues.
 
 ---
 
+## Dos validaciones que faltan (necesitan una segunda persona)
+
+Todo lo anterior se verificó con una sola cuenta. Quedan dos comprobaciones que por definición no
+puede hacer un solo dev, y que se cumplirán solas cuando el primer compañero instale el plugin:
+
+1. **Instalación limpia**: que alguien que nunca configuró nada instale el plugin, vea
+   `atlassian` en `/mcp` y **no** tenga acceso antes de autenticarse.
+2. **Aislamiento entre identidades**: que dos devs autenticados vean cada uno sólo los recursos
+   que sus permisos de Atlassian les permiten.
+
+Si al hacerlas aparece algo distinto de lo documentado aquí, corregir este archivo con la
+evidencia nueva.
+
 ## Hallazgos de la verificación — todos resueltos
 
 Se registran cerrados, no borrados: son las razones por las que el kit quedó como quedó.

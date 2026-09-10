@@ -56,11 +56,10 @@ Tabla completa con cuándo usar cada uno: `docs/commands.md`.
 - Claude Code con soporte de plugins.
 - Node.js ≥ 18.
 - Git.
-- **Una cuenta corporativa Atlassian.** El servidor MCP de Atlassian (Jira, Confluence y
-  Bitbucket) lo trae el plugin: no hay que configurarlo ni conseguir un token. Sólo autentícate
-  una vez con `/mcp` → `atlassian` → Authenticate. Detalle: `docs/atlassian-mcp.md`.
-- MCP SonarQube cuando esté disponible en tu sesión — si no lo está, las fases que lo usan lo
-  declaran explícitamente en vez de fallar en silencio o inventar contexto.
+- **Una cuenta corporativa Atlassian** y **un token de SonarCloud**. Los cinco servidores MCP del
+  kit los trae el plugin —no hay endpoints que configurar—; lo único que pones tú es la
+  identidad: OAuth para Atlassian vía `/mcp`, y `KLAP_SONARQUBE_TOKEN` como variable de usuario.
+  Si falta alguna, el kit te avisa al iniciar la sesión. Tabla completa: `docs/conexiones.md`.
 - Opcional para certificación completa en el propio repo: Trivy y/o OWASP Dependency-Check
   (`bootstrap/` ayuda a instalarlos).
 

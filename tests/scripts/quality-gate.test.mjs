@@ -105,3 +105,51 @@ test("condición con operador desconocido en config lanza error en vez de aproba
   };
   assert.throws(() => evaluarGate({ ...reporteOk, sonar: { ...reporteOk.sonar, bugs_nuevos: 1 } }, gatesInvalidos), /operador desconocido/);
 });
+
+test("sin métricas de Sonar advierte pero no reprueba", () => {
+  const veredicto = evaluarGate(
+    { coverage_porcentaje: 95, tests: { total: 10, fallidos: 0 } },
+    { ...gates, sonarqube: { ...gates.sonarqube, quality_gate_debe_pasar: true } }
+  );
+  assert.equal(veredicto.aprobado, true);
+  assert.equal(veredicto.motivos.length, 0);
+  assert.ok(veredicto.advertencias.some((a) => a.includes("Sin métricas de Sonar")));
+  assert.ok(veredicto.advertencias.some((a) => a.includes("KLAP_SONARQUBE_TOKEN")));
+});
+
+test("con métricas de Sonar en OK no advierte", () => {
+  const veredicto = evaluarGate(
+    {
+      coverage_porcentaje: 95,
+      tests: { total: 10, fallidos: 0 },
+      sonar: {
+        quality_gate_status: "OK",
+        bugs_nuevos: 0,
+        vulnerabilities_nuevas: 0,
+        security_hotspots_sin_revisar: 0,
+        rating_mantenibilidad: "A",
+      },
+    },
+    gates
+  );
+  assert.equal(veredicto.aprobado, true);
+  assert.deepEqual(veredicto.advertencias, []);
+});
+
+test("mutation_score ausente sigue sin advertir — es opcional por diseño", () => {
+  const veredicto = evaluarGate(
+    {
+      coverage_porcentaje: 95,
+      tests: { total: 10, fallidos: 0 },
+      sonar: {
+        quality_gate_status: "OK",
+        bugs_nuevos: 0,
+        vulnerabilities_nuevas: 0,
+        security_hotspots_sin_revisar: 0,
+        rating_mantenibilidad: "A",
+      },
+    },
+    gates
+  );
+  assert.ok(!veredicto.advertencias.some((a) => a.toLowerCase().includes("mutation")));
+});

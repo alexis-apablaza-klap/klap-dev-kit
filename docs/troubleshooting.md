@@ -24,6 +24,28 @@ Escálalo a un admin de Atlassian/Bitbucket.
 > **Ojo con Jira:** una búsqueda JQL sobre un proyecto sin acceso devuelve una lista vacía **sin
 > error**. Un resultado vacío no prueba que no exista nada.
 
+## `plugin:klap:sonarqube` dice `✘ Failed to connect — HTTP 403`
+
+Falta `KLAP_SONARQUBE_TOKEN`, o el token no es válido. Genera uno en
+https://sonarcloud.io/account/access-tokens y déjalo como variable de usuario (`setx` en Windows,
+`~/.bashrc`/`~/.zshrc` en Linux/Mac); ver `docs/conexiones.md`.
+
+Detalle útil: cuando la variable no existe, Claude Code **no avisa** — deja el literal
+`${KLAP_SONARQUBE_TOKEN}` en el header y SonarCloud responde 403. Por eso el mensaje es el mismo
+para "falta la variable" y "el token es inválido". Comprueba primero que la variable esté
+definida en la terminal donde corre Claude Code.
+
+## `/klap:certificar` aprueba pero advierte que no verificó el Quality Gate
+
+Es el comportamiento correcto, no un bug. La certificación no se bloquea por falta de métricas de
+Sonar, pero tampoco aprueba esa dimensión en silencio. Dos causas posibles, y la advertencia
+menciona ambas:
+
+1. Falta `KLAP_SONARQUBE_TOKEN` (ver arriba).
+2. El proyecto **no tiene análisis publicado** en SonarCloud. El análisis lo produce el pipeline
+   de Jenkins del repo (desa o qa); no se corre en local, así que un repo sin corrida reciente no
+   tiene métricas aunque tu token sea válido.
+
 ## `plugin:klap:klap-knowledge` dice `✘ Failed to connect`
 
 Casi siempre falta `KLAP_KNOWLEDGE_HOME` (y a veces `KLAP_KNOWLEDGE_PYTHON`). El plugin declara

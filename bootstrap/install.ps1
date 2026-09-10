@@ -51,6 +51,17 @@ if ($dcCmd) {
 }
 
 Write-Host ""
+Write-Host "== Conexiones del plugin =="
+if (Get-Command node -ErrorAction SilentlyContinue) {
+    # Mismo verificador que corre el hook SessionStart: una sola fuente de verdad sobre qué
+    # variables hacen falta (config/klap.yaml -> mcp.*.requiere_env).
+    $verificador = Join-Path $PSScriptRoot "..\scripts\verificar-conexiones.mjs"
+    $salida = & node $verificador | Out-String
+    if ($salida.Trim()) { Write-Host $salida.Trim() }
+    else { Write-Host "[OK] Todas las variables KLAP_* necesarias estan definidas." }
+}
+
+Write-Host ""
 Write-Host "== Instalacion del plugin =="
 Write-Host "1. /plugin marketplace add <url-del-repo-klap-dev-kit>"
 Write-Host "2. /plugin install klap@klap-dev-kit"

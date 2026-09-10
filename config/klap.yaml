@@ -11,6 +11,10 @@ mcp:
     server: klap-knowledge
     modo: produccion # mock | produccion
     fallback_si_no_disponible: true
+    # El servicio real vive en un repo aparte (klap-dev-kit-knowledge); el plugin no puede saber
+    # dónde lo clonó cada quien. KLAP_KNOWLEDGE_PYTHON es opcional (default `python`).
+    requiere_env: [KLAP_KNOWLEDGE_HOME]
+    obtener_credencial: docs/installation.md # no es una credencial: es el checkout del repo
     # Comando para levantar el mock como proceso stdio independiente de Claude Code
     # (usado por scripts/targeted-sync.mjs y por tests). No aplica en modo produccion.
     mock_launch: ["node", "mocks/klap-knowledge-mcp/server.mjs"]
@@ -26,9 +30,24 @@ mcp:
     auth: oauth
     productos: [jira, confluence, bitbucket] # verificados read-write el 2026-09-10
   sonarqube:
-    server: sonarqube # nombre esperado del MCP de SonarQube cuando esté disponible
+    # SonarQube Cloud. Única conexión del kit que no puede usar OAuth: el MCP oficial de
+    # SonarSource sólo admite token de usuario. El token vive en una variable de entorno de cada
+    # dev — nunca en el repo — y `scripts/verificar-conexiones.mjs` avisa si falta.
+    server: plugin_klap_sonarqube
+    endpoint: https://api.sonarcloud.io/mcp
+    auth: token
+    org: multicaja-cloud
+    requiere_env: [KLAP_SONARQUBE_TOKEN]
+    obtener_credencial: https://sonarcloud.io/account/access-tokens
+    # El análisis lo produce Jenkins al correr el pipeline del repo (desa o qa); el kit sólo lee
+    # métricas ya publicadas. Un proyecto sin análisis reciente no devuelve métricas aunque el
+    # token sea válido — ver docs/conexiones.md.
   context7:
-    server: claude_ai_Context7 # documentación oficial de librerías/frameworks en vivo — nunca hardcodear guías estáticas de contenido que caduca con cada release
+    # Documentación oficial de librerías/frameworks en vivo — nunca hardcodear guías estáticas de
+    # contenido que caduca con cada release. Endpoint público: sin credencial ni configuración.
+    server: plugin_klap_context7
+    endpoint: https://mcp.context7.com/mcp
+    auth: ninguna
 
 stack_soportado:
   # origen: C:\klap-workspace\CLAUDE.md (2026-08-26). Confirmar con el equipo antes de v1.0.0.
