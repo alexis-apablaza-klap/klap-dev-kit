@@ -46,7 +46,20 @@
             "auth": { "$ref": "#/$defs/auth" },
             "org": { "type": "string" },
             "requiere_env": { "$ref": "#/$defs/requiereEnv" },
-            "obtener_credencial": { "type": "string" }
+            "obtener_credencial": { "type": "string" },
+            "project_key": {
+              "type": "object",
+              "description": "La project key no es descubrible desde el repo (vive en la config de Jenkins): se resuelve vía MCP y nunca se construye por concatenación. Los prefijos/sufijos son observados, no un formato garantizado — sirven para elegir entre candidatos. Ver agents/certificador.md paso 4a.",
+              "required": ["resolver_con", "ambiente_por_defecto", "ambientes"],
+              "properties": {
+                "resolver_con": { "type": "string" },
+                "ambiente_por_defecto": { "type": "string" },
+                "ambientes": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+                "prefijos_tipo": { "type": "array", "items": { "type": "string" } },
+                "sufijos_observados": { "type": "array", "items": { "type": "string" } },
+                "sin_proyecto": { "type": "array", "items": { "type": "string" }, "description": "Productos sin proyecto en SonarCloud: la HU no puede ejercer el gate y el bloque se omite con advertencia." }
+              }
+            }
           }
         },
         "context7": {

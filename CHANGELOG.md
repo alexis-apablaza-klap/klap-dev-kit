@@ -5,6 +5,51 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.1.2-alpha] - 2026-09-10
+
+### Added
+
+- **Resolución de la project key de SonarQube, verificada contra la organización real.** La key
+  **no es descubrible desde el repo** (sin `sonar-project.properties`, sin bloque `sonar` en
+  `build.gradle`, sin `.sonarlint/connectedMode.json`, sin `Jenkinsfile`): vive en la config de
+  Jenkins. `config/klap.yaml → mcp.sonarqube.project_key` declara ahora cómo **resolverla** —
+  `search_my_sonarqube_projects` con el nombre del repo, elección por ambiente, y **omitir el
+  bloque `sonar` con advertencia si hay 0 o >1 candidatos** — más los prefijos y sufijos
+  observados, que sirven para elegir entre candidatos y nunca para construir una key. Declarado
+  en `schemas/klap-config.schema.json` para que un typo no pase inadvertido.
+- Registrado que **`abono-ya` no tiene proyecto en SonarCloud** (0 resultados para "anticipo"
+  entre los 76 de la organización): una HU de ese producto no puede ejercer el gate, y eso es una
+  advertencia, no una reprobación.
+- **Mapeo campo del gate → tool del MCP** en `agents/certificador.md` (paso 4b), con las trampas
+  verificadas contra un proyecto real y verde.
+
+### Fixed
+
+- **`rating_mantenibilidad` habría dejado la HU sin veredicto.** El MCP devuelve `sqale_rating`
+  como `"1.0"`, no como `"A"`; pasarlo tal cual a `scripts/quality-gate.mjs` **lanza**
+  (`valor "1.0" no está en la escala "rating"`), no reprueba. El agente convierte `1→A … 5→E`
+  antes de armar el reporte, y hay test que fija el motivo.
+- **`bugs_nuevos` y `vulnerabilities_nuevas` no salen de donde se creía.**
+  `search_sonar_issues_in_projects` **no tiene filtro de nuevo código** (ni `inNewCodePeriod` ni
+  `createdAfter`), así que contaría el histórico completo: salen de las métricas `new_bugs` y
+  `new_vulnerabilities`.
+- **`security_hotspots_sin_revisar` no tiene métrica.** `security_hotspots_reviewed` es un
+  porcentaje y `security_hotspots` es el total con revisados incluidos: se cuenta con
+  `search_security_hotspots(status: "TO_REVIEW", sinceLeakPeriod: true, pageSize: 1)` →
+  `paging.total`.
+- Documentada la regla que faltaba: una medida `new_*` puede volver **sin `value`** cuando el
+  proyecto no tiene período de nuevo código con cambios (verificado: las seis `new_*` vacías
+  mientras las globales traían valor). El campo se **omite**, nunca se rellena con 0 — el 0
+  inventado es el modo de fallo peor, porque aprueba de verdad.
+
+### Changed
+
+- **Precedencia de cobertura explícita** (`quality-gates.yaml → coverage.precedencia_sobre_sonar`):
+  el 92% del kit manda sobre el 80% del QG de SonarCloud porque miden cosas distintas — unit del
+  cambio que se certifica vs. cobertura global del proyecto según la última corrida de Jenkins. No
+  son un indicador con dos valores. El `coverage_porcentaje` del reporte sale del JaCoCo local,
+  nunca de la métrica `coverage` de Sonar.
+
 ## [0.1.1-alpha] - 2026-09-10
 
 ### Added

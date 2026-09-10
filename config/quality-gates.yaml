@@ -17,6 +17,17 @@ coverage:
   alcance: unit
   herramienta: jacoco # ajustar por stack (jacoco para Java, istanbul/nyc para TS)
   no_optimizar_ciegamente: true # priorizar calidad de pruebas sobre el número; ver standards/testing
+  # Precedencia frente a SonarQube: manda ESTE umbral. El Quality Gate de los proyectos en
+  # SonarCloud exige coverage >= 80 (verificado en desa-mcs-ms-central-fasf-r2-reportes-jdk17),
+  # un número distinto porque mide algo distinto: es cobertura global del proyecto según la
+  # última corrida de Jenkins, mientras el 92 de acá es sólo unit del cambio que se está
+  # certificando. No son el mismo indicador con dos valores — son dos indicadores.
+  #
+  # Consecuencias prácticas: el `coverage_porcentaje` del reporte sale del JaCoCo local, NUNCA
+  # de la métrica `coverage` de Sonar; y un proyecto puede pasar su propio QG (>= 80) y aun así
+  # reprobar acá. Eso no es un conflicto a resolver bajando el umbral: el QG de Sonar entra al
+  # veredicto por `sonarqube.quality_gate_debe_pasar`, no por este número.
+  precedencia_sobre_sonar: true
 
 mutacion:
   # Umbral interino aceptado (decisión 2026-08-28) — no calibrado contra un repo real todavía.
@@ -33,6 +44,11 @@ escalas:
 
 sonarqube:
   quality_gate_debe_pasar: true
+  # De qué tool del MCP sale cada campo de abajo está en agents/certificador.md (paso 4b) — no se
+  # repite acá, y no es trivial: `bugs_nuevos` sólo se puede obtener de la métrica `new_bugs`
+  # (`search_sonar_issues_in_projects` no tiene filtro de nuevo código),
+  # `security_hotspots_sin_revisar` no tiene métrica y se cuenta por `paging.total`, y
+  # `rating_mantenibilidad` llega como "1.0" y hay que convertirlo a la escala A-E de abajo.
   bloquear_si:
     - { campo: bugs_nuevos, operador: ">", valor: 0, mensaje: "{actual} bug(s) nuevo(s) en Sonar." }
     - { campo: vulnerabilities_nuevas, operador: ">", valor: 0, mensaje: "{actual} vulnerabilidad(es) nueva(s) en Sonar." }

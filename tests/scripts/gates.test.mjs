@@ -76,3 +76,38 @@ test("algunaCondicionCumple: true si al menos una condición se dispara", () => 
   assert.equal(algunaCondicionCumple(condiciones, { severidad: "HIGH" }, escalas), true);
   assert.equal(algunaCondicionCumple(condiciones, { severidad: "CRITICAL" }, escalas), true);
 });
+
+test("el rating numérico que devuelve el MCP de Sonar lanza: la conversión a A-E es obligatoria", () => {
+  // `get_component_measures` devuelve sqale_rating como "1.0", no como "A" (verificado contra un
+  // proyecto real). Pasarlo tal cual al gate no reprueba: lanza, y la HU queda sin veredicto.
+  // Por eso agents/certificador.md exige convertir 1→A … 5→E antes de armar el reporte.
+  assert.throws(
+    () =>
+      evaluarCondiciones(
+        [{ campo: "rating_mantenibilidad", operador: ">", valor: "A", escala: "rating" }],
+        { rating_mantenibilidad: "1.0" },
+        { rating: ["A", "B", "C", "D", "E"] }
+      ),
+    /no está en la escala/
+  );
+  // Convertido, el mismo dato aprueba sin ruido.
+  assert.deepEqual(
+    evaluarCondiciones(
+      [{ campo: "rating_mantenibilidad", operador: ">", valor: "A", escala: "rating" }],
+      { rating_mantenibilidad: "A" },
+      { rating: ["A", "B", "C", "D", "E"] }
+    ),
+    []
+  );
+});
+
+test("una métrica new_* ausente no reprueba, y un 0 inventado sí aprobaría en falso", () => {
+  // Las medidas `new_*` vuelven sin `value` cuando el proyecto no tiene período de nuevo código
+  // con cambios. El campo se omite del reporte: ausente no es cero.
+  const condiciones = [{ campo: "bugs_nuevos", operador: ">", valor: 0 }];
+  assert.deepEqual(evaluarCondiciones(condiciones, {}, {}), []);
+  assert.deepEqual(evaluarCondiciones(condiciones, { bugs_nuevos: undefined }, {}), []);
+  // Y el caso que sí debe reprobar, para que el test anterior no pase por vacuidad.
+  assert.equal(evaluarCondiciones(condiciones, { bugs_nuevos: 1 }, {}).length, 1);
+});
+
