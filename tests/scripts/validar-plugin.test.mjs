@@ -268,3 +268,23 @@ test(".mcp.json parametrizado con variables de entorno no reporta problema de po
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("marketplace.json sin description se reporta (lo exige claude plugin validate --strict)", () => {
+  const root = crearRootTemporal();
+  try {
+    mkdirSync(path.join(root, ".claude-plugin"), { recursive: true });
+    writeFileSync(path.join(root, ".claude-plugin", "marketplace.json"), JSON.stringify({ name: "x", plugins: [] }));
+    writeFileSync(
+      path.join(root, ".claude-plugin", "plugin.json"),
+      JSON.stringify({ name: "x", description: "Con descripción." })
+    );
+    const { problemas } = validarPlugin(root);
+    assert.ok(
+      problemas.some((p) => p.includes("marketplace.json") && p.includes("description")),
+      JSON.stringify(problemas)
+    );
+    assert.ok(!problemas.some((p) => p.includes("plugin.json") && p.includes("description")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

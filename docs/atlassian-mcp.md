@@ -156,15 +156,23 @@ duplica servidores. No lo agregues.
 
 ---
 
-## REQUIERE-USUARIO
+## Hallazgos de la verificación — todos resueltos
 
-1. ~~`.mcp.json` → entrada `klap-knowledge` tiene rutas absolutas de una máquina concreta.~~
-   **Resuelto**: ahora usa `${KLAP_KNOWLEDGE_PYTHON:-python}` y `${KLAP_KNOWLEDGE_HOME}`
+Se registran cerrados, no borrados: son las razones por las que el kit quedó como quedó.
+
+1. **`.mcp.json` → `klap-knowledge` tenía rutas absolutas de una máquina concreta**, además
+   Windows-only. Ahora usa `${KLAP_KNOWLEDGE_PYTHON:-python}` y `${KLAP_KNOWLEDGE_HOME}`
    (configuración en `docs/installation.md`, paso 4), y `scripts/validar-plugin.mjs` rechaza
    cualquier ruta absoluta en `.mcp.json` para que no vuelva a colarse.
-2. **`config/klap.yaml` → `hosting.proveedor_actual: github`** mientras los repos de producto son
-   `git@bitbucket.org:multicaja-cloud/…`. Inconsistencia ya señalada en `proposal.md`.
-3. ~~`config/klap.yaml` apunta al conector personal `claude_ai_Atlassian`.~~ **Resuelto**: ahora
-   es `plugin_klap_atlassian`, con `endpoint`, `auth: oauth` y `productos` declarados, y el
-   schema exige `auth`. `scripts/validar-plugin.mjs` verifica que los nombres de tools MCP en el
-   frontmatter de los agentes sigan coincidiendo con ese valor.
+2. **`config/klap.yaml` → `hosting` describía mal la realidad**: decía `proveedor_actual: github`
+   con `migracion_planificada: bitbucket`, lo que hacía leer Bitbucket como futuro cuando ya es
+   el presente de todos los repos de producto (`git@bitbucket.org:multicaja-cloud/…`). Ahora el
+   bloque declara los dos hostings que coexisten —`dev_kit` en GitHub, `productos` en Bitbucket
+   Cloud— en vez de una migración a medias.
+3. **`config/klap.yaml` apuntaba al conector personal `claude_ai_Atlassian`** (endpoint v1, sin
+   Bitbucket). Ahora es `plugin_klap_atlassian`, con `endpoint`, `auth: oauth` y `productos`
+   declarados; el schema exige `auth` y `validar-plugin.mjs` verifica que los nombres de tools
+   MCP del frontmatter de los agentes sigan coincidiendo con ese valor.
+4. **`marketplace.json` no tenía `description`**, así que `claude plugin validate --strict`
+   fallaba. Ese validador oficial no corre en CI, de modo que el hueco sólo aparecía al
+   validarlo a mano; `validar-plugin.mjs` ahora exige los campos mínimos de ambos manifests.

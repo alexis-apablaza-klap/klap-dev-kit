@@ -68,9 +68,18 @@ rutas:
   knowledge_mcp_contract: schemas/knowledge-mcp/tools.json
 
 hosting:
-  proveedor_actual: github
-  cuenta: alexis.apablaza@klap.cl
-  migracion_planificada: bitbucket # informativo — el CI debe mantenerse portable
+  # Son dos hostings coexistentes, no una migración pendiente: este kit vive en GitHub y los
+  # repos de producto Klap viven en Bitbucket Cloud. La versión anterior de este bloque decía
+  # `proveedor_actual: github` + `migracion_planificada: bitbucket`, lo que hacía leer Bitbucket
+  # como futuro cuando ya es el presente de todos los repos de producto.
+  # Informativo: nada del kit lo consume programáticamente. El CI debe mantenerse portable.
+  dev_kit:
+    proveedor: github
+    cuenta: alexis.apablaza@klap.cl
+    migracion_planificada: bitbucket # intención declarada para este repo, sin fecha
+  productos:
+    proveedor: bitbucket
+    workspace: multicaja-cloud # verificado 2026-09-10 (remotos git + listBitbucketRepositories)
 
 contratos:
   # Versión de schemas/knowledge-mcp/tools.json contra la que este kit fue validado.

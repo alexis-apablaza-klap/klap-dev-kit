@@ -23,11 +23,22 @@ function jsonValido(rutaAbsoluta) {
 export function validarPlugin(root = resolveFromRoot()) {
   const problemas = [];
 
-  // 1. plugin.json y marketplace.json
+  // 1. plugin.json y marketplace.json — existen, parsean, y traen los campos que
+  // `claude plugin validate --strict` exige. Ese validador oficial no corre en CI (requiere el
+  // CLI instalado en el runner), así que sin este chequeo un manifest incompleto sólo se
+  // descubre cuando alguien lo valida a mano — que fue exactamente lo que pasó con la
+  // `description` faltante del marketplace.
+  const CAMPOS_MINIMOS_MANIFEST = { "plugin.json": ["name", "description"], "marketplace.json": ["name", "description"] };
   for (const rel of ["plugin.json", "marketplace.json"]) {
     const p = path.join(root, ".claude-plugin", rel);
     if (!existsSync(p)) problemas.push(`Falta ${rel}`);
     else if (!jsonValido(p)) problemas.push(`${rel} no es JSON válido`);
+    else {
+      const manifest = JSON.parse(readFileSync(p, "utf8"));
+      for (const campo of CAMPOS_MINIMOS_MANIFEST[rel]) {
+        if (!manifest[campo]) problemas.push(`${rel}: falta "${campo}" (lo exige claude plugin validate --strict)`);
+      }
+    }
   }
 
   // 2. .mcp.json — además de existir y parsear, no puede contener rutas absolutas: el archivo

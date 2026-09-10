@@ -37,6 +37,17 @@ Versionado según [SemVer](https://semver.org/lang/es/).
   mock y Atlassian siguen conectados. `scripts/validar-plugin.mjs` ahora rechaza cualquier ruta
   absoluta en `.mcp.json`, para que el problema no pueda reaparecer.
 
+- **`config/klap.yaml` → `hosting` describía mal la realidad.** Decía `proveedor_actual: github`
+  con `migracion_planificada: bitbucket`, lo que hacía leer Bitbucket como futuro cuando ya es el
+  presente de todos los repos de producto (`git@bitbucket.org:multicaja-cloud/…`). Ahora declara
+  los dos hostings que **coexisten**: `dev_kit` (GitHub) y `productos` (Bitbucket Cloud,
+  workspace `multicaja-cloud`). El bloque sigue siendo informativo — nada del kit lo consume
+  programáticamente — pero ya no induce a error sobre dónde vive el código.
+- **`marketplace.json` no declaraba `description`**, así que `claude plugin validate --strict`
+  fallaba. `scripts/validar-plugin.mjs` ahora exige los campos mínimos de ambos manifests: el
+  validador oficial no corre en CI (necesitaría el CLI en el runner), así que sin este chequeo
+  un manifest incompleto sólo se descubre al validarlo a mano.
+
 ### Changed
 
 - `config/klap.yaml` → `mcp.atlassian`: `server` pasa de `claude_ai_Atlassian` (conector

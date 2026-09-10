@@ -40,11 +40,16 @@ La lógica de cada gate vive en `scripts/*.mjs` de este kit, no en el YAML del p
 
 ## Portabilidad (MANDATORY el diseño, informativo el estado actual)
 
-`config/klap.yaml` → `hosting` indica GitHub como proveedor actual, con migración a Bitbucket
-planificada. Como toda la lógica de gate vive en scripts Node y no en sintaxis específica de
-GitHub Actions, el archivo de pipeline (`.github/workflows/ci.yml`) es un envoltorio delgado
-que sólo invoca esos scripts — migrar de proveedor de CI no debería requerir reescribir la
-lógica de validación, sólo el YAML que la invoca.
+`config/klap.yaml` → `hosting` declara dos hostings que **coexisten**: el Dev-Kit vive en GitHub
+y los repos de producto Klap en Bitbucket Cloud (workspace `multicaja-cloud`). No es una
+migración a medias — un pipeline escrito para este kit y uno escrito para un repo de producto
+corren hoy en proveedores distintos, y así seguirá mientras el bloque diga eso.
+
+Por eso la portabilidad no es teórica: toda la lógica de gate vive en scripts Node y no en
+sintaxis específica de GitHub Actions, de modo que el archivo de pipeline
+(`.github/workflows/ci.yml`) es un envoltorio delgado que sólo invoca esos scripts. Migrar de
+proveedor de CI —o escribir el pipeline de un repo de producto en Bitbucket Pipelines— no
+debería requerir reescribir la lógica de validación, sólo el YAML que la invoca.
 
 ## Nunca
 
