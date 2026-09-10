@@ -64,14 +64,19 @@ const handlers = {
     return { productos: resultados };
   },
 
-  resumen_producto({ producto }) {
+  resumen_producto({ producto, incluir_deprecados = false }) {
     const p = productos.find((x) => x.nombre === producto);
     if (!p) return { producto, resumen: null, componentes: [], actualizado_en: null };
+    // Contrato 2.4.0: un deprecado es parte del historial del producto, no de su composición
+    // vigente. Se omite salvo opt-in explícito.
+    const visibles = incluir_deprecados
+      ? p.componentes
+      : p.componentes.filter((id) => (componentes[id]?.status ?? "active") !== "deprecated");
     return {
       producto: p.nombre,
       resumen: p.resumen,
       fase: p.fase,
-      componentes: p.componentes,
+      componentes: visibles,
       actualizado_en: "2026-08-01T00:00:00Z",
     };
   },
@@ -82,6 +87,7 @@ const handlers = {
     return {
       componente,
       resumen: c.resumen,
+      status: c.status ?? "active",
       productos: c.productos,
       dependencias: c.dependencias,
       actualizado_en: "2026-08-01T00:00:00Z",
@@ -93,7 +99,14 @@ const handlers = {
     let resultados = busqueda
       .map((b) => {
         const hits = b.keywords.filter((k) => q.includes(k)).length;
-        return { tipo: b.tipo, titulo: b.titulo, extracto: b.extracto, relevancia: hits > 0 ? Math.min(1, hits / b.keywords.length) : 0 };
+        // El deprecado no se excluye — sigue respondiendo preguntas históricas — pero se declara.
+        return {
+          tipo: b.tipo,
+          titulo: b.titulo,
+          extracto: b.extracto,
+          relevancia: hits > 0 ? Math.min(1, hits / b.keywords.length) : 0,
+          ...(b.status ? { status: b.status } : {}),
+        };
       })
       .filter((r) => r.relevancia > 0);
     if (tipos?.length) resultados = resultados.filter((r) => tipos.includes(r.tipo));
@@ -156,9 +169,18 @@ const handlers = {
     const changed_files = componentesNuevos.map((op) => `components/${op.value.component_id}.yaml`);
     changed_files.push(`products/${product_id}/product.yaml`);
     if (operations.some((op) => op.op === "append_event")) changed_files.push(`products/${product_id}/timeline.ndjson`);
-    if (operations.some((op) => op.op === "upsert_document")) changed_files.push(`products/${product_id}/documents.yaml`);
+    if (operations.some((op) => op.op === "upsert_document")) changed_files.push(`products/${product_id}/documents.ndjson`);
     if (operations.some((op) => op.op === "upsert_source_state")) changed_files.push(`products/${product_id}/sources.yaml`);
-    if (componentesNuevos.length) changed_files.push("catalog.yaml");
+    // Las bajas van al final, orden inverso al del alta (ver contrato 2.4.0): el archivo del
+    // componente desaparece después de que ya no queda ninguna referencia apuntándolo.
+    for (const op of operations.filter((o) => o.op === "remove_component")) {
+      changed_files.push(`components/${op.value.component_id}.yaml`);
+    }
+    if (componentesNuevos.length || operations.some((op) => op.op === "remove_component")) {
+      changed_files.push("catalog.yaml");
+    }
+    // `operaciones_sin_efecto` no se emite: el mock no tiene el contenido de la memoria, así que
+    // no puede saber si había algo que borrar. Declararlo vacío afirmaría que sí lo sabe.
     return { applied: true, product_id, previous_revision, new_revision, changed_files };
   },
 

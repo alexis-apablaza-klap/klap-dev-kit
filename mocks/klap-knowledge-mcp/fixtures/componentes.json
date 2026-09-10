@@ -1,12 +1,20 @@
 {
   "ms-central-sva-anticipo-calculos": {
     "resumen": "Calcula el monto anticipable por comercio a partir de las ventas del día. Expone REST interno y consume eventos de ventas.",
+    "status": "active",
     "productos": ["abono-ya"],
-    "dependencias": ["ms-central-sva-anticipo-ondemand", "contable", "mc_tlog"]
+    "dependencias": ["ms-central-sva-anticipo-ondemand", "contable", "mc-tlog"]
   },
   "ms-central-sva-anticipo-ondemand": {
     "resumen": "Ejecuta el pago on-demand del anticipo ya calculado hacia el comercio.",
+    "status": "active",
     "productos": ["abono-ya"],
     "dependencias": ["ms-central-sva-anticipo-calculos", "contable"]
+  },
+  "mcs-anticipo-batch-nocturno": {
+    "resumen": "Batch nocturno que calculaba el anticipo antes del cálculo incremental por venta. Retirado tras ADR-014.",
+    "status": "deprecated",
+    "productos": ["abono-ya"],
+    "dependencias": ["contable"]
   }
 }

@@ -5,7 +5,7 @@
     "aliases": ["Abono Ya", "payout acceleration"],
     "resumen": "Pago adelantado al comercio de las ventas del día, sin esperar el proceso de pago normal (payout acceleration).",
     "fase": "fase-1",
-    "componentes": ["ms-central-sva-anticipo-calculos", "ms-central-sva-anticipo-ondemand"],
+    "componentes": ["ms-central-sva-anticipo-calculos", "ms-central-sva-anticipo-ondemand", "mcs-anticipo-batch-nocturno"],
     "keywords": ["abono", "anticipo", "payout", "adelanto", "liquidacion"],
     "revision": 3,
     "business": {

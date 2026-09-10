@@ -98,6 +98,36 @@ directamente, o el Flujo 0 cuando detecta "requiere alta" al cierre de fase 1 de
    prioriza por título/ubicación (overview, producto, negocio, arquitectura, integraciones,
    procesos, decisiones), lee sólo las candidatas, y registra ID/título/versión/`updated_at`/
    resumen/temas — nunca el cuerpo completo salvo requisito explícito.
+
+   **Por cada página leída, el patch del paso 8 lleva dos operaciones.** El artefacto local es
+   para revisión humana, no es memoria compartida: sin estas dos operaciones lo que leíste muere
+   con la sesión y la próxima pasada vuelve a leer lo mismo.
+
+   1. `upsert_document` — el puntero reutilizable y buscable por FTS:
+      `document_id: "confluence:<id>"`, `source_type: "confluence"`, `source_ref` (el id o la URL
+      de la página), `title`, `summary`, `topics`, `source_version` (la versión que declara
+      Confluence), `source_updated_at`, `content_hash` si lo tienes, y `last_processed_at`
+      (cuándo lo leíste **tú**, no cuándo cambió la página — son dos fechas distintas y
+      responden preguntas distintas: la segunda dice si la fuente cambió, la primera si tu
+      lectura está al día).
+      - `topics` son términos reales del documento, no prosa: alimentan la `razon` que
+        `documentos_relevantes` devuelve desde el contrato 2.4.0.
+      - `summary` es tu resumen, no el cuerpo. Un resumen que sólo vive dentro de un
+        `append_event` no es un documento: no es actualizable por versión ni recuperable como
+        puntero.
+      - **`upsert_document` reemplaza la fila completa, no mergea** — al revés que
+        `upsert_component`. Reemitir una versión parcial borra los campos que ya estaban, así
+        que aunque sólo haya cambiado la versión, emite la fila completa con lo que ya sabes.
+   2. `upsert_source_state` con `confluence.pages{<id>: {version, updated_at, content_hash}}` —
+      el cursor de delta-sync. Es lo que permite que `estado_fuentes` diga en la próxima pasada
+      qué página cambió y cuál no hace falta releer; sin él el Flujo B no tiene contra qué
+      comparar y termina releyendo el espacio completo cada vez. `pages` se mergea por id, así
+      que basta enviar las páginas de esta pasada.
+
+   No confundas una con otra: `documents.ndjson` es el conocimiento (qué dice el documento),
+   `sources.yaml → confluence.pages` es el estado de sincronización (en qué versión lo viste).
+   Emitir sólo la primera deja memoria sin cursor; sólo la segunda, un cursor que afirma tener
+   leído algo que no quedó registrado en ninguna parte.
 6. **Descubrir representación técnica.** Klap Knowledge es la única fuente de verdad de los
    componentes (contrato v2.3.0, `upsert_component`) — ya no existe `component.yaml` en los
    repos, ni falta que exista.
@@ -137,15 +167,17 @@ directamente, o el Flujo 0 cuando detecta "requiere alta" al cierre de fase 1 de
 8. **Propuesta.** Escribe los 4 artefactos locales con hechos, fuentes, ambigüedades, preguntas
    resueltas, memoria propuesta y el patch MCP a aplicar (`operations` con `create_product`,
    `update_business`, `upsert_product_relation`, `upsert_component`, `upsert_component_link`,
-   `append_event` con `type: product_created`, etc. — cada operación con sus `sources`). Orden
+   `upsert_document` por cada página leída en el paso 5, `append_event` con
+   `type: product_created`, etc. — cada operación con sus `sources`). Orden
    obligatorio entre operaciones de componente, exigido por el store (`upsert_component_link`
    rechaza si el componente aún no existe en el mismo patch o en disco): primero
    `upsert_component` de cada **secundario** (para que sus `component_id` existan cuando los
    principales los declaren en `dependencies[]`), luego `upsert_component` de cada
    **principal**, y recién después `upsert_component_link` — sólo para los principales, nunca
    para secundarios. **`upsert_source_state` es obligatorio en todo patch de alta**, con las
-   épicas y espacios recogidos en el paso 3 — sin él, el gate de producto por épica (Flujo 0) no
-   encuentra este producto la próxima vez y volvería a preguntar si dar de alta lo mismo.
+   épicas y espacios recogidos en el paso 3 **y las `pages` del paso 5** — sin él, el gate de
+   producto por épica (Flujo 0) no encuentra este producto la próxima vez y volvería a preguntar
+   si dar de alta lo mismo, y sin las `pages` el primer Flujo B relee el espacio completo.
 9. **Pausa humana obligatoria.** La creación inicial de un producto siempre se presenta para
    aprobación antes del primer `aplicar_patch_memoria` — sin excepción, sin importar cuán
    inequívocas parezcan las fuentes. Tras aprobar, aplica el patch con `expected_revision: 0`.
@@ -159,7 +191,12 @@ durante un análisis. No vuelve a escanear todo.
 1. `obtener_producto` (trae `metadata.revision` — la necesitas para `expected_revision`).
 2. `estado_fuentes`.
 3. Consulta Jira/Confluence, pero **sólo** las fuentes que `estado_fuentes` marca como nuevas o
-   desalineadas (`updated_at`, versión, IDs, cursores) — nunca releas todo por defecto.
+   desalineadas (`updated_at`, versión, IDs, cursores) — nunca releas todo por defecto. Cada
+   página que sí releas vuelve a pasar por las dos operaciones del paso 5 del Flujo A
+   (`upsert_document` + el cursor en `upsert_source_state`): si actualizas el documento pero no
+   el cursor, `estado_fuentes` seguirá reportando la misma desalineación y la releerás en cada
+   pasada; si actualizas el cursor pero no el documento, la memoria queda afirmando estar al día
+   sobre contenido que nunca registró.
 4. Genera el delta semántico y el patch correspondiente.
 5. Decide autoaplicar o preguntar según el riesgo (ver abajo). Si autoaplicas, usa
    `aplicar_patch_memoria` con el `expected_revision` obtenido en el paso 1; si la revisión
