@@ -28,6 +28,9 @@ coverage:
   # reprobar acá. Eso no es un conflicto a resolver bajando el umbral: el QG de Sonar entra al
   # veredicto por `sonarqube.quality_gate_debe_pasar`, no por este número.
   precedencia_sobre_sonar: true
+  # Y cuando se compare contra Sonar, sólo contra el proyecto de `desa`
+  # (`klap.yaml → mcp.sonarqube.project_key.ambiente_unico`): la cobertura de otro ambiente
+  # responde una pregunta distinta de la que hace la HU.
 
 mutacion:
   # Umbral interino aceptado (decisión 2026-08-28) — no calibrado contra un repo real todavía.

@@ -44,17 +44,21 @@ suficiente".
       `<ambiente>-<prefijo>-<repo>`: los prefijos y sufijos de
       `config/klap.yaml → mcp.sonarqube.project_key` sirven para **elegir** entre candidatos, no
       para inventar uno.
-   2. Del resultado, elige por ambiente (`ambiente_por_defecto: desa`). Un mismo repo suele tener
-      una key por ambiente, y a veces varias en el mismo ambiente que difieren sólo en el sufijo
+   2. Del resultado, **descarta todo lo que no sea del ambiente `desa`**
+      (`project_key.ambiente_unico`). Los demás ambientes existen pero el kit no los lee, ni como
+      respaldo cuando `desa` no aparece: si un repo no tiene proyecto en `desa`, no tiene gate de
+      Sonar. Certificar contra `qa` o `prod` respondería una pregunta distinta de la que hace la
+      HU. Dentro de `desa` un repo puede tener aún varias keys que difieren sólo en el sufijo
       (`-jdk17`, `-visa`, `-2`) — el sufijo no es ruido descartable.
-   3. **Si hay 0 o más de 1 candidato que no puedas desambiguar por ambiente, omite el bloque
+   3. **Si hay 0 o más de 1 candidato en `desa` que no puedas desambiguar, omite el bloque
       `sonar` con una advertencia explícita** que nombre los candidatos encontrados. No elijas
       "el más parecido".
 
    Ejemplo real: `q: "cuota-comercio"` devuelve **4** proyectos — dos repos distintos (un backend
    `mcs-ms-central-sva-consultas-...-jdk17` y un front `ret-mcf-wpr-...`), cada uno en `desa` y
-   `qa`. Con el nombre del repo completo como `q` la ambigüedad baja a 2 (un ambiente cada uno) y
-   `ambiente_por_defecto` la resuelve. Con "cuota-comercio" a secas, no.
+   `qa`. Filtrar a `desa` baja la ambigüedad a 2, y ahí ya son **dos repos distintos**: el nombre
+   completo del repo como `q` deja uno. Con "cuota-comercio" a secas, no — y en ese caso se omite
+   el bloque, no se elige.
 
    Ojo con `q`: hace **match parcial contra el nombre y exacto contra la key**. Casi todos los
    proyectos tienen nombre == key, pero no todos (hay uno cuyo nombre es un rótulo legible con
@@ -80,6 +84,10 @@ suficiente".
    Duplicación: `duplicated_lines_density`. Cobertura: **no la tomes de Sonar** — el `coverage` de
    Sonar es global y el umbral del kit es de unit tests (punto 2 y
    `quality-gates.yaml → coverage`).
+
+   Todas las medidas se leen del proyecto de `desa` resuelto en 4a, y sobre su rama por defecto.
+   No mezcles medidas de dos keys del mismo repo: un número de `desa` y otro de `qa` en el mismo
+   reporte no es un veredicto, es dos veredictos a medias.
 
    #### 4c. Dato ausente ≠ dato en cero
 

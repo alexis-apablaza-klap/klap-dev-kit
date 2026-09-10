@@ -41,9 +41,9 @@ mcp:
     org: multicaja-cloud
     requiere_env: [KLAP_SONARQUBE_TOKEN]
     obtener_credencial: https://sonarcloud.io/account/access-tokens
-    # El análisis lo produce Jenkins al correr el pipeline del repo (desa o qa); el kit sólo lee
-    # métricas ya publicadas. Un proyecto sin análisis reciente no devuelve métricas aunque el
-    # token sea válido — ver docs/conexiones.md.
+    # El análisis lo produce Jenkins al correr el pipeline del repo; el kit sólo lee métricas ya
+    # publicadas. Un proyecto sin análisis reciente no devuelve métricas aunque el token sea
+    # válido — ver docs/conexiones.md.
     project_key:
       # La project key NO es descubrible desde el repo. Verificado en
       # CUOTA-COMERCIO/ms-central-sva-consultas-cuota-comercio e
@@ -55,14 +55,19 @@ mcp:
       # métricas de otro proyecto **en silencio** — mismo shape, valores plausibles — y el
       # veredicto de certificación queda firmado con datos ajenos. Ver agents/certificador.md.
       resolver_con: search_my_sonarqube_projects
-      ambiente_por_defecto: desa
-      ambientes: [desa, qa, test, preprod, prod]
+      # Los prefijos de ambiente distinguen la ejecución del pipeline por ambiente. **El kit lee
+      # SÓLO `desa`** — decisión del Tech Lead (2026-09-10), y aplica igual a las métricas de
+      # Sonar y a la cobertura. Los demás ambientes existen en la organización pero no participan
+      # de ninguna certificación: un candidato que no es de `desa` se descarta, no se usa como
+      # respaldo. Esto además reduce la ambigüedad de la resolución, que es su modo de fallo real.
+      ambiente_unico: desa
+      ambientes_observados: [desa, qa, test, preprod, prod] # informativo: no se leen
       # Los prefijos y sufijos de abajo son OBSERVADOS en la organización (76 proyectos al
       # 2026-09-10), no un formato garantizado: sirven para reconocer y elegir entre candidatos,
-      # nunca para armar una key. Cinco proyectos no llevan prefijo de ambiente en absoluto
-      # (`ms-pci-smv-*`, `srv-pci-smv-*`, `datalake-*`, `mcs-central-be-envia-fe-sii`).
-      # REQUIERE-USUARIO: confirmar qué designa cada prefijo de tipo — se infiere del patrón,
-      # no está documentado en ninguna parte legible desde los repos.
+      # nunca para armar una key — por eso no hace falta saber qué designa cada uno. Cinco
+      # proyectos no llevan prefijo de ambiente en absoluto (`ms-pci-smv-*`, `srv-pci-smv-*`,
+      # `datalake-*`, `mcs-central-be-envia-fe-sii`): esos quedan fuera del gate igual que
+      # cualquier repo sin proyecto en `desa`.
       prefijos_tipo: [mcs, mcf, lbd, ms, pci, ret, cnsr]
       # Sufijos que la key arrastra y el nombre del repo no tiene. Un mismo repo puede tener
       # varias keys que difieren SÓLO en el sufijo (p.ej. la marca de tarjeta:
