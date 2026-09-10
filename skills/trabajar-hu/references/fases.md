@@ -99,3 +99,24 @@ a la fase 8.
    `new_revision`/`changed_files` si aplicó), el PR de memoria si se creó, y qué queda pendiente
    (si algo del análisis quedó como pregunta abierta que no bloqueaba la HU pero vale la pena
    registrar).
+
+## Fase 9 — Retroalimentación
+
+No bloqueante, sin pausa humana. Corre **después** de que la fase 8 cerró la HU: su objeto de
+estudio es el workflow que la produjo, no la HU.
+
+Invoca `retroalimentador` (ver `agents/retroalimentador.md`) con el `<ISSUE-KEY>`. Sus insumos son
+`.klap/hu/<ISSUE-KEY>/traza.jsonl` — la traza determinista que fue escribiendo
+`hooks/registrar-traza.mjs` durante todas las fases anteriores — más los artefactos de fase y tu
+resumen de la fase 8. Su única salida es `docs/mejoras-sugeridas.md`, reescrito y consolidado.
+
+Dos cosas que no debes hacer acá:
+
+- **No reabras la HU.** Si la fase 9 falla, o si no hay `traza.jsonl` (checkout limpio, otra
+  máquina: `.klap/` es local y gitignoreado), repórtalo en el resumen y termina. La HU ya cerró en
+  la fase 8.
+- **No apliques ninguna mejora propuesta.** `mejoras-sugeridas.md` es una lista de propuestas al
+  kit; cada una va por su propia rama y su propio PR, nunca como efecto colateral de cerrar una HU.
+
+El mismo agente se corre bajo demanda con `/klap:retroalimentar` — sin `ISSUE-KEY` analiza el
+acumulado de todas las HUs con traza, que es donde se ve el síntoma que se repite entre HUs.

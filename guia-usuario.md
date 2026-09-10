@@ -74,7 +74,8 @@ Detalle completo: `docs/installation.md`. Problemas comunes: `docs/troubleshooti
 
 | Comando | Qué hace |
 |---|---|
-| `/klap:trabajar-hu <ISSUE-KEY>` | Flujo completo de 8 fases para una HU real (el que usarás casi siempre) |
+| `/klap:trabajar-hu <ISSUE-KEY>` | Flujo completo de 9 fases para una HU real (el que usarás casi siempre) |
+| `/klap:retroalimentar [ISSUE-KEY]` | Qué mejorar del flujo mismo, a partir de cómo se ejecutó — no de la HU |
 | `/klap:analizar <ISSUE-KEY o descripción>` | Solo contexto + análisis — para estimar o decidir alcance sin comprometerte |
 | `/klap:disenar [analisis.md]` | Solo diseño, a partir de un análisis ya hecho |
 | `/klap:desarrollar [diseno.md]` | Solo implementación, a partir de un diseño ya aprobado |

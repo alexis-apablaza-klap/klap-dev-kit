@@ -5,6 +5,51 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.1.3-alpha] - 2026-09-10
+
+### Added
+
+- **Fase 9 — Retroalimentación** en `/klap:trabajar-hu`, no bloqueante y sin pausa: observa el
+  *workflow* que produjo la HU, no la HU. Agente `retroalimentador` (allowlist `Read, Glob, Grep,
+  Write`: propone, no ejecuta) y skill `/klap:retroalimentar [ISSUE-KEY]` para correrlo bajo
+  demanda o sobre el acumulado de todas las HUs con traza.
+- **`hooks/registrar-traza.mjs`** — traza determinista en `.klap/hu/<ISSUE-KEY>/traza.jsonl`, una
+  línea JSON por evento. Existe porque un agente no puede leer retroactivamente la ejecución de
+  otro: sin ella el retroalimentador sólo vería los artefactos finales, ciego a reintentos y a
+  gates que reprobaron y se corrigieron. Registra hitos (scripts del kit, artefactos de fase,
+  llamadas MCP) y **todos** los fallos; nunca bloquea ni falla el flujo que observa.
+- **`docs/mejoras-sugeridas.md`** rastreado en git, con la regla anti-bloat declarada en el propio
+  archivo: se reescribe consolidado en cada corrida, techo de **12 entradas activas**, mejoras ya
+  aplicadas retiradas, síntomas repetidos fusionados subiendo prioridad. Nace vacío a propósito —
+  precargarlo con hallazgos deducidos de leer el kit sería la fricción inventada que el agente
+  prohíbe.
+
+### Changed
+
+- Contrato de eventos de hook **verificado contra el runtime instalado** (Claude Code 2.1.267), no
+  contra el doc, que publica la lista de eventos pero no el payload de estos tres. Dos
+  consecuencias de diseño: `PostToolUse` ya trae `duration_ms` (no hay que medir nada), y
+  `agent_type` viene en los campos comunes cuando el hook se dispara *dentro* de un subagente —
+  es lo que permite atribuir una llamada de herramienta a la fase que la hizo.
+- Se registra además **`PostToolUseFailure`**, que no estaba en el plan y es el evento que más
+  importa: un gate que reprobó y se corrigió termina con un `PostToolUse` exitoso, así que sin
+  ese evento el intento fallido — justo la fricción a observar — no deja rastro.
+- `fase` en la traza se emite **sólo cuando es derivable sin ambigüedad** (por el script invocado,
+  o por un agente que cubre exactamente una fase). `analista` cubre las fases 1 y 2 y
+  `documentador-klap` las fases 1 y 8: sus eventos van sin `fase`. Misma regla que ya rige para
+  las métricas de Sonar — ausente no es cero, y un dato inventado se usaría como evidencia.
+- `docs/commands.md`, `docs/workflows.md`, `guia-usuario.md` y `skills/trabajar-hu/` hablan ahora
+  de 9 fases.
+
+### Known limitations
+
+- **`SubagentStop` no trae `tool_input`**, así que su atribución a una HU depende enteramente del
+  nombre de la rama (misma convención que `hooks/pre-push-quality-gate.mjs`). En una rama sin
+  ISSUE-KEY la traza queda con los eventos de herramienta y sin los cierres de fase: degradación
+  parcial, no corrupción. `agents/retroalimentador.md` ya asume que la traza no es exhaustiva.
+- La restricción de escritura del `retroalimentador` a `docs/mejoras-sugeridas.md` es una **regla
+  del agente, no del runtime**: el frontmatter permite declarar `Write`, no acotarlo a un archivo.
+
 ## [0.1.2-alpha] - 2026-09-10
 
 ### Added

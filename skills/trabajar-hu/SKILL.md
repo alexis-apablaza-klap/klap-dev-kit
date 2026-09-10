@@ -25,6 +25,7 @@ asumas nombres de servidor ni umbrales hardcodeados.
 | 6 | Certificación | `certificador` + `seguridad` (en paralelo) | `certificacion.json` | **bloqueante si `aprobado: false`** |
 | 7 | Documentación | `documentador` | diff en `docs/` (+ Confluence si aplica) | **sí, antes de tocar Confluence** |
 | 8 | Finalización | orquestador + `documentador-klap` | invoca `/klap:actualizar-componente`, patch de memoria global de producto, resumen final | no (salvo que `documentador-klap` detecte conflicto) |
+| 9 | Retroalimentación | `retroalimentador` | `docs/mejoras-sugeridas.md` (consolidado) | no |
 
 Instrucciones detalladas de cada fase: `references/fases.md` (ábrelo sólo si necesitas el
 detalle — no lo cargues de entrada).
@@ -43,3 +44,6 @@ detalle — no lo cargues de entrada).
   continuar con Jira + memoria del repo — nunca inventar contexto organizacional.
 - Al terminar, la fase 8 deja el estado listo para `git commit`/`git push`; los hooks del kit
   (`hooks/hooks.json`) validan secretos y certificación en verde antes de permitir el push.
+- La fase 9 **no es un gate y no pausa**: corre después de la fase 8 y su único efecto es
+  reescribir `docs/mejoras-sugeridas.md`. Si falla o no encuentra traza, la HU ya está cerrada —
+  repórtalo y no la reabras por esto.
