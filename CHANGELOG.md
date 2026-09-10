@@ -7,6 +7,62 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ### Added
 
+- **Conexión Atlassian distribuida por el plugin.** `.mcp.json` declara el servidor `atlassian`
+  contra el Rovo MCP oficial (`https://mcp.atlassian.com/v2/mcp`, transporte HTTP, sin headers
+  ni variables de entorno): quien instala el plugin recibe la misma conexión que todo el equipo
+  y sólo autentica con `/mcp` → Authenticate usando su cuenta corporativa. OAuth con Dynamic
+  Client Registration lo resuelve Claude Code; el repositorio no contiene ninguna credencial y
+  no existe token compartido ni fallback a uno. Verificado end-to-end el 2026-09-10 sobre Jira,
+  Confluence y Bitbucket — evidencia, nombres reales de tools y modos de fallo en
+  `docs/atlassian-mcp.md` (nuevo).
+- **Bitbucket queda cubierto por el MCP.** El endpoint v2 expone `bitbucket: read-write` y ~18
+  operaciones (repos, PRs, branches, commits, pipelines, deployments). Esto **corrige la
+  conclusión previa** de que Atlassian no llegaba a Bitbucket: aquella prueba fue contra el
+  endpoint v1 del conector personal `claude_ai_Atlassian`. Ya no hace falta el API token con
+  Basic Auth que se había usado como salida puntual.
+- `scripts/validar-plugin.mjs` cruza los nombres de tools MCP declarados en el frontmatter de
+  `agents/*.md` contra `config/klap.yaml` → `mcp.atlassian.server`. El frontmatter es la única
+  excepción a "nunca hardcodees un nombre de servidor MCP" (se evalúa antes de que el agente
+  pueda leer la config), así que el chequeo evita que un rename deje `disallowedTools` apuntando
+  a un servidor inexistente — un permiso muerto que reabriría escritura en un agente de sólo
+  lectura sin romper nada visible.
+
+### Fixed
+
+- **`.mcp.json` deja de depender de la máquina de una persona.** La entrada `klap-knowledge`
+  apuntaba a `C:\klap-workspace\klap-dev-kit-knowledge\.venv\Scripts\python.exe`: una ruta
+  absoluta, además de Windows-only, que hacía fallar ese servidor en el equipo de cualquier otro
+  dev. Ahora se resuelve con `${KLAP_KNOWLEDGE_PYTHON:-python}` y `${KLAP_KNOWLEDGE_HOME}`
+  (documentado en `docs/installation.md`, paso 4). Si faltan, falla **sólo** ese servidor: el
+  mock y Atlassian siguen conectados. `scripts/validar-plugin.mjs` ahora rechaza cualquier ruta
+  absoluta en `.mcp.json`, para que el problema no pueda reaparecer.
+
+- **`config/klap.yaml` → `hosting` describía mal la realidad.** Decía `proveedor_actual: github`
+  con `migracion_planificada: bitbucket`, lo que hacía leer Bitbucket como futuro cuando ya es el
+  presente de todos los repos de producto (`git@bitbucket.org:multicaja-cloud/…`). Ahora declara
+  los dos hostings que **coexisten**: `dev_kit` (GitHub) y `productos` (Bitbucket Cloud,
+  workspace `multicaja-cloud`). El bloque sigue siendo informativo — nada del kit lo consume
+  programáticamente — pero ya no induce a error sobre dónde vive el código.
+- **`marketplace.json` no declaraba `description`**, así que `claude plugin validate --strict`
+  fallaba. `scripts/validar-plugin.mjs` ahora exige los campos mínimos de ambos manifests: el
+  validador oficial no corre en CI (necesitaría el CLI en el runner), así que sin este chequeo
+  un manifest incompleto sólo se descubre al validarlo a mano.
+
+### Changed
+
+- `config/klap.yaml` → `mcp.atlassian`: `server` pasa de `claude_ai_Atlassian` (conector
+  personal, endpoint v1, sin Bitbucket) a `plugin_klap_atlassian`, el servidor del plugin.
+  Se agregan `endpoint`, `auth` y `productos`. `schemas/klap-config.schema.json` exige `auth` y
+  lo restringe a `oauth` — un enum de un solo valor a propósito: abrirlo a tokens debe ser un
+  cambio explícito y revisable, no un descuido.
+- Mínimo privilegio: `analista`, `arquitecto`, `seguridad` y `certificador` pasan a negar
+  explícitamente las tools de escritura de Atlassian (`executeWrite`, `executeDestructive` y las
+  primarias de creación/edición de Jira y Confluence). `documentador` y `documentador-klap`
+  conservan escritura porque la necesitan para Confluence.
+- Los agentes y `skills/trabajar-hu` ahora distinguen **MCP no autenticado** de **MCP conectado
+  sin permisos**, y advierten que una búsqueda JQL vacía puede ser falta de acceso, no ausencia
+  de datos — Jira devuelve `issues: []` sin error en ese caso.
+
 - Contrato Klap Knowledge MCP `2.3.0`: nueva operación `upsert_component` en
   `aplicar_patch_memoria` para crear/actualizar `memory/components/<id>.yaml` — hasta ahora
   `upsert_component_link` no tenía forma de que ese archivo llegara a existir, así que ningún

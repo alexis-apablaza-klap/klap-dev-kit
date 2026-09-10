@@ -20,7 +20,19 @@ Dentro de una sesión de Claude Code:
 ```
 
 Con eso quedan activos: los 11 comandos `/klap:*`, los 7 agentes especializados, los hooks de
-validación y el servidor MCP mock de Klap Knowledge (se activa solo, sin pasos extra).
+validación, el servidor MCP mock de Klap Knowledge y el servidor MCP de Atlassian (se activan
+solos, sin pasos extra).
+
+**Autenticar Atlassian — una vez, y es lo único que tienes que hacer a mano:**
+
+```
+/mcp
+```
+
+Elige `atlassian` → **Authenticate** → entra con tu cuenta corporativa Klap. Con eso quedan
+disponibles Jira, Confluence y Bitbucket, cada uno con **tus** permisos. No hay tokens que pedir
+ni compartir. Si te lo saltas, las fases que usan Jira o Confluence te lo dirán en vez de
+inventar contexto.
 
 **Actualizar:**
 
@@ -35,7 +47,7 @@ comandos.
 
 - Claude Code con soporte de plugins.
 - Node.js ≥ 18 y Git.
-- Acceso a MCP Atlassian (Jira/Confluence) para las fases de contexto/documentación, y MCP
+- Cuenta corporativa Atlassian (el MCP viene con el plugin; sólo hay que autenticarse) y MCP
   SonarQube para certificación — si no están conectados, el kit lo declara en vez de fallar en
   silencio.
 - Opcional, para certificación completa: Trivy y/o OWASP Dependency-Check. El script

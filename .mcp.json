@@ -6,8 +6,12 @@
   },
   "klap-knowledge": {
     "type": "stdio",
-    "command": "C:\\klap-workspace\\klap-dev-kit-knowledge\\.venv\\Scripts\\python.exe",
+    "command": "${KLAP_KNOWLEDGE_PYTHON:-python}",
     "args": ["-m", "klap_knowledge.server"],
-    "cwd": "C:\\klap-workspace\\klap-dev-kit-knowledge"
+    "cwd": "${KLAP_KNOWLEDGE_HOME}"
+  },
+  "atlassian": {
+    "type": "http",
+    "url": "https://mcp.atlassian.com/v2/mcp"
   }
 }

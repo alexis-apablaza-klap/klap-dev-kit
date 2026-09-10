@@ -10,7 +10,7 @@ const configMinima = {
   version: 1,
   mcp: {
     knowledge: { server: "klap-knowledge-local-mock", modo: "mock" },
-    atlassian: { server: "claude_ai_Atlassian" },
+    atlassian: { server: "plugin_klap_atlassian", auth: "oauth" },
   },
   stack_soportado: {},
   rutas: {
@@ -38,6 +38,33 @@ test("modo fuera del enum (mock|produccion) falla", () => {
 test("falta mcp.atlassian (requerido) falla", () => {
   const { atlassian, ...sinAtlassian } = configMinima.mcp;
   const invalido = { ...configMinima, mcp: sinAtlassian };
+  const { valido } = validar(schemaPath, invalido);
+  assert.equal(valido, false);
+});
+
+test("mcp.atlassian.auth fuera del enum falla — el kit sólo admite OAuth individual", () => {
+  const invalido = {
+    ...configMinima,
+    mcp: { ...configMinima.mcp, atlassian: { server: "x", auth: "api_token" } },
+  };
+  const { valido } = validar(schemaPath, invalido);
+  assert.equal(valido, false);
+});
+
+test("falta mcp.atlassian.auth (requerido) falla", () => {
+  const invalido = { ...configMinima, mcp: { ...configMinima.mcp, atlassian: { server: "x" } } };
+  const { valido } = validar(schemaPath, invalido);
+  assert.equal(valido, false);
+});
+
+test("mcp.atlassian.productos fuera del enum falla", () => {
+  const invalido = {
+    ...configMinima,
+    mcp: {
+      ...configMinima.mcp,
+      atlassian: { server: "x", auth: "oauth", productos: ["jira", "github"] },
+    },
+  };
   const { valido } = validar(schemaPath, invalido);
   assert.equal(valido, false);
 });

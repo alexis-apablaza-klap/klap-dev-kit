@@ -1,5 +1,38 @@
 # Problemas frecuentes
 
+## Jira/Confluence "no están disponibles" en una fase
+
+Revisa `claude mcp list`. Si `plugin:klap:atlassian` dice `! Needs authentication`, falta el
+paso de onboarding: `/mcp` → `atlassian` → **Authenticate** con tu cuenta corporativa. El
+servidor lo trae el plugin, pero la autenticación es personal y no se hereda de nadie.
+
+Si al volver del navegador ves `Invalid context provided. Please try authorizing again`,
+**revisa `claude mcp list` antes de reintentar**: ese mensaje ha aparecido con la autenticación
+ya completada correctamente.
+
+## Atlassian conectado, pero un recurso da error de permisos
+
+Son dos fallos distintos y el kit los reporta distinto (ver `docs/atlassian-mcp.md`): que el MCP
+esté `✔ Connected` no implica que tengas acceso a cada proyecto, espacio o workspace. Un error de
+acceso significa que tu cuenta no tiene ese permiso en Atlassian — se resuelve con quien
+administre el recurso, no con otra credencial. El kit nunca cae a un token compartido.
+
+Caso particular de Bitbucket: `Your Bitbucket workspace must be linked to an Atlassian
+organization to use MCP tools` significa que ese workspace no está vinculado a la organización.
+Escálalo a un admin de Atlassian/Bitbucket.
+
+> **Ojo con Jira:** una búsqueda JQL sobre un proyecto sin acceso devuelve una lista vacía **sin
+> error**. Un resultado vacío no prueba que no exista nada.
+
+## `plugin:klap:klap-knowledge` dice `✘ Failed to connect`
+
+Casi siempre falta `KLAP_KNOWLEDGE_HOME` (y a veces `KLAP_KNOWLEDGE_PYTHON`). El plugin declara
+el servidor real de forma portable —con variables de entorno, no con la ruta de una máquina
+concreta—, así que sin ellas intenta un `python` genérico en un directorio que no corresponde y
+el proceso muere al arrancar. Cómo definirlas: `docs/installation.md`, paso 4.
+
+Es un fallo aislado: el mock de Klap Knowledge y Atlassian siguen conectados.
+
 ## "Klap Knowledge no responde" durante `/klap:trabajar-hu`
 
 Comportamiento esperado, no una falla: si el MCP de Klap Knowledge no está disponible, el

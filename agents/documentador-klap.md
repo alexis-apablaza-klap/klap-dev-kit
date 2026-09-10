@@ -86,7 +86,10 @@ directamente, o el Flujo 0 cuando detecta "requiere alta" al cierre de fase 1 de
    revisión, la tabla `componentes.md` del paso 6, no una pregunta abierta aquí. No conviertas
    esto en un cuestionario manual más allá de épicas/espacios — eso sigue prohibido para el
    resto de los campos.
-4. **Leer Jira** (MCP Atlassian) por cada épica: título, descripción, estado, fechas, issues
+4. **Leer Jira** (MCP Atlassian, ver `config/klap.yaml` → `mcp.atlassian`; si no está
+   autenticado o el acceso se deniega, aplica `docs/atlassian-mcp.md` → "Cómo distinguir los
+   modos de fallo" y regístralo como fuente no consultada, nunca como "no hay nada").
+   Por cada épica: título, descripción, estado, fechas, issues
    hijos relevantes, links/dependencias que aporten contexto, actualización de cada issue.
    Changelog sólo si hace falta entender evolución, no por defecto. Comentarios sólo si
    contienen una decisión ausente de la descripción/documentación. Construye eventos

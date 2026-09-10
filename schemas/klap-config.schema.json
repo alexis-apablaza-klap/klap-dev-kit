@@ -23,8 +23,20 @@
         },
         "atlassian": {
           "type": "object",
-          "required": ["server"],
-          "properties": { "server": { "type": "string" } }
+          "required": ["server", "auth"],
+          "properties": {
+            "server": { "type": "string" },
+            "endpoint": { "type": "string", "format": "uri" },
+            "auth": {
+              "type": "string",
+              "enum": ["oauth"],
+              "description": "Único mecanismo admitido: OAuth individual por dev vía /mcp. El enum tiene un solo valor a propósito — abrirlo a tokens debe ser un cambio explícito y revisable, no un descuido de configuración."
+            },
+            "productos": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["jira", "confluence", "bitbucket"] }
+            }
+          }
         },
         "sonarqube": {
           "type": "object",

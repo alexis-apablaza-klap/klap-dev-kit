@@ -1,5 +1,6 @@
 {
   "name": "klap-dev-kit",
+  "description": "Herramientas corporativas Klap para Claude Code: el ciclo completo de una HU (contexto, análisis, diseño, implementación, certificación y documentación), estándares versionados y conexión Atlassian lista para usar.",
   "owner": {
     "name": "Alexis Apablaza",
     "email": "alexis.apablaza@klap.cl",

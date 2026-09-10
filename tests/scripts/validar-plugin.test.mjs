@@ -43,7 +43,7 @@ function escribirConfigYContrato(root, { versionContrato, versionRegistrada }) {
     version: 1,
     mcp: {
       knowledge: { server: "klap-knowledge-local-mock", modo: "mock" },
-      atlassian: { server: "claude_ai_Atlassian" },
+      atlassian: { server: "plugin_klap_atlassian", auth: "oauth" },
     },
     stack_soportado: {},
     rutas: {
@@ -127,6 +127,37 @@ test("agente que declara mcpServers/hooks/permissionMode reporta que se ignoran 
   }
 });
 
+test("agente que nombra un servidor MCP distinto al de config/klap.yaml lo reporta", () => {
+  const root = crearRootTemporal();
+  try {
+    mkdirSync(path.join(root, "config"), { recursive: true });
+    copyFileSync(resolveFromRoot("schemas", "klap-config.schema.json"), path.join(root, "schemas", "klap-config.schema.json"));
+    escribirConfigYContrato(root, { versionContrato: "1.0.0", versionRegistrada: "1.0.0" });
+    escribirAgente(root, "servidor-viejo.md", "disallowedTools: Bash, mcp__claude_ai_Atlassian__executeWrite\n");
+    const { problemas } = validarPlugin(root);
+    assert.ok(
+      problemas.some((p) => p.includes("servidor-viejo.md") && p.includes("claude_ai_Atlassian")),
+      JSON.stringify(problemas)
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("agente que nombra el servidor MCP vigente no reporta problema", () => {
+  const root = crearRootTemporal();
+  try {
+    mkdirSync(path.join(root, "config"), { recursive: true });
+    copyFileSync(resolveFromRoot("schemas", "klap-config.schema.json"), path.join(root, "schemas", "klap-config.schema.json"));
+    escribirConfigYContrato(root, { versionContrato: "1.0.0", versionRegistrada: "1.0.0" });
+    escribirAgente(root, "servidor-vigente.md", "disallowedTools: Bash, mcp__plugin_klap_atlassian__executeWrite\n");
+    const { problemas } = validarPlugin(root);
+    assert.ok(!problemas.some((p) => p.includes("servidor-vigente.md")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("detecta obligatoriedad/estado que no coinciden entre standards/index.yaml y el frontmatter del doc", () => {
   const root = crearRootTemporal();
   try {
@@ -198,6 +229,61 @@ test("templates/context-index.yaml válido no genera problemas de esa sección",
 
     const { problemas } = validarPlugin(root);
     assert.ok(!problemas.some((p) => p.includes("templates/context-index.yaml")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+function escribirMcpJson(root, servidor) {
+  writeFileSync(path.join(root, ".mcp.json"), JSON.stringify({ "un-servidor": servidor }, null, 2));
+}
+
+test(".mcp.json con una ruta absoluta se reporta como no portable", () => {
+  const root = crearRootTemporal();
+  try {
+    escribirMcpJson(root, {
+      type: "stdio",
+      command: "C:\\alguien\\.venv\\Scripts\\python.exe",
+      args: ["-m", "algo"],
+    });
+    const { problemas } = validarPlugin(root);
+    assert.ok(problemas.some((p) => p.includes("ruta absoluta")), JSON.stringify(problemas));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test(".mcp.json parametrizado con variables de entorno no reporta problema de portabilidad", () => {
+  const root = crearRootTemporal();
+  try {
+    escribirMcpJson(root, {
+      type: "stdio",
+      command: "${KLAP_KNOWLEDGE_PYTHON:-python}",
+      args: ["-m", "algo"],
+      cwd: "${KLAP_KNOWLEDGE_HOME}",
+    });
+    const { problemas } = validarPlugin(root);
+    assert.ok(!problemas.some((p) => p.includes("ruta absoluta")), JSON.stringify(problemas));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("marketplace.json sin description se reporta (lo exige claude plugin validate --strict)", () => {
+  const root = crearRootTemporal();
+  try {
+    mkdirSync(path.join(root, ".claude-plugin"), { recursive: true });
+    writeFileSync(path.join(root, ".claude-plugin", "marketplace.json"), JSON.stringify({ name: "x", plugins: [] }));
+    writeFileSync(
+      path.join(root, ".claude-plugin", "plugin.json"),
+      JSON.stringify({ name: "x", description: "Con descripción." })
+    );
+    const { problemas } = validarPlugin(root);
+    assert.ok(
+      problemas.some((p) => p.includes("marketplace.json") && p.includes("description")),
+      JSON.stringify(problemas)
+    );
+    assert.ok(!problemas.some((p) => p.includes("plugin.json") && p.includes("description")));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

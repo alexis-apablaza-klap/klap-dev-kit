@@ -23,17 +23,41 @@ function jsonValido(rutaAbsoluta) {
 export function validarPlugin(root = resolveFromRoot()) {
   const problemas = [];
 
-  // 1. plugin.json y marketplace.json
+  // 1. plugin.json y marketplace.json — existen, parsean, y traen los campos que
+  // `claude plugin validate --strict` exige. Ese validador oficial no corre en CI (requiere el
+  // CLI instalado en el runner), así que sin este chequeo un manifest incompleto sólo se
+  // descubre cuando alguien lo valida a mano — que fue exactamente lo que pasó con la
+  // `description` faltante del marketplace.
+  const CAMPOS_MINIMOS_MANIFEST = { "plugin.json": ["name", "description"], "marketplace.json": ["name", "description"] };
   for (const rel of ["plugin.json", "marketplace.json"]) {
     const p = path.join(root, ".claude-plugin", rel);
     if (!existsSync(p)) problemas.push(`Falta ${rel}`);
     else if (!jsonValido(p)) problemas.push(`${rel} no es JSON válido`);
+    else {
+      const manifest = JSON.parse(readFileSync(p, "utf8"));
+      for (const campo of CAMPOS_MINIMOS_MANIFEST[rel]) {
+        if (!manifest[campo]) problemas.push(`${rel}: falta "${campo}" (lo exige claude plugin validate --strict)`);
+      }
+    }
   }
 
-  // 2. .mcp.json
+  // 2. .mcp.json — además de existir y parsear, no puede contener rutas absolutas: el archivo
+  // viaja con el plugin a la máquina de cada dev, así que una ruta como C:\...\python.exe o
+  // /home/alguien/... sólo funciona en el equipo de quien la escribió. Lo portable es
+  // ${CLAUDE_PLUGIN_ROOT} para lo que vive dentro del plugin y ${VAR}/${VAR:-default} para lo
+  // que depende del entorno de cada persona.
   const mcpPath = path.join(root, ".mcp.json");
   if (!existsSync(mcpPath)) problemas.push("Falta .mcp.json");
   else if (!jsonValido(mcpPath)) problemas.push(".mcp.json no es JSON válido");
+  else {
+    const crudo = readFileSync(mcpPath, "utf8");
+    const RUTA_ABSOLUTA = /"[^"]*(?:[A-Za-z]:\\\\|\/(?:home|Users)\/)[^"]*"/g;
+    for (const hallazgo of crudo.match(RUTA_ABSOLUTA) ?? []) {
+      problemas.push(
+        `.mcp.json contiene una ruta absoluta (${hallazgo.trim()}) — no es portable entre máquinas; usa \${CLAUDE_PLUGIN_ROOT} o una variable de entorno`
+      );
+    }
+  }
 
   // 3. config/klap.yaml
   const config = readYaml(path.join(root, "config", "klap.yaml"));
@@ -162,6 +186,24 @@ export function validarPlugin(root = resolveFromRoot()) {
       for (const campo of CAMPOS_IGNORADOS_EN_PLUGIN) {
         if (fm[campo] !== undefined) {
           problemas.push(`agents/${entry.name}: declara "${campo}", que se ignora en silencio para agentes de plugin`);
+        }
+      }
+      // 7b. El frontmatter es la única excepción a "nunca hardcodees el nombre de un servidor
+      // MCP" (CLAUDE.md): se evalúa antes de que el agente pueda leer config/klap.yaml, así que
+      // una tool MCP sólo puede nombrarse literalmente. Este chequeo mantiene la fuente de
+      // verdad: si mcp.atlassian.server cambia en config/klap.yaml, los agentes fallan aquí en
+      // vez de quedarse con un disallowedTools que ya no matchea nada — un permiso muerto que
+      // no rompe nada visible y deja escritura abierta en un agente de sólo lectura.
+      // Sin config/klap.yaml no hay fuente de verdad contra la cual cruzar — ese caso ya lo
+      // reporta el chequeo 3, no tiene sentido acusar además a cada agente.
+      const serverAtlassian = config?.mcp?.atlassian?.server;
+      const declaradas = serverAtlassian ? String(fm.disallowedTools ?? fm.tools ?? "") : "";
+      for (const tool of declaradas.split(",").map((t) => t.trim())) {
+        const match = /^mcp__(.+?)__/.exec(tool);
+        if (match && match[1] !== serverAtlassian && match[1] !== config?.mcp?.knowledge?.server) {
+          problemas.push(
+            `agents/${entry.name}: la tool "${tool}" nombra el servidor MCP "${match[1]}", que no coincide con config/klap.yaml (mcp.atlassian.server=${serverAtlassian})`
+          );
         }
       }
     }
