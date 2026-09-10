@@ -18,7 +18,9 @@
             "server": { "type": "string" },
             "modo": { "type": "string", "enum": ["mock", "produccion"] },
             "fallback_si_no_disponible": { "type": "boolean" },
-            "mock_launch": { "type": "array", "items": { "type": "string" } }
+            "mock_launch": { "type": "array", "items": { "type": "string" } },
+            "requiere_env": { "$ref": "#/$defs/requiereEnv" },
+            "obtener_credencial": { "type": "string" }
           }
         },
         "atlassian": {
@@ -27,20 +29,35 @@
           "properties": {
             "server": { "type": "string" },
             "endpoint": { "type": "string", "format": "uri" },
-            "auth": {
-              "type": "string",
-              "enum": ["oauth"],
-              "description": "Único mecanismo admitido: OAuth individual por dev vía /mcp. El enum tiene un solo valor a propósito — abrirlo a tokens debe ser un cambio explícito y revisable, no un descuido de configuración."
-            },
+            "auth": { "$ref": "#/$defs/auth" },
             "productos": {
               "type": "array",
               "items": { "type": "string", "enum": ["jira", "confluence", "bitbucket"] }
-            }
+            },
+            "requiere_env": { "$ref": "#/$defs/requiereEnv" }
           }
         },
         "sonarqube": {
           "type": "object",
-          "properties": { "server": { "type": "string" } }
+          "required": ["server", "auth"],
+          "properties": {
+            "server": { "type": "string" },
+            "endpoint": { "type": "string", "format": "uri" },
+            "auth": { "$ref": "#/$defs/auth" },
+            "org": { "type": "string" },
+            "requiere_env": { "$ref": "#/$defs/requiereEnv" },
+            "obtener_credencial": { "type": "string" }
+          }
+        },
+        "context7": {
+          "type": "object",
+          "required": ["server", "auth"],
+          "properties": {
+            "server": { "type": "string" },
+            "endpoint": { "type": "string", "format": "uri" },
+            "auth": { "$ref": "#/$defs/auth" },
+            "requiere_env": { "$ref": "#/$defs/requiereEnv" }
+          }
         }
       }
     },
@@ -71,6 +88,18 @@
           "description": "Versión de schemas/knowledge-mcp/tools.json contra la que el kit fue validado (debe coincidir con tools.json → contractVersion)."
         }
       }
+    }
+  },
+  "$defs": {
+    "auth": {
+      "type": "string",
+      "enum": ["oauth", "token", "ninguna"],
+      "description": "Mecanismo de autenticación del servidor MCP. Enum cerrado a propósito: `oauth` es el preferido (individual, sin credencial en disco) y sólo se usa `token` donde el servicio no ofrece OAuth — hoy únicamente SonarQube. Agregar un mecanismo debe ser un cambio explícito y revisable, no un descuido de configuración."
+    },
+    "requiereEnv": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^KLAP_[A-Z0-9_]+$" },
+      "description": "Variables de entorno que el dev debe definir para que esta conexión funcione. Todas llevan el prefijo KLAP_ por convención, para que se distingan de cualquier otra variable del sistema. scripts/verificar-conexiones.mjs lee esta lista — no la hardcodea — para avisar qué falta."
     }
   }
 }

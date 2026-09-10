@@ -46,6 +46,19 @@ else
 fi
 
 echo ""
+echo "== Conexiones del plugin =="
+if command -v node >/dev/null 2>&1; then
+  # Reusa el mismo verificador que corre el hook SessionStart: una sola fuente de verdad sobre
+  # qué variables hacen falta (config/klap.yaml -> mcp.*.requiere_env).
+  salida=$(node "$(dirname "$0")/../scripts/verificar-conexiones.mjs") || true
+  if [ -n "$salida" ]; then
+    echo "$salida"
+  else
+    echo "[OK] Todas las variables KLAP_* necesarias están definidas."
+  fi
+fi
+
+echo ""
 echo "== Instalación del plugin =="
 echo "1. /plugin marketplace add <url-del-repo-klap-dev-kit>"
 echo "2. /plugin install klap@klap-dev-kit"

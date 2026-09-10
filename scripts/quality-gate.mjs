@@ -19,6 +19,7 @@ import { resolveFromRoot, esPuntoDeEntrada } from "./lib/paths.mjs";
 
 export function evaluarGate(reporte, gates = readYaml(resolveFromRoot("config", "quality-gates.yaml"))) {
   const motivos = [];
+  const advertencias = [];
 
   if (gates.tests.bloquear_si_falla_alguno && reporte.tests?.fallidos > 0) {
     motivos.push(`${reporte.tests.fallidos} test(s) fallando de ${reporte.tests.total}.`);
@@ -35,6 +36,16 @@ export function evaluarGate(reporte, gates = readYaml(resolveFromRoot("config", 
   }
 
   const s = reporte.sonar ?? {};
+  // `quality_gate_debe_pasar: true` declara Sonar como obligatorio, pero un reporte sin métricas
+  // pasaba de largo sin evaluarse: la dimensión aprobaba sin verificarse. No bloquea (un repo
+  // puede no estar todavía en SonarCloud), pero deja de ser silencioso.
+  if (gates.sonarqube.quality_gate_debe_pasar && !s.quality_gate_status) {
+    advertencias.push(
+      "Sin métricas de Sonar: el Quality Gate no se verificó. Causas típicas: falta KLAP_SONARQUBE_TOKEN " +
+        "(ver docs/conexiones.md), o el proyecto aún no tiene análisis publicado en SonarCloud — el análisis " +
+        "lo produce el pipeline de Jenkins del repo (desa o qa), no se corre en local."
+    );
+  }
   if (gates.sonarqube.quality_gate_debe_pasar && s.quality_gate_status && s.quality_gate_status !== "OK") {
     motivos.push(`Sonar Quality Gate: ${s.quality_gate_status}.`);
   }
@@ -43,7 +54,9 @@ export function evaluarGate(reporte, gates = readYaml(resolveFromRoot("config", 
   // agregar o cambiar un umbral es editar sólo config/quality-gates.yaml.
   motivos.push(...evaluarCondiciones(gates.sonarqube.bloquear_si, s, gates.escalas));
 
-  return { aprobado: motivos.length === 0, motivos, evaluado_en: new Date().toISOString() };
+  // `advertencias` no participa del veredicto: son cosas que el certificador debe reportar tal
+  // cual, no razones para reprobar.
+  return { aprobado: motivos.length === 0, motivos, advertencias, evaluado_en: new Date().toISOString() };
 }
 
 if (esPuntoDeEntrada(import.meta.url)) {

@@ -7,6 +7,42 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ### Added
 
+- **Las cinco conexiones del kit llegan con el plugin.** Además de Atlassian, `.mcp.json` declara
+  ahora `context7` (`https://mcp.context7.com/mcp`, endpoint público sin credencial) y
+  `sonarqube` (`https://api.sonarcloud.io/mcp`, org `multicaja-cloud`, `SONARQUBE_READ_ONLY`).
+  `context7` apuntaba a `claude_ai_Context7` —un conector personal de claude.ai, el mismo
+  problema que tenía Atlassian— y `sonarqube` **nunca había estado declarado**: su entrada en
+  `config/klap.yaml` decía literalmente "nombre esperado … cuando esté disponible".
+- **`scripts/verificar-conexiones.mjs` + hook `SessionStart`**: avisa qué variables `KLAP_*`
+  faltan, qué se pierde sin cada una y dónde obtener la credencial, con instrucciones para
+  dejarla como variable de usuario en Windows y en Linux/Mac. Sólo imprime cuando falta algo. La
+  lista sale de `config/klap.yaml` → `mcp.*.requiere_env`, no está hardcodeada: agregar una
+  conexión con su `requiere_env` basta para que quede cubierta. `bootstrap/install.ps1` e
+  `install.sh` invocan el mismo script.
+- Convención: **toda variable de entorno del plugin lleva el prefijo `KLAP_`**, para que se
+  distinga de cualquier otra variable del sistema. El schema la impone en `requiere_env`.
+- `docs/conexiones.md`: tabla única de las cinco conexiones — qué trae el plugin, qué pone cada
+  dev y qué se degrada si falta.
+
+### Fixed
+
+- **El Quality Gate de Sonar aprobaba en silencio.** `scripts/quality-gate.mjs` sólo evaluaba el
+  gate `if (s.quality_gate_status)`, así que un reporte sin métricas —el caso de todos, porque el
+  MCP de Sonar no estaba declarado— pasaba de largo sin verificarse: `quality_gate_debe_pasar:
+  true` era letra muerta. Ahora emite una **advertencia** explícita en ese caso, con las dos
+  causas posibles (falta el token, o el proyecto no tiene análisis publicado — lo produce el
+  pipeline de Jenkins, no se corre en local). No bloquea: un repo que aún no está en SonarCloud
+  sigue certificando. `mutation_score` no cambia, es opcional por diseño.
+- `agents/certificador.md`: instrucción explícita de **omitir** el bloque `sonar` cuando no hay
+  datos en vez de rellenarlo con ceros (un cero inventado se lee como "verificado y sin
+  hallazgos"), y de presentar siempre las `advertencias` junto al veredicto.
+
+### Removed
+
+- `PLAN_ATLASSIAN_CLAUDE_CODE.md`: sus 20 criterios de aceptación se cumplen y su contenido vive
+  en `docs/atlassian-mcp.md` y este changelog. Las dos validaciones que requerían una segunda
+  persona quedaron anotadas en `docs/atlassian-mcp.md`.
+
 - **Conexión Atlassian distribuida por el plugin.** `.mcp.json` declara el servidor `atlassian`
   contra el Rovo MCP oficial (`https://mcp.atlassian.com/v2/mcp`, transporte HTTP, sin headers
   ni variables de entorno): quien instala el plugin recibe la misma conexión que todo el equipo

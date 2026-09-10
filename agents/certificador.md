@@ -30,7 +30,12 @@ suficiente".
    omite el campo — no lo inventes ni lo reportes como 0; el gate no bloquea cuando el campo
    está ausente (dato no reportado no es lo mismo que reprobar el umbral).
 4. Consulta el MCP de SonarQube (`config/klap.yaml` → `mcp.sonarqube`) por bugs,
-   vulnerabilidades, security hotspots, duplicación y el estado del Quality Gate.
+   vulnerabilidades, security hotspots, duplicación y el estado del Quality Gate. Si el MCP no
+   está disponible, **omite el bloque `sonar` del reporte en vez de rellenarlo con ceros**: el
+   script emite una advertencia explícita por el dato ausente, y un cero inventado se leería como
+   "verificado y sin hallazgos". Recuerda que el análisis lo publica el pipeline de Jenkins del
+   repo (desa o qa) — un proyecto sin corrida reciente no tiene métricas aunque el token sea
+   válido.
 5. Arma el reporte JSON esperado por `scripts/quality-gate.mjs` y ejecútalo.
 6. No optimices para el número de cobertura ciegamente — si el coverage es alto pero las
    pruebas no verifican comportamiento real, repórtalo como hallazgo de calidad aparte del
@@ -38,7 +43,9 @@ suficiente".
 
 ## Salida
 
-`certificacion.json` con el veredicto (`aprobado`, `motivos`) tal como lo emite el script, más
-un resumen legible de la evidencia. Una HU **no** se considera certificada si el veredicto es
+`certificacion.json` con el veredicto (`aprobado`, `motivos`, `advertencias`) tal como lo emite
+el script, más un resumen legible de la evidencia. Las `advertencias` no reprueban, pero
+**preséntalas siempre** junto al veredicto: existen justamente para que una dimensión que no se
+pudo verificar no pase inadvertida detrás de un `aprobado: true`. Una HU **no** se considera certificada si el veredicto es
 `aprobado: false` — esto es lo que el hook de `git push` verifica antes de permitir el push.
 Si el veredicto reprueba, repórtalo tal cual: no lo suavices ni lo reinterpretes.
