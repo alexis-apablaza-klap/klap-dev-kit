@@ -37,7 +37,36 @@ declaran explícitamente. No se comparten ni se crean API tokens: cada quien usa
 exactamente lo que sus permisos en Atlassian le permiten. Detalle, modos de fallo y evidencia de
 la verificación: `docs/atlassian-mcp.md`.
 
-## 4. Actualizar
+## 4. Klap Knowledge en modo producción (opcional)
+
+El plugin trae el **mock** de Klap Knowledge, que se activa solo y basta para probar el flujo
+completo. Para apuntar al **servicio real** hace falta tener clonado e instalado el repo
+`klap-dev-kit-knowledge` (privado, separado) y declarar dos variables de entorno — el plugin no
+puede saber dónde lo clonaste ni qué intérprete de Python usas:
+
+| Variable | Qué es | Default |
+|---|---|---|
+| `KLAP_KNOWLEDGE_HOME` | Ruta al checkout de `klap-dev-kit-knowledge` | — (obligatoria) |
+| `KLAP_KNOWLEDGE_PYTHON` | Intérprete con el paquete instalado, normalmente el del venv | `python` |
+
+La forma recomendada es el bloque `env` de tu `settings.json` de Claude Code:
+
+```json
+{
+  "env": {
+    "KLAP_KNOWLEDGE_HOME": "/ruta/a/klap-dev-kit-knowledge",
+    "KLAP_KNOWLEDGE_PYTHON": "/ruta/a/klap-dev-kit-knowledge/.venv/bin/python"
+  }
+}
+```
+
+En Windows el intérprete del venv es `…\.venv\Scripts\python.exe`.
+
+Si no las defines, `plugin:klap:klap-knowledge` aparece como `✘ Failed to connect` en
+`claude mcp list` — **sólo ese servidor**; el mock y Atlassian siguen funcionando, y las fases
+que usan Klap Knowledge lo declaran en vez de inventar contexto.
+
+## 5. Actualizar
 
 ```
 /plugin update klap@klap-dev-kit

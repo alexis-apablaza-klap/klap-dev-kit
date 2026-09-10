@@ -30,10 +30,23 @@ export function validarPlugin(root = resolveFromRoot()) {
     else if (!jsonValido(p)) problemas.push(`${rel} no es JSON válido`);
   }
 
-  // 2. .mcp.json
+  // 2. .mcp.json — además de existir y parsear, no puede contener rutas absolutas: el archivo
+  // viaja con el plugin a la máquina de cada dev, así que una ruta como C:\...\python.exe o
+  // /home/alguien/... sólo funciona en el equipo de quien la escribió. Lo portable es
+  // ${CLAUDE_PLUGIN_ROOT} para lo que vive dentro del plugin y ${VAR}/${VAR:-default} para lo
+  // que depende del entorno de cada persona.
   const mcpPath = path.join(root, ".mcp.json");
   if (!existsSync(mcpPath)) problemas.push("Falta .mcp.json");
   else if (!jsonValido(mcpPath)) problemas.push(".mcp.json no es JSON válido");
+  else {
+    const crudo = readFileSync(mcpPath, "utf8");
+    const RUTA_ABSOLUTA = /"[^"]*(?:[A-Za-z]:\\\\|\/(?:home|Users)\/)[^"]*"/g;
+    for (const hallazgo of crudo.match(RUTA_ABSOLUTA) ?? []) {
+      problemas.push(
+        `.mcp.json contiene una ruta absoluta (${hallazgo.trim()}) — no es portable entre máquinas; usa \${CLAUDE_PLUGIN_ROOT} o una variable de entorno`
+      );
+    }
+  }
 
   // 3. config/klap.yaml
   const config = readYaml(path.join(root, "config", "klap.yaml"));

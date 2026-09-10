@@ -24,6 +24,15 @@ Escálalo a un admin de Atlassian/Bitbucket.
 > **Ojo con Jira:** una búsqueda JQL sobre un proyecto sin acceso devuelve una lista vacía **sin
 > error**. Un resultado vacío no prueba que no exista nada.
 
+## `plugin:klap:klap-knowledge` dice `✘ Failed to connect`
+
+Casi siempre falta `KLAP_KNOWLEDGE_HOME` (y a veces `KLAP_KNOWLEDGE_PYTHON`). El plugin declara
+el servidor real de forma portable —con variables de entorno, no con la ruta de una máquina
+concreta—, así que sin ellas intenta un `python` genérico en un directorio que no corresponde y
+el proceso muere al arrancar. Cómo definirlas: `docs/installation.md`, paso 4.
+
+Es un fallo aislado: el mock de Klap Knowledge y Atlassian siguen conectados.
+
 ## "Klap Knowledge no responde" durante `/klap:trabajar-hu`
 
 Comportamiento esperado, no una falla: si el MCP de Klap Knowledge no está disponible, el

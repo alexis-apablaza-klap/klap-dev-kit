@@ -27,6 +27,16 @@ Versionado según [SemVer](https://semver.org/lang/es/).
   a un servidor inexistente — un permiso muerto que reabriría escritura en un agente de sólo
   lectura sin romper nada visible.
 
+### Fixed
+
+- **`.mcp.json` deja de depender de la máquina de una persona.** La entrada `klap-knowledge`
+  apuntaba a `C:\klap-workspace\klap-dev-kit-knowledge\.venv\Scripts\python.exe`: una ruta
+  absoluta, además de Windows-only, que hacía fallar ese servidor en el equipo de cualquier otro
+  dev. Ahora se resuelve con `${KLAP_KNOWLEDGE_PYTHON:-python}` y `${KLAP_KNOWLEDGE_HOME}`
+  (documentado en `docs/installation.md`, paso 4). Si faltan, falla **sólo** ese servidor: el
+  mock y Atlassian siguen conectados. `scripts/validar-plugin.mjs` ahora rechaza cualquier ruta
+  absoluta en `.mcp.json`, para que el problema no pueda reaparecer.
+
 ### Changed
 
 - `config/klap.yaml` → `mcp.atlassian`: `server` pasa de `claude_ai_Atlassian` (conector

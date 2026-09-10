@@ -158,10 +158,10 @@ duplica servidores. No lo agregues.
 
 ## REQUIERE-USUARIO
 
-1. **`.mcp.json` → entrada `klap-knowledge` tiene rutas absolutas de una máquina concreta**
-   (`C:\klap-workspace\klap-dev-kit-knowledge\.venv\Scripts\python.exe`). Para cualquier otro dev
-   ese servidor falla al arrancar — el mismo problema de portabilidad que esta ronda resolvió
-   para Atlassian, en la otra entrada del mismo archivo. Pendiente de decidir.
+1. ~~`.mcp.json` → entrada `klap-knowledge` tiene rutas absolutas de una máquina concreta.~~
+   **Resuelto**: ahora usa `${KLAP_KNOWLEDGE_PYTHON:-python}` y `${KLAP_KNOWLEDGE_HOME}`
+   (configuración en `docs/installation.md`, paso 4), y `scripts/validar-plugin.mjs` rechaza
+   cualquier ruta absoluta en `.mcp.json` para que no vuelva a colarse.
 2. **`config/klap.yaml` → `hosting.proveedor_actual: github`** mientras los repos de producto son
    `git@bitbucket.org:multicaja-cloud/…`. Inconsistencia ya señalada en `proposal.md`.
 3. ~~`config/klap.yaml` apunta al conector personal `claude_ai_Atlassian`.~~ **Resuelto**: ahora

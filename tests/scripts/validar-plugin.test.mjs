@@ -233,3 +233,38 @@ test("templates/context-index.yaml válido no genera problemas de esa sección",
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+function escribirMcpJson(root, servidor) {
+  writeFileSync(path.join(root, ".mcp.json"), JSON.stringify({ "un-servidor": servidor }, null, 2));
+}
+
+test(".mcp.json con una ruta absoluta se reporta como no portable", () => {
+  const root = crearRootTemporal();
+  try {
+    escribirMcpJson(root, {
+      type: "stdio",
+      command: "C:\\alguien\\.venv\\Scripts\\python.exe",
+      args: ["-m", "algo"],
+    });
+    const { problemas } = validarPlugin(root);
+    assert.ok(problemas.some((p) => p.includes("ruta absoluta")), JSON.stringify(problemas));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test(".mcp.json parametrizado con variables de entorno no reporta problema de portabilidad", () => {
+  const root = crearRootTemporal();
+  try {
+    escribirMcpJson(root, {
+      type: "stdio",
+      command: "${KLAP_KNOWLEDGE_PYTHON:-python}",
+      args: ["-m", "algo"],
+      cwd: "${KLAP_KNOWLEDGE_HOME}",
+    });
+    const { problemas } = validarPlugin(root);
+    assert.ok(!problemas.some((p) => p.includes("ruta absoluta")), JSON.stringify(problemas));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
