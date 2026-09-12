@@ -63,8 +63,8 @@ No se invocan a mano. Sirve saber qué hace cada uno para entender qué esperar 
 | `retroalimentador` | Retroalimentación | Propone mejoras al workflow a partir de la traza; propone, nunca aplica |
 
 **Los agentes de sólo lectura lo son técnicamente, no por convención.** `analista` y
-`arquitecto` sólo pueden escribir su propio artefacto en `.klap/hu/<ISSUE-KEY>/`: tienen vetados
-`Edit` y **ambas** shells. Vetar una sola shell no veta nada — un denylist es tan fuerte como su
+`arquitecto` sólo pueden escribir su propio artefacto en `.klap/hu/<ISSUE-KEY>/`, y `seguridad`
+no escribe nada en absoluto: los tres tienen vetados `Edit` y **ambas** shells. Vetar una sola shell no veta nada — un denylist es tan fuerte como su
 entrada más floja — así que `npm run validate` falla si un agente nombra `Bash` sin `PowerShell`
 o al revés.
 

@@ -9,6 +9,18 @@ comentarios del script o del agente que lo implementa, `docs/`, y — para el co
 
 ## [Unreleased]
 
+## [0.1.8-alpha] - 2026-09-12
+
+### Fixed
+
+- `seguridad` se declaraba de sólo lectura vetando `Write` y `Edit`, pero conservaba ambas
+  shells: la garantía era decorativa. Ahora veta las dos, y los escaneos deterministas
+  (`deps-scan.mjs`, `auditar-kafka.mjs`) más el `git diff` los prepara el orquestador y se los
+  pasa como insumo — misma división que ya rige en la fase 5.
+- `validar-plugin.mjs` rechaza vetar `Write` sin vetar ambas shells. La asimetría es
+  deliberada: vetar sólo `Edit` no promete sólo-lectura y no arrastra la exigencia, porque
+  `certificador` necesita la shell para correr los gates.
+
 ## [0.1.7-alpha] - 2026-09-12
 
 ### Changed

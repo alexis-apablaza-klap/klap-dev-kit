@@ -140,6 +140,46 @@ test("el veto de shell parcial se detecta en cualquier direccion", () => {
   }
 });
 
+test("agente que veta Write conservando shell reporta el veto decorativo", () => {
+  const root = crearRootTemporal();
+  try {
+    escribirAgente(root, "solo-lectura-de-mentira.md", "disallowedTools: Write, Edit, NotebookEdit\n");
+    const { problemas } = validarPlugin(root);
+    assert.ok(
+      problemas.some(
+        (p) => p.includes("solo-lectura-de-mentira.md") && p.includes("veta Write pero no Bash, PowerShell")
+      )
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("agente que veta Write y ambas shells no reporta veto decorativo", () => {
+  const root = crearRootTemporal();
+  try {
+    escribirAgente(root, "solo-lectura-real.md", "disallowedTools: Write, Edit, Bash, PowerShell\n");
+    const { problemas } = validarPlugin(root);
+    assert.ok(!problemas.some((p) => p.includes("veto de escritura es decorativo")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+// La asimetria es deliberada: vetar Edit no promete solo-lectura, asi que no arrastra la
+// exigencia de shell. `certificador` vive exactamente en este caso — veta Edit y conserva
+// shell porque correr los gates es su trabajo.
+test("agente que veta Edit pero no Write puede conservar shell", () => {
+  const root = crearRootTemporal();
+  try {
+    escribirAgente(root, "ejecutor.md", "disallowedTools: Edit, NotebookEdit\n");
+    const { problemas } = validarPlugin(root);
+    assert.ok(!problemas.some((p) => p.includes("veto de escritura es decorativo")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("agente que no veta ninguna shell no reporta veto parcial", () => {
   const root = crearRootTemporal();
   try {

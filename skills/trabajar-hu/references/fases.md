@@ -60,12 +60,18 @@ de avanzar — no llegues a certificación con tests rotos.
 
 ## Fase 6 — Certificación
 
-Invoca `certificador` y `seguridad` (pueden correr en paralelo, cada uno entrega su parte).
-El `certificador` corre `scripts/quality-gate.mjs` sobre las métricas reales que reunió;
-`seguridad` corre `scripts/deps-scan.mjs` e interpreta el diff, y si el componente tiene
-`*KafkaConfig.java` corre además `scripts/auditar-kafka.mjs`. Combina ambos en
-`certificacion.json` con un único `aprobado` (AND de ambos) y la lista completa de `motivos`.
-Si `aprobado: false`, detente aquí y repórtalo — no continúes a documentación.
+**Antes de invocar a nadie**, prepara los insumos de `seguridad`, que no tiene shell:
+- `node scripts/deps-scan.mjs …`
+- `node scripts/auditar-kafka.mjs <repo>` sólo si el componente tiene `*KafkaConfig.java`
+- `git diff` de la rama, guardado en `.klap/hu/<ISSUE-KEY>/diff.patch`
+
+Luego invoca `certificador` y `seguridad` (pueden correr en paralelo, cada uno entrega su
+parte). El `certificador` corre `scripts/quality-gate.mjs` sobre las métricas reales que
+reunió; `seguridad` interpreta el diff y la salida de los escaneos que le pasaste — **no los
+corre él**, porque es el único agente de la fase que no escribe nada y una shell desharía esa
+garantía. Combina ambos en `certificacion.json` con un único `aprobado` (AND de ambos) y la
+lista completa de `motivos`. Si `aprobado: false`, detente aquí y repórtalo — no continúes a
+documentación.
 
 ## Fase 7 — Documentación
 
