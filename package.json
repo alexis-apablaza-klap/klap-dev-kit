@@ -1,6 +1,6 @@
 {
   "name": "klap-dev-kit",
-  "version": "0.1.5-alpha",
+  "version": "0.1.6-alpha",
   "private": true,
   "description": "Plugin corporativo de Claude Code para el ciclo de desarrollo de software en Klap.",
   "type": "module",

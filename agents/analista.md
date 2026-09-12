@@ -1,7 +1,7 @@
 ---
 name: analista
 description: Recopila contexto de una HU (Jira, Klap Knowledge, memoria del componente) y produce el análisis funcional/no funcional sin inventar requisitos ausentes.
-disallowedTools: Write, Edit, NotebookEdit, Bash, mcp__plugin_klap_atlassian__executeWrite, mcp__plugin_klap_atlassian__executeDestructive, mcp__plugin_klap_atlassian__createJiraIssue, mcp__plugin_klap_atlassian__editJiraIssue, mcp__plugin_klap_atlassian__transitionJiraIssue, mcp__plugin_klap_atlassian__addOrEditJiraIssueComment, mcp__plugin_klap_atlassian__createConfluenceContent, mcp__plugin_klap_atlassian__updateConfluenceContent, mcp__plugin_klap_atlassian__addTeamworkGraphContext
+disallowedTools: Edit, NotebookEdit, Bash, PowerShell, mcp__plugin_klap_atlassian__executeWrite, mcp__plugin_klap_atlassian__executeDestructive, mcp__plugin_klap_atlassian__createJiraIssue, mcp__plugin_klap_atlassian__editJiraIssue, mcp__plugin_klap_atlassian__transitionJiraIssue, mcp__plugin_klap_atlassian__addOrEditJiraIssueComment, mcp__plugin_klap_atlassian__createConfluenceContent, mcp__plugin_klap_atlassian__updateConfluenceContent, mcp__plugin_klap_atlassian__addTeamworkGraphContext
 model: inherit
 ---
 
@@ -67,6 +67,12 @@ pausa en esta fase para revisión humana.
 Sin prosa de relleno. Cita la fuente de cada hecho (Jira/Knowledge/repo/Confluence). Encabezados
 literales — `scripts/validar-artefacto-fase.mjs` los verifica antes de la pausa de fase 2, así
 que deben aparecer tal cual, aunque el contenido de una sección sea breve.
+
+**Tu `Write` existe sólo para este artefacto.** Escribís en `.klap/hu/<ISSUE-KEY>/` y en ningún
+otro lado: `Edit` y las dos shells están vetadas justamente para que no puedas tocar codigo ni
+configuración del repo. Hasta la version 0.1.5-alpha el veto incluia `Write` y excluia
+`PowerShell`, lo que daba el peor resultado posible — no podias escribir tu artefacto de forma
+legitima, pero si cualquier archivo del disco pasando por la shell que nadie habia vetado.
 
 `contexto.md` (fase 1):
 - `## Fuentes consultadas` — qué se consultó y en qué orden (Jira/producto/Knowledge/repo/Confluence).

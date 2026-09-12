@@ -215,6 +215,26 @@ export function validarPlugin(root = resolveFromRoot()) {
           problemas.push(`agents/${entry.name}: declara "${campo}", que se ignora en silencio para agentes de plugin`);
         }
       }
+      // 7a-bis. Un veto de shell tiene que nombrar TODAS las shells, o no veta nada.
+      // Descubierto ejecutando la fase 7 del plan: `analista` declaraba `disallowedTools: Write,
+      // …, Bash` y aun así escribió su artefacto en disco — porque el denylist nombraba `Bash`
+      // pero no `PowerShell`, que es una tool distinta con la misma capacidad. Un denylist sólo
+      // es tan fuerte como su entrada más floja, y el modo de fallo es silencioso: el agente
+      // parece de sólo lectura, el frontmatter dice que lo es, y escribe igual. La regla se
+      // vuelve determinista acá en vez de quedar en el juicio de quien edite un agente.
+      const shells = ["Bash", "PowerShell"];
+      const vetadas = String(fm.disallowedTools ?? "")
+        .split(",")
+        .map((t) => t.trim());
+      const shellsVetadas = shells.filter((sh) => vetadas.includes(sh));
+      if (shellsVetadas.length > 0 && shellsVetadas.length < shells.length) {
+        const faltan = shells.filter((sh) => !vetadas.includes(sh));
+        problemas.push(
+          `agents/${entry.name}: veta ${shellsVetadas.join(", ")} pero no ${faltan.join(", ")} — ` +
+            `un veto de shell parcial no impide nada, el agente conserva la capacidad por la otra tool`
+        );
+      }
+
       // 7b. El frontmatter es la única excepción a "nunca hardcodees el nombre de un servidor
       // MCP" (CLAUDE.md): se evalúa antes de que el agente pueda leer config/klap.yaml, así que
       // una tool MCP sólo puede nombrarse literalmente. Este chequeo mantiene la fuente de

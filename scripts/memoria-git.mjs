@@ -18,7 +18,8 @@
  *     [--motivo "texto"] [--changed-files "products/x/product.yaml,products/x/sources.yaml"]
  *     [--base main] [--repo <ruta-absoluta-al-checkout>]
  *
- * Sin --changed-files, hace `git add -A -- memory/` (store.py sólo escribe bajo memory/).
+ * Sin --changed-files, hace `git add -- memory/` (store.py sólo escribe bajo memory/) y aborta
+ * si eso arrastra archivos de otro producto: pasá `changed_files` de aplicar_patch_memoria.
  * Requiere `gh` autenticado para crear el PR; si no está disponible, deja la rama pusheada y
  * lo declara explícitamente en la salida en vez de fallar en silencio.
  */
@@ -123,6 +124,32 @@ export async function correr({ producto, issue, motivo, changedFiles, base, repo
 
   const rutasAAgregar = changedFiles?.length ? changedFiles : ["memory/"];
   ejecutar("git", ["add", "--", ...rutasAAgregar], opcionesGit);
+
+  // `memory/` como default stagea TODO lo pendiente, no lo de este producto: si se aplicaron
+  // dos patches y recién después se invoca el script, el primer producto se lleva ambos y la
+  // segunda invocación reporta "nada que commitear". Pasó de verdad en la fase 6 del plan de
+  // migración. No se puede acotar por `product_id` a secas — los componentes viven en
+  // `memory/components/<id>.yaml` y su nombre no deriva del producto — así que el script no
+  // adivina: detecta la mezcla y exige los `changed_files` que `aplicar_patch_memoria` ya
+  // devolvió. Fallar acá es barato; un PR con dos productos mezclados se descubre en revisión.
+  const ajenos = ejecutar("git", ["diff", "--cached", "--name-only"], opcionesGit)
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .filter((f) => {
+      const m = /^memory\/products\/([^/]+)\//.exec(f);
+      return m && m[1] !== producto;
+    });
+  if (ajenos.length > 0) {
+    const otros = [...new Set(ajenos.map((f) => /^memory\/products\/([^/]+)\//.exec(f)[1]))];
+    ejecutar("git", ["reset", "--quiet"], opcionesGit);
+    throw new Error(
+      `Hay cambios de otro(s) producto(s) sin commitear (${otros.join(", ")}), así que un ` +
+        `commit de "${producto}" se los llevaría. Invocá el script con --changed-files usando ` +
+        `el arreglo "changed_files" que devolvió aplicar_patch_memoria para cada producto, o ` +
+        `corré el script después de cada patch en vez de al final.`
+    );
+  }
 
   const estado = ejecutar("git", ["status", "--porcelain"], opcionesGit);
   if (!estado) {

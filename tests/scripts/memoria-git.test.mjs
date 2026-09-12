@@ -1,7 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import {
+  correr,
   parsearArgs,
   nombreRama,
   mensajeCommit,
@@ -84,4 +88,36 @@ test("resolverRepoPath: --repo explícito tiene prioridad sobre el config", () =
 
 test("resolverRepoPath: sin memoria.repo_path ni --repo, falla explícito", () => {
   assert.throws(() => resolverRepoPath({ config: {}, root: "/cualquier/raiz" }), /memoria\.repo_path/);
+});
+
+test("correr: aborta si hay cambios de otro producto sin commitear", async () => {
+  // El default `git add -- memory/` stagea todo lo pendiente, no lo del producto pedido. Este
+  // test fija que la mezcla se detecta ANTES del commit: el modo de fallo real no era un error,
+  // era un PR silencioso con dos productos adentro.
+  const repo = mkdtempSync(path.join(tmpdir(), "memoria-git-"));
+  try {
+    const git = (...args) => execFileSync("git", args, { cwd: repo, stdio: "pipe" });
+    git("init", "--initial-branch=main");
+    git("config", "user.email", "test@example.com");
+    git("config", "user.name", "Test");
+    mkdirSync(path.join(repo, "memory", "products", "abono-ya"), { recursive: true });
+    mkdirSync(path.join(repo, "memory", "products", "impulso-klap"), { recursive: true });
+    writeFileSync(path.join(repo, "memory", "products", "abono-ya", "product.yaml"), "id: abono-ya\n");
+    git("add", "-A");
+    git("commit", "-m", "base");
+
+    writeFileSync(path.join(repo, "memory", "products", "abono-ya", "product.yaml"), "id: abono-ya\nrev: 2\n");
+    writeFileSync(path.join(repo, "memory", "products", "impulso-klap", "product.yaml"), "id: impulso-klap\n");
+
+    await assert.rejects(
+      () => correr({ producto: "abono-ya", repoOverride: repo }),
+      /impulso-klap/,
+      "debe nombrar al producto ajeno que se iba a arrastrar"
+    );
+    // Y deja el índice limpio: un abort no puede quedarse con todo staged.
+    const staged = execFileSync("git", ["diff", "--cached", "--name-only"], { cwd: repo, encoding: "utf8" });
+    assert.equal(staged.trim(), "");
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
 });

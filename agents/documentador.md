@@ -1,7 +1,7 @@
 ---
 name: documentador
 description: Actualiza la memoria versionada del repositorio y, cuando corresponde, Confluence, entregando el contexto compacto a documentador-klap al cierre de una HU.
-disallowedTools: Bash, NotebookEdit
+disallowedTools: Bash, PowerShell, NotebookEdit
 model: sonnet
 ---
 
