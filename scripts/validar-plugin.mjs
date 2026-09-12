@@ -233,6 +233,22 @@ export function validarPlugin(root = resolveFromRoot()) {
         );
       }
 
+      // 7a-ter. Vetar `Write` es la declaración de "este agente no escribe en disco", y una
+      // shell la deshace por completo: `echo … > archivo` no pasa por ninguna tool de edición.
+      // Es el mismo agujero que 7a-bis un nivel más arriba — ahí el denylist se contradecía
+      // entre dos shells, acá entre la escritura y la shell — y falla igual de callado: el
+      // frontmatter promete sólo-lectura y el agente escribe lo que quiera. Ojo con la
+      // asimetría deliberada: vetar sólo `Edit` NO se exige acá, porque no promete
+      // sólo-lectura (`certificador` veta `Edit` y conserva shell para correr los gates, que
+      // es su trabajo). La promesa que esta regla protege es la de `Write`.
+      if (vetadas.includes("Write") && shellsVetadas.length < shells.length) {
+        const faltan = shells.filter((sh) => !vetadas.includes(sh));
+        problemas.push(
+          `agents/${entry.name}: veta Write pero no ${faltan.join(", ")} — ` +
+            `el veto de escritura es decorativo, el agente puede escribir en disco por la shell`
+        );
+      }
+
       // 7b. El frontmatter es la única excepción a "nunca hardcodees el nombre de un servidor
       // MCP" (CLAUDE.md): se evalúa antes de que el agente pueda leer config/klap.yaml, así que
       // una tool MCP sólo puede nombrarse literalmente. Este chequeo mantiene la fuente de

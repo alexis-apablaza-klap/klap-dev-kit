@@ -9,6 +9,11 @@ Invoca a `certificador` y `seguridad` (ver `agents/certificador.md` y `agents/se
 sobre el estado actual del repositorio (o el diff de la rama actual). Ambos entregan su parte
 del veredicto; combínalos en un único `certificacion.json`.
 
+`seguridad` **no tiene shell**: corre vos `scripts/deps-scan.mjs` (y `scripts/auditar-kafka.mjs`
+si el componente tiene `*KafkaConfig.java`), guarda el diff en `.klap/hu/<ISSUE-KEY>/diff.patch`
+si hay ISSUE-KEY, y pásale ambas cosas. Sin esos insumos el agente lo declara y acota su
+análisis, en vez de suponer un resultado que no vio.
+
 Los umbrales viven en `config/quality-gates.yaml` y la decisión numérica la toma
 `scripts/quality-gate.mjs` — el rol de los agentes es reunir evidencia real e interpretar lo
 que un script no puede (calidad de las pruebas, criterio de seguridad sobre el diff), no
