@@ -19,7 +19,9 @@
  *     [--base main] [--repo <ruta-absoluta-al-checkout>]
  *
  * Sin --changed-files, hace `git add -- memory/` (store.py sólo escribe bajo memory/) y aborta
- * si eso arrastra archivos de otro producto: pasá `changed_files` de aplicar_patch_memoria.
+ * si eso arrastra archivos de otro producto. Con --changed-files aborta si la lista está
+ * incompleta y deja fuera un archivo del propio producto. Las dos salidas son la misma: pasá
+ * tal cual el `changed_files` que devolvió aplicar_patch_memoria, sin editarlo a mano.
  * Requiere `gh` autenticado para crear el PR; si no está disponible, deja la rama pusheada y
  * lo declara explícitamente en la salida en vez de fallar en silencio.
  */
@@ -151,6 +153,41 @@ export async function correr({ producto, issue, motivo, changedFiles, base, repo
     );
   }
 
+  // El guard de arriba cubre el error de más (arrastrar otro producto). Este cubre el de
+  // menos: un `--changed-files` incompleto deja fuera del commit un archivo de este mismo
+  // producto, y el modo de fallo es peor, porque no hay nada que lo delate — el PR sale bien
+  // formado y le falta una pieza. Pasó copiando a mano el `changed_files` que devolvió
+  // `aplicar_patch_memoria` y salteando una línea.
+  //
+  // Sólo se puede afirmar la pertenencia de lo que vive bajo `products/<producto>/`; un
+  // componente sin stagear puede ser de este patch o del de otro producto todavía pendiente,
+  // y abortar por eso rompería el flujo que el propio error de arriba recomienda (un script
+  // por producto). Por eso el componente se reporta y no bloquea: la regla dura llega hasta
+  // donde llega la evidencia.
+  // Se listan por separado modificados y no rastreados en vez de parsear las columnas de
+  // `status --porcelain`: `ejecutar` recorta la salida completa, y ese trim se come el espacio
+  // inicial de la primera linea, que es justo la columna que distingue staged de sin stagear.
+  const lineas = (salida) =>
+    salida
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter(Boolean);
+  const sinStagear = [
+    ...lineas(ejecutar("git", ["diff", "--name-only", "--", "memory/"], opcionesGit)),
+    ...lineas(ejecutar("git", ["ls-files", "--others", "--exclude-standard", "--", "memory/"], opcionesGit)),
+  ];
+
+  const propiosFuera = sinStagear.filter((f) => f.startsWith(`memory/products/${producto}/`));
+  if (propiosFuera.length > 0) {
+    ejecutar("git", ["reset", "--quiet"], opcionesGit);
+    throw new Error(
+      `Estos archivos de "${producto}" quedaron fuera del commit: ${propiosFuera.join(", ")}. ` +
+        `El --changed-files que pasaste está incompleto — usá tal cual el arreglo "changed_files" ` +
+        `que devolvió aplicar_patch_memoria, sin editarlo.`
+    );
+  }
+  const componentesFuera = sinStagear.filter((f) => f.startsWith("memory/components/"));
+
   const estado = ejecutar("git", ["status", "--porcelain"], opcionesGit);
   if (!estado) {
     return {
@@ -192,7 +229,16 @@ export async function correr({ producto, issue, motivo, changedFiles, base, repo
     };
   }
 
-  return { rama, commit, pr_url: prUrl };
+  return componentesFuera.length > 0
+    ? {
+        rama,
+        commit,
+        pr_url: prUrl,
+        nota:
+          `Quedaron componentes sin commitear (${componentesFuera.join(", ")}). Si son de este ` +
+          `patch, faltaban en --changed-files; si son de otro producto, commiteálos con el suyo.`,
+      }
+    : { rama, commit, pr_url: prUrl };
 }
 
 if (esPuntoDeEntrada(import.meta.url)) {

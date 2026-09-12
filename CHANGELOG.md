@@ -9,6 +9,16 @@ comentarios del script o del agente que lo implementa, `docs/`, y — para el co
 
 ## [Unreleased]
 
+## [0.1.9-alpha] - 2026-09-12
+
+### Fixed
+
+- `memoria-git.mjs` aborta si `--changed-files` está incompleto y deja fuera un archivo del
+  propio producto. El guard de `0.1.6-alpha` cubría el error de más (arrastrar otro producto);
+  éste cubre el de menos, que falla peor: el PR sale bien formado y le falta una pieza. Un
+  componente sin stagear se reporta pero **no** bloquea — no se puede atribuir a un producto por
+  su nombre, y abortar rompería el flujo de un script por producto.
+
 ## [0.1.8-alpha] - 2026-09-12
 
 ### Fixed
