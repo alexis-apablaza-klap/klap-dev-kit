@@ -1,7 +1,7 @@
 ---
 name: documentador-klap
 description: Mantiene la memoria global de productos Klap a partir de Jira, Confluence, repositorios y Klap Knowledge, generando patches estructurados y trazables (aplicar_patch_memoria). No sustituye a `documentador`, que sigue siendo responsable de la memoria técnica del repositorio.
-disallowedTools: Bash, NotebookEdit
+disallowedTools: Bash, PowerShell, NotebookEdit
 model: sonnet
 ---
 

@@ -106,9 +106,46 @@ test("agente sin tools ni disallowedTools reporta que hereda todas las tools por
 test("agente con disallowedTools declarado no reporta problema de least privilege", () => {
   const root = crearRootTemporal();
   try {
-    escribirAgente(root, "con-restriccion.md", "disallowedTools: Write, Edit, Bash\n");
+    escribirAgente(root, "con-restriccion.md", "disallowedTools: Write, Edit, Bash, PowerShell\n");
     const { problemas } = validarPlugin(root);
     assert.ok(!problemas.some((p) => p.includes("con-restriccion.md")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("agente que veta Bash pero no PowerShell reporta el veto de shell parcial", () => {
+  const root = crearRootTemporal();
+  try {
+    escribirAgente(root, "veto-parcial.md", "disallowedTools: Write, Edit, Bash\n");
+    const { problemas } = validarPlugin(root);
+    assert.ok(
+      problemas.some((p) => p.includes("veto-parcial.md") && p.includes("veta Bash pero no PowerShell"))
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("el veto de shell parcial se detecta en cualquier direccion", () => {
+  const root = crearRootTemporal();
+  try {
+    escribirAgente(root, "veto-invertido.md", "disallowedTools: PowerShell, NotebookEdit\n");
+    const { problemas } = validarPlugin(root);
+    assert.ok(
+      problemas.some((p) => p.includes("veto-invertido.md") && p.includes("veta PowerShell pero no Bash"))
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("agente que no veta ninguna shell no reporta veto parcial", () => {
+  const root = crearRootTemporal();
+  try {
+    escribirAgente(root, "con-shell.md", "disallowedTools: Edit, NotebookEdit\n");
+    const { problemas } = validarPlugin(root);
+    assert.ok(!problemas.some((p) => p.includes("veto de shell")));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -117,7 +154,7 @@ test("agente con disallowedTools declarado no reporta problema de least privileg
 test("agente que declara mcpServers/hooks/permissionMode reporta que se ignoran en agentes de plugin", () => {
   const root = crearRootTemporal();
   try {
-    escribirAgente(root, "con-campos-ignorados.md", "disallowedTools: Bash\nmcpServers: [algo]\nhooks: {}\npermissionMode: default\n");
+    escribirAgente(root, "con-campos-ignorados.md", "disallowedTools: Bash, PowerShell\nmcpServers: [algo]\nhooks: {}\npermissionMode: default\n");
     const { problemas } = validarPlugin(root);
     assert.ok(problemas.some((p) => p.includes("mcpServers")));
     assert.ok(problemas.some((p) => p.includes("hooks")));
@@ -133,7 +170,7 @@ test("agente que nombra un servidor MCP distinto al de config/klap.yaml lo repor
     mkdirSync(path.join(root, "config"), { recursive: true });
     copyFileSync(resolveFromRoot("schemas", "klap-config.schema.json"), path.join(root, "schemas", "klap-config.schema.json"));
     escribirConfigYContrato(root, { versionContrato: "1.0.0", versionRegistrada: "1.0.0" });
-    escribirAgente(root, "servidor-viejo.md", "disallowedTools: Bash, mcp__claude_ai_Atlassian__executeWrite\n");
+    escribirAgente(root, "servidor-viejo.md", "disallowedTools: Bash, PowerShell, mcp__claude_ai_Atlassian__executeWrite\n");
     const { problemas } = validarPlugin(root);
     assert.ok(
       problemas.some((p) => p.includes("servidor-viejo.md") && p.includes("claude_ai_Atlassian")),
@@ -150,7 +187,7 @@ test("agente que nombra el servidor MCP vigente no reporta problema", () => {
     mkdirSync(path.join(root, "config"), { recursive: true });
     copyFileSync(resolveFromRoot("schemas", "klap-config.schema.json"), path.join(root, "schemas", "klap-config.schema.json"));
     escribirConfigYContrato(root, { versionContrato: "1.0.0", versionRegistrada: "1.0.0" });
-    escribirAgente(root, "servidor-vigente.md", "disallowedTools: Bash, mcp__plugin_klap_atlassian__executeWrite\n");
+    escribirAgente(root, "servidor-vigente.md", "disallowedTools: Bash, PowerShell, mcp__plugin_klap_atlassian__executeWrite\n");
     const { problemas } = validarPlugin(root);
     assert.ok(!problemas.some((p) => p.includes("servidor-vigente.md")));
   } finally {

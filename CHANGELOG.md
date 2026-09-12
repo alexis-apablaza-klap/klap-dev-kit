@@ -5,6 +5,28 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.1.6-alpha] - 2026-09-12
+
+### Fixed
+
+- Un veto de shell parcial no vetaba nada. `analista`, `arquitecto`, `documentador` y
+  `documentador-klap` declaraban `disallowedTools: Bash` sin nombrar `PowerShell`, que es otra
+  tool con la misma capacidad: los cuatro conservaban escritura al disco pese a declararse de
+  solo lectura. Los cuatro vetan ahora ambas shells, y `scripts/validar-plugin.mjs` rechaza un
+  veto parcial en cualquier direccion para que el agujero no se reabra al agregar un agente.
+- `analista` y `arquitecto` recuperan `Write`, que el skill les exige para producir
+  `contexto.md`, `analisis.md` y `diseno.md`. Siguen sin `Edit` y sin shell: crean artefactos,
+  no tocan codigo.
+- `scripts/memoria-git.mjs` ya no mezcla productos. Sin `--changed-files` stageaba todo
+  `memory/`, asi que dos patches aplicados antes de invocarlo terminaban en el PR del primer
+  producto y el segundo reportaba "nada que commitear". Ahora detecta la mezcla, limpia el
+  indice y falla nombrando el producto ajeno.
+
+### Notes
+
+Los tres defectos salieron de ejecutar la fase 7 del plan sobre una HU real (SVA-2737), no de
+una revision de codigo: ninguno rompia nada visible.
+
 ## [0.1.5-alpha] - 2026-09-10
 
 ### Changed
