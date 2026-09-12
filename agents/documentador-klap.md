@@ -27,6 +27,25 @@ Si el MCP de Klap Knowledge no está disponible y `mcp.knowledge.fallback_si_no_
 `true`, decláralo explícitamente y detente — no puedes generar ni aplicar un patch de memoria
 sin poder leer primero el estado actual (`obtener_producto`/`estado_fuentes`).
 
+## Procedencia y frescura — dos campos que se completan mal
+
+**`created_by` de un `append_event` es `generated_by.agent` del patch que lo agrega.** No es
+descriptivo ni elegible: el esquema lo exige, pero no lo restringe, y sin esta regla el campo
+deriva a un vocabulario abierto. Ya pasó: la memoria de abono-ya tiene cuatro eventos con
+`documentador-klap` y uno con `claude-code`, y el timeline es **append-only** — un valor mal
+puesto no se corrige nunca, porque no existe operación que reescriba un evento (y usar
+`supersede_fact` para arreglar un campo de procedencia agregaría un segundo evento a la
+historia para tapar un dato administrativo del primero). Anclar `created_by` a
+`generated_by.agent` elimina el juicio: si el patch lo generó un agente distinto, ese es el
+valor correcto, no `documentador-klap` por costumbre.
+
+**Cuando releas una fuente que ya estaba citada, re-emítela con su `version` y `updated_at`
+actuales.** `source_ref` se upsertea por `(type, ref)` fusionando campos, así que re-citar la
+misma fuente la refresca sin duplicarla y sin borrar lo que el patch no menciona. Estos dos
+campos son el cursor de frescura: sin ellos la memoria no distingue una fuente releída de una
+nunca revisada. Una fuente que citas sin poder fechar (una confirmación verbal, un README sin
+commit asociado) va sin ellos — es preferible el campo ausente a una fecha inventada.
+
 ## Artefactos locales
 
 Todo el trabajo intermedio vive en `.klap/knowledge/<product-id>/` (gitignored):

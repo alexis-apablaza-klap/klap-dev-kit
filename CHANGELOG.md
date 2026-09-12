@@ -5,6 +5,34 @@ Versionado según [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.1.5-alpha] - 2026-09-10
+
+### Changed
+
+- **`created_by` de un `append_event` queda anclado a `generated_by.agent` del patch**
+  (`agents/documentador-klap.md`). El esquema exige el campo pero no lo restringe, y sin regla
+  derivó a vocabulario abierto: la memoria de abono-ya tiene cuatro eventos con
+  `documentador-klap` y uno con `claude-code`. El timeline es append-only, así que un valor mal
+  puesto no se corrige nunca — no hay operación que reescriba un evento, y `supersede_fact`
+  agregaría un segundo evento para tapar un dato administrativo del primero. Anclarlo a
+  `generated_by.agent` elimina el juicio en vez de fijar un vocabulario que hay que mantener.
+- **Una fuente releída se re-emite con su `version`/`updated_at`.** `source_ref` se upsertea por
+  `(type, ref)` fusionando campos (requiere el servicio de Knowledge ≥ `0.3.2`), así que re-citar
+  refresca sin duplicar. Los dos campos son el cursor de frescura: sin ellos la memoria no
+  distingue una fuente releída de una nunca revisada. Una fuente que no se puede fechar va sin
+  ellos — campo ausente antes que fecha inventada.
+
+### Known limitations
+
+- El anclaje de `created_by` es una regla del agente, no una validación del store. Hacerla
+  exigible implicaría rechazar `append_event` cuando `created_by ≠ generated_by.agent`, que es
+  un cambio de contrato (`2.5.0`) y rompe a cualquier productor existente: queda propuesto, no
+  aplicado.
+- El evento histórico `abono-ya-aliases-confirmados` conserva `created_by: claude-code`, y así se
+  queda. Es además el valor **correcto** — ese patch lo generó claude-code directamente, no el
+  agente.
+
+
 ## [0.1.4-alpha] - 2026-09-10
 
 ### Changed
