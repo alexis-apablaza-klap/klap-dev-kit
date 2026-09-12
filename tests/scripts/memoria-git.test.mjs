@@ -121,3 +121,76 @@ test("correr: aborta si hay cambios de otro producto sin commitear", async () =>
     rmSync(repo, { recursive: true, force: true });
   }
 });
+
+test("correr: aborta si --changed-files deja fuera un archivo del propio producto", async () => {
+  // El guard de arriba cubre el error de más (arrastrar otro producto); éste el de menos. Pasó
+  // de verdad copiando a mano el `changed_files` de aplicar_patch_memoria y salteando una línea:
+  // el PR sale bien formado y le falta una pieza, sin nada que lo delate.
+  const repo = mkdtempSync(path.join(tmpdir(), "memoria-git-"));
+  try {
+    const git = (...args) => execFileSync("git", args, { cwd: repo, stdio: "pipe" });
+    git("init", "--initial-branch=main");
+    git("config", "user.email", "test@example.com");
+    git("config", "user.name", "Test");
+    const dir = path.join(repo, "memory", "products", "cuota-comercio");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(path.join(dir, "product.yaml"), "id: cuota-comercio\n");
+    writeFileSync(path.join(dir, "documents.ndjson"), "{}\n");
+    git("add", "-A");
+    git("commit", "-m", "base");
+
+    writeFileSync(path.join(dir, "product.yaml"), "id: cuota-comercio\nrev: 2\n");
+    writeFileSync(path.join(dir, "documents.ndjson"), '{"doc":1}\n');
+
+    await assert.rejects(
+      () =>
+        correr({
+          producto: "cuota-comercio",
+          changedFiles: ["memory/products/cuota-comercio/product.yaml"],
+          repoOverride: repo,
+        }),
+      /documents\.ndjson/,
+      "debe nombrar el archivo que quedaba fuera del commit"
+    );
+    const staged = execFileSync("git", ["diff", "--cached", "--name-only"], { cwd: repo, encoding: "utf8" });
+    assert.equal(staged.trim(), "", "un abort no puede dejar nada staged");
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test("correr: un componente sin stagear se reporta pero no bloquea", async () => {
+  // Un componente no se puede atribuir a un producto por su nombre, así que puede ser de este
+  // patch o del de otro producto todavía pendiente. Abortar rompería el flujo de "un script por
+  // producto" que recomienda el error del guard anterior: se informa y se sigue.
+  const repo = mkdtempSync(path.join(tmpdir(), "memoria-git-"));
+  try {
+    const git = (...args) => execFileSync("git", args, { cwd: repo, stdio: "pipe" });
+    git("init", "--initial-branch=main");
+    git("config", "user.email", "test@example.com");
+    git("config", "user.name", "Test");
+    mkdirSync(path.join(repo, "memory", "products", "cuota-comercio"), { recursive: true });
+    mkdirSync(path.join(repo, "memory", "components"), { recursive: true });
+    writeFileSync(path.join(repo, "memory", "products", "cuota-comercio", "product.yaml"), "id: cuota-comercio\n");
+    git("add", "-A");
+    git("commit", "-m", "base");
+
+    writeFileSync(path.join(repo, "memory", "products", "cuota-comercio", "product.yaml"), "id: cuota-comercio\nrev: 2\n");
+    writeFileSync(path.join(repo, "memory", "components", "otro-componente.yaml"), "id: otro\n");
+
+    // Sin remoto configurado el push falla, así que sólo se verifica que el guard no aborte
+    // antes: el error tiene que venir de git push, no de una validación de alcance.
+    await assert.rejects(
+      () =>
+        correr({
+          producto: "cuota-comercio",
+          changedFiles: ["memory/products/cuota-comercio/product.yaml"],
+          repoOverride: repo,
+        }),
+      (err) => !/quedaron fuera del commit/.test(err.message),
+      "un componente ajeno no puede bloquear el commit del producto"
+    );
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
