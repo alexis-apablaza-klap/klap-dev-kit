@@ -15,7 +15,7 @@ que clonar ni compilar nada manualmente para usarlo dentro de Claude Code.
 /plugin install klap@klap-dev-kit
 ```
 
-Esto registra los 11 comandos `/klap:*`, los 7 agentes, los hooks de validación y **las cinco
+Esto registra los 12 comandos `/klap:*`, los 8 agentes, los hooks de validación y **las cinco
 conexiones MCP** del kit (Atlassian, Context7, SonarQube, Klap Knowledge y su mock). Los
 endpoints llegan configurados; sólo faltan las credenciales personales de los pasos 3 a 5.
 

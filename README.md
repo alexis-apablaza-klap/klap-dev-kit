@@ -39,16 +39,18 @@ Fase 6 — Certificación: coverage 94%, Sonar Quality Gate OK, sin vulnerabilid
 Fase 7 — Documentación: docs/decisions/ADR-015.md propuesto.
          ⏸ Confirma antes de publicar en Confluence.
 Fase 8 — Finalización: índice de contexto actualizado. Listo para PR.
+Fase 9 — Retroalimentación: 1 hallazgo nuevo en docs/mejoras-sugeridas.md.
 ```
 
 Salida resumida — el detalle real de cada fase queda en `.klap/hu/KLAP-123/`.
 
 ## Comandos
 
-11 comandos `/klap:*`: el flujo completo (`trabajar-hu`), 7 comandos puntuales para ejecutar
+12 comandos `/klap:*`: el flujo completo (`trabajar-hu`), 8 comandos puntuales para ejecutar
 una sola fase o capacidad (`analizar`, `disenar`, `desarrollar`, `certificar`, `documentar`,
-`actualizar-componente`, `consultar-estandar`) y 3 para gestionar la memoria organizacional de
-producto en Klap Knowledge (`memoria-inicializar`, `memoria-actualizar`, `memoria-consultar`).
+`actualizar-componente`, `consultar-estandar`, `retroalimentar`) y 3 para gestionar la memoria
+organizacional de producto en Klap Knowledge (`memoria-inicializar`, `memoria-actualizar`,
+`memoria-consultar`).
 Tabla completa con cuándo usar cada uno: `docs/commands.md`.
 
 ## Requisitos
@@ -80,8 +82,8 @@ falla si los dos manifests del plugin discrepan, si la versión no tiene entrada
 
 | Carpeta | Qué es |
 |---|---|
-| `skills/` | Los 11 comandos `/klap:*` |
-| `agents/` | 7 sub-agentes especializados (analista, arquitecto, desarrollador, certificador, seguridad, documentador, documentador-klap) |
+| `skills/` | Los 12 comandos `/klap:*` |
+| `agents/` | 8 sub-agentes especializados (analista, arquitecto, desarrollador, certificador, seguridad, documentador, documentador-klap, retroalimentador) |
 | `standards/` | Estándares Klap versionados, con índice para progressive disclosure |
 | `hooks/` + `scripts/` | Validaciones deterministas: secretos, tests, coverage, dependencias, quality gate |
 | `schemas/` | Contratos: índice de contexto, y el contrato de Klap Knowledge MCP |

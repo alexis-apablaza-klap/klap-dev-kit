@@ -123,7 +123,7 @@ setting local que lo active, así que el kit no declara `experimental.evals` ni 
 `eval`. Los casos están conservados en `docs/futuro/evals/`; la ficha de reactivación y el probe
 sin costo para detectar la habilitación están en `docs/claude-plugin-eval.md`.
 
-## `/klap:trabajar-hu` no muestra los 8 comandos tras instalar
+## `/klap:trabajar-hu` no muestra los 12 comandos tras instalar
 
 Confirma que `/plugin list` muestra `klap` como instalado. Si tienes el repo clonado
 localmente, `claude plugin validate --strict <ruta-al-repo>` valida el manifest. Si el
