@@ -127,8 +127,8 @@ export async function correr({ producto, issue, motivo, changedFiles, base, repo
 
   // `memory/` como default stagea TODO lo pendiente, no lo de este producto: si se aplicaron
   // dos patches y recién después se invoca el script, el primer producto se lleva ambos y la
-  // segunda invocación reporta "nada que commitear". Pasó de verdad en la fase 6 del plan de
-  // migración. No se puede acotar por `product_id` a secas — los componentes viven en
+  // segunda invocación reporta "nada que commitear". No se puede acotar por `product_id` a
+  // secas — los componentes viven en
   // `memory/components/<id>.yaml` y su nombre no deriva del producto — así que el script no
   // adivina: detecta la mezcla y exige los `changed_files` que `aplicar_patch_memoria` ya
   // devolvió. Fallar acá es barato; un PR con dos productos mezclados se descubre en revisión.

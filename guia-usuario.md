@@ -4,95 +4,52 @@
 > `CLAUDE.md`, `standards/`, `skills/*/SKILL.md` y `agents/*.md`.
 
 Klap Dev-Kit es un **plugin de Claude Code** que estandariza el ciclo de desarrollo en Klap:
-contexto → análisis → diseño → implementación → validación → certificación → documentación,
-con validaciones automáticas (tests, coverage, Sonar, secretos, dependencias) y acceso a la
-memoria organizacional de Klap Knowledge.
+contexto → análisis → diseño → implementación → validación → certificación → documentación →
+finalización → retroalimentación, con validaciones deterministas (tests, coverage, Sonar,
+secretos, dependencias) y acceso a la memoria organizacional de Klap Knowledge.
 
----
+Esta guía es el mapa. Cada tema tiene **un** documento dueño, y acá sólo va lo que no cabe en
+ninguno de ellos.
 
-## 1. Instalación
+| Quiero… | Ir a |
+|---|---|
+| Instalar, actualizar, requisitos, bootstrap | `docs/installation.md` |
+| Ver el primer uso fase por fase | `docs/getting-started.md` |
+| Saber qué comando usar y cuándo | `docs/commands.md` |
+| Entender las pausas, los gates y cómo retomar un flujo | `docs/workflows.md` |
+| Resolver un error concreto | `docs/troubleshooting.md` |
+| Configurar tokens y servidores MCP | `docs/conexiones.md` |
+| Entender la separación kit ↔ Klap Knowledge | `docs/architecture-overview.md` |
+| Evaluar el criterio de los agentes | `docs/claude-plugin-eval.md` |
 
-Dentro de una sesión de Claude Code:
+**Arranque mínimo**, dentro de una sesión de Claude Code:
 
 ```
 /plugin marketplace add https://github.com/alexis-apablaza-klap/klap-dev-kit.git
 /plugin install klap@klap-dev-kit
+/mcp        → atlassian → Authenticate
 ```
 
-Con eso quedan activos: los 11 comandos `/klap:*`, los 7 agentes especializados, los hooks de
-validación, el servidor MCP mock de Klap Knowledge y el servidor MCP de Atlassian (se activan
-solos, sin pasos extra).
-
-**Autenticar Atlassian — una vez, y es lo único que tienes que hacer a mano:**
-
-```
-/mcp
-```
-
-Elige `atlassian` → **Authenticate** → entra con tu cuenta corporativa Klap. Con eso quedan
-disponibles Jira, Confluence y Bitbucket, cada uno con **tus** permisos. No hay tokens que pedir
-ni compartir. Si te lo saltas, las fases que usan Jira o Confluence te lo dirán en vez de
-inventar contexto.
-
-**Actualizar:**
-
-```
-/plugin update klap@klap-dev-kit
-```
-
-**Verificar que quedó instalado:** escribe `/klap:` en el prompt — deberían listarse los 11
-comandos.
-
-### Requisitos
-
-- Claude Code con soporte de plugins.
-- Node.js ≥ 18 y Git.
-- Cuenta corporativa Atlassian y un token de SonarCloud (`KLAP_SONARQUBE_TOKEN`). Los servidores
-  MCP vienen con el plugin; sólo hay que poner la identidad. Si falta alguno, el kit te avisa al
-  iniciar la sesión y lo declara en vez de fallar en silencio. Ver `docs/conexiones.md`.
-- Opcional, para certificación completa: Trivy y/o OWASP Dependency-Check. El script
-  `bootstrap/install.ps1` (Windows) / `install.sh` (Linux/Mac) revisa qué falta e indica dónde
-  instalarlo — no instala nada por sí solo.
-
-Detalle completo: `docs/installation.md`. Problemas comunes: `docs/troubleshooting.md`.
+Lo único manual es autenticar Atlassian: cada persona entra con su cuenta corporativa y queda
+con **sus** permisos sobre Jira, Confluence y Bitbucket. No hay tokens que compartir. Si te lo
+saltas, las fases que usan esas fuentes lo declaran en vez de inventar contexto.
 
 ---
 
-## 2. Qué trae el kit
+## Qué trae el kit
 
 | Herramienta | Cantidad | Para qué sirve |
 |---|---|---|
-| Comandos `/klap:*` | 11 | Ejecutar el flujo completo, una fase puntual, o gestionar la memoria de producto en Klap Knowledge |
-| Agentes especializados | 7 | Cada uno cubre una fase del flujo o la memoria global de producto (los invocan los comandos, no se llaman a mano) |
-| Hooks de validación | 3 | Bloquean automáticamente commits con secretos y pushes sin certificación |
-| Scripts deterministas | 11 | Tests, coverage, quality gate, escaneo de secretos/dependencias, validación de artefactos, git de la memoria de producto, descubrimiento local de componentes |
-| MCP mock de Klap Knowledge | 1 | Simula la memoria organizacional para probar el flujo sin el servicio real |
+| Comandos `/klap:*` | 12 | El flujo completo, una fase puntual, o la memoria de producto en Klap Knowledge |
+| Agentes especializados | 8 | Cada uno cubre una fase; los invocan los comandos, no se llaman a mano |
+| Hooks de validación | 4 | Bloquean commits con secretos y pushes sin certificación; registran la traza del flujo |
+| Scripts deterministas | 13 | Tests, coverage, quality gate, escaneo de secretos/dependencias, validación de artefactos, git de la memoria de producto, descubrimiento de componentes |
 | Estándares Klap | catálogo en `standards/` | Guías versionadas de arquitectura, seguridad, testing, etc. |
 | Plantillas | en `templates/` | ADR, RDC, `context-index.yaml` para adoptar el kit en un repo |
 
-### 2.1 Comandos `/klap:*`
+## Los agentes
 
-| Comando | Qué hace |
-|---|---|
-| `/klap:trabajar-hu <ISSUE-KEY>` | Flujo completo de 9 fases para una HU real (el que usarás casi siempre) |
-| `/klap:retroalimentar [ISSUE-KEY]` | Qué mejorar del flujo mismo, a partir de cómo se ejecutó — no de la HU |
-| `/klap:analizar <ISSUE-KEY o descripción>` | Solo contexto + análisis — para estimar o decidir alcance sin comprometerte |
-| `/klap:disenar [analisis.md]` | Solo diseño, a partir de un análisis ya hecho |
-| `/klap:desarrollar [diseno.md]` | Solo implementación, a partir de un diseño ya aprobado |
-| `/klap:certificar [repo] [ISSUE-KEY]` | Tests + coverage + Sonar + dependencias, con veredicto — para re-certificar sin repetir todo |
-| `/klap:documentar [ISSUE-KEY]` | Actualiza memoria del repo y, si corresponde, Confluence |
-| `/klap:actualizar-componente [repo]` | Reconcilia el componente del repo en Klap Knowledge (propone `upsert_component`) y pone al día `docs/context/index.yaml` |
-| `/klap:consultar-estandar <tema>` | Muestra el estándar Klap relevante a un tema, sin arrancar ningún flujo |
-| `/klap:memoria-inicializar <producto>` | Construye la memoria inicial de un producto en Klap Knowledge (pausa humana antes de aplicar) |
-| `/klap:memoria-actualizar <producto\|ISSUE-KEY>` | Actualiza incrementalmente la memoria de un producto, sin releer todo |
-| `/klap:memoria-consultar <producto o pregunta>` | Responde usando la memoria consolidada de Klap Knowledge |
-
-Tabla ampliada con criterios de cuándo usar cada uno: `docs/commands.md`.
-
-### 2.2 Agentes
-
-No se invocan a mano — cada comando delega automáticamente en el agente que corresponde a esa
-fase. Sirve saber qué hace cada uno para entender qué esperar en cada pausa del flujo:
+No se invocan a mano. Sirve saber qué hace cada uno para entender qué esperar en cada pausa:
 
 | Agente | Fase | Rol |
 |---|---|---|
@@ -102,130 +59,48 @@ fase. Sirve saber qué hace cada uno para entender qué esperar en cada pausa de
 | `certificador` | Validación/Certificación | Ejecuta e interpreta tests, coverage y Sonar contra los umbrales del kit |
 | `seguridad` | Certificación | Revisión OWASP del diff e interpretación de Trivy/Dependency-Check |
 | `documentador` | Documentación | Actualiza memoria del repo y, si corresponde, Confluence |
-| `documentador-klap` | Finalización (y `/klap:memoria-*`) | Mantiene la memoria global de producto en Klap Knowledge; nunca inventa negocio, componentes ni relaciones |
+| `documentador-klap` | Finalización (y `/klap:memoria-*`) | Mantiene la memoria global de producto; nunca inventa negocio, componentes ni relaciones |
+| `retroalimentador` | Retroalimentación | Propone mejoras al workflow a partir de la traza; propone, nunca aplica |
 
-### 2.3 Hooks (automáticos, no requieren acción)
+**Los agentes de sólo lectura lo son técnicamente, no por convención.** `analista` y
+`arquitecto` sólo pueden escribir su propio artefacto en `.klap/hu/<ISSUE-KEY>/`: tienen vetados
+`Edit` y **ambas** shells. Vetar una sola shell no veta nada — un denylist es tan fuerte como su
+entrada más floja — así que `npm run validate` falla si un agente nombra `Bash` sin `PowerShell`
+o al revés.
+
+## Los hooks
 
 | Hook | Cuándo actúa | Qué hace |
 |---|---|---|
 | `pre-commit-secret-scan.mjs` | Antes de `git commit` | Bloquea el commit si detecta un patrón de secreto en el diff |
-| `pre-push-quality-gate.mjs` | Antes de `git push` en una rama con el issue en el nombre (`feature/KLAP-123-...`) | Bloquea el push si no hay certificación aprobada para ese issue |
-| `post-write-validate-memoria.mjs` | Después de escribir/editar archivos de memoria | Valida que el índice de contexto siga siendo consistente |
+| `pre-push-quality-gate.mjs` | Antes de `git push` en una rama con el issue en el nombre | Bloquea el push si no hay certificación aprobada para ese issue |
+| `post-write-validate-memoria.mjs` | Al escribir archivos de memoria | Valida que el índice de contexto siga siendo consistente |
+| `registrar-traza.mjs` | Durante todo el flujo | Escribe `.klap/hu/<KEY>/traza.jsonl`; nunca bloquea ni falla el flujo |
 
-### 2.4 MCP: Klap Knowledge
+## Memoria de producto: lo que conviene saber antes de cargar un producto
 
-`klap-knowledge-local-mock` se registra solo al instalar el plugin y sirve datos de ejemplo
-(`mocks/klap-knowledge-mcp/fixtures/`) para probar el flujo sin depender del servicio real. El
-día que exista el servicio real, sólo cambia `config/klap.yaml` — ningún comando ni agente
-necesita tocarse.
+`/klap:memoria-inicializar` y `/klap:memoria-actualizar` escanean los repos del producto con
+`scripts/descubrir-componentes.mjs` (determinista, sin LLM) y presentan una **tabla provisional
+editable** antes de vincular nada: podés quitar filas, corregir la clasificación o agregar
+componentes sin checkout local.
 
-El contrato tiene 11 tools: las de consulta de siempre (`buscar_producto`, `resumen_producto`,
-`resumen_componente`, `buscar`, `documentos_relevantes`), `producto_por_epica` (resuelve
-determinísticamente el producto de una HU a partir de su épica Jira — es el gate de producto de
-fase 1 de `/klap:trabajar-hu`), la memoria estructurada completa de un producto
-(`obtener_producto`, `historial_producto`, `estado_fuentes`), y una única vía de escritura real
-— `aplicar_patch_memoria` — que sólo usa el agente `documentador-klap` (nunca a mano).
-`targeted_sync` sigue existiendo pero está deprecada.
+Esa clasificación no es cosmética. Un componente **principal** es propio del producto y se
+vincula a él; uno **secundario** es una dependencia transversal compartida (una base de datos,
+el repo de properties) y se declara como dependencia de quien lo usa, nunca como componente del
+producto — así "los componentes del producto" sigue significando lo propio del producto.
 
-Cada vez que `aplicar_patch_memoria` se aplica, `scripts/memoria-git.mjs` deja el cambio en una
-rama `producto/<id>` del checkout de `klap-dev-kit-knowledge` (`config/klap.yaml` →
-`memoria.repo_path`) con PR hacia `main` — el merge siempre es humano.
+Klap Knowledge es la única fuente de verdad de los componentes: **no existe ni hace falta un
+`component.yaml` en el repo**.
 
-Para levantarlo manualmente fuera de Claude Code (debug):
+Cada patch aplicado lo deja `scripts/memoria-git.mjs` en una rama `producto/<id>` del checkout
+de `klap-dev-kit-knowledge` con PR hacia `main`. **El merge siempre es humano.**
 
-```bash
-node mocks/klap-knowledge-mcp/server.mjs
-```
+## Scripts sueltos desde la terminal
 
----
-
-## 3. Ejemplos de uso
-
-### Flujo completo sobre una HU real
-
-```
-/klap:trabajar-hu KLAP-123
-```
-
-Avanza fase por fase, deteniéndose a pedir tu confirmación después de **Análisis** y de
-**Diseño** (los puntos más baratos para corregir el rumbo), y se detiene solo si la
-certificación no aprueba. Si la HU pertenece a un producto que todavía no existe en Klap
-Knowledge, **Contexto** se detiene primero: dispara `/klap:memoria-inicializar` y pide tu
-aprobación antes de seguir — la HU no se analiza sin memoria de producto resuelta. Al final
-entrega un resumen corto; el detalle de cada fase queda en `.klap/hu/KLAP-123/`.
-
-### Solo una fase puntual
-
-Ya tienes el diseño resuelto y sólo falta implementar:
-
-```
-/klap:desarrollar diseno.md
-```
-
-Quieres re-certificar después de un fix, sin repetir análisis/diseño:
-
-```
-/klap:certificar . KLAP-123
-```
-
-### Consulta rápida a un estándar (sin flujo)
-
-```
-/klap:consultar-estandar logging
-```
-
-Devuelve sólo el estándar relevante — no arranca ninguna fase.
-
-### Consulta rápida a la memoria de un producto (sin flujo)
-
-```
-/klap:memoria-consultar "qué productos dependen de Liquidaciones"
-```
-
-Responde con la memoria consolidada de Klap Knowledge, expandiendo a Jira/Confluence sólo si
-hace falta — nunca escribe memoria, aunque detecte algo desactualizado.
-
-### Onboarding de un repo nuevo al kit
-
-```
-/klap:actualizar-componente ms-central-sva-anticipo-calculos
-```
-
-Klap Knowledge es la única fuente de verdad de los componentes — no existe (ni hace falta) un
-`component.yaml` en el repo. El comando infiere del código real (dependencias declaradas,
-endpoints, topics Kafka) y **propone** una operación `upsert_component` hacia Klap Knowledge
-(aplicada por `documentador-klap`, nunca a mano), y de forma separada pone al día
-`docs/context/index.yaml` (memoria técnica del repo, no cambia).
-
-### Descubrimiento de componentes al cargar un producto
-
-`/klap:memoria-inicializar`/`/klap:memoria-actualizar` escanean localmente los repos del
-producto (`scripts/descubrir-componentes.mjs`, determinista, sin LLM) y presentan una tabla
-provisional editable (`componentes.md`) antes de vincular nada — puedes quitar filas, corregir
-la clasificación `principal`/`secundario` (un componente `secundario` es una dependencia
-transversal compartida, como una base de datos, que nunca se vincula directo al producto), o
-agregar componentes que no tengan checkout local.
-
-### Scripts deterministas (fuera del flujo de un comando)
-
-Útiles para depurar o correr validaciones sueltas desde la terminal, sin pasar por un agente:
+Para depurar o validar sin pasar por un agente:
 
 ```bash
-npm test              # pruebas del propio kit
-npm run validate       # coherencia estructural del plugin (manifests, índices, frontmatter)
+npm test                                          # pruebas del propio kit
+npm run validate                                  # coherencia estructural del plugin
 node scripts/quality-gate.mjs .klap/hu/KLAP-123   # re-evalúa el veredicto de certificación
 ```
-
----
-
-## 4. Más documentación
-
-| Documento | Contenido |
-|---|---|
-| `docs/getting-started.md` | Recorrido guiado del primer uso, fase por fase |
-| `docs/commands.md` | Tabla completa de comandos y cuándo usar cada uno |
-| `docs/installation.md` | Instalación, actualización, requisitos y bootstrap |
-| `docs/workflows.md` | Flujos de trabajo típicos combinando comandos |
-| `docs/troubleshooting.md` | Soluciones a problemas frecuentes (push bloqueado, falsos positivos de secretos, etc.) |
-| `docs/architecture-overview.md` | Cómo se relaciona el kit con Klap Knowledge y el resto del ecosistema |
-| `docs/claude-plugin-eval.md` | Evaluación del criterio de los agentes: los 6 casos conservados en `docs/futuro/evals/` y la ficha de reactivación (fase futura) |

@@ -31,6 +31,8 @@ Lo que vas a ver, fase por fase:
    tocar Confluence**, si es que corresponde tocarlo.
 8. **Finalización** — se actualiza el índice de contexto si hizo falta, y se entrega un
    resumen corto de qué se hizo y qué quedó pendiente.
+9. **Retroalimentación** — el agente `retroalimentador` mira la traza del flujo y consolida
+   `docs/mejoras-sugeridas.md`. No es un gate y no pausa: mejora el **kit**, no la HU.
 
 Al final, si intentas `git push` en una rama con el issue en el nombre (p.ej.
 `feature/KLAP-123-algo`) y la certificación no quedó aprobada, el hook de push lo bloquea —

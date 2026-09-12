@@ -18,7 +18,7 @@ test("cada standard en estado: requiere-revision estÃ¡ citado en CHANGELOG.md â†
     .map(([clave, entrada]) => ({ clave, path: entrada.path }));
 
   const changelog = readFileSync(resolveFromRoot("CHANGELOG.md"), "utf8");
-  const seccionPendiente = changelog.split(/^### Pendiente para 1\.0\.0$/m)[1] ?? "";
+  const seccionPendiente = changelog.split(/^#{2,3} Pendiente para 1\.0\.0$/m)[1] ?? "";
 
   const faltantes = pendientes.filter(({ path }) => !seccionPendiente.includes(path));
   assert.deepEqual(

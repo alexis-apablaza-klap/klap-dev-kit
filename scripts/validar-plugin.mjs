@@ -215,13 +215,11 @@ export function validarPlugin(root = resolveFromRoot()) {
           problemas.push(`agents/${entry.name}: declara "${campo}", que se ignora en silencio para agentes de plugin`);
         }
       }
-      // 7a-bis. Un veto de shell tiene que nombrar TODAS las shells, o no veta nada.
-      // Descubierto ejecutando la fase 7 del plan: `analista` declaraba `disallowedTools: Write,
-      // …, Bash` y aun así escribió su artefacto en disco — porque el denylist nombraba `Bash`
-      // pero no `PowerShell`, que es una tool distinta con la misma capacidad. Un denylist sólo
-      // es tan fuerte como su entrada más floja, y el modo de fallo es silencioso: el agente
-      // parece de sólo lectura, el frontmatter dice que lo es, y escribe igual. La regla se
-      // vuelve determinista acá en vez de quedar en el juicio de quien edite un agente.
+      // 7a-bis. Un veto de shell tiene que nombrar TODAS las shells, o no veta nada: `Bash` y
+      // `PowerShell` son tools distintas con la misma capacidad, y un denylist es tan fuerte
+      // como su entrada más floja. El modo de fallo es silencioso — el agente parece de sólo
+      // lectura, el frontmatter dice que lo es, y escribe igual — así que la regla se decide
+      // acá y no en el juicio de quien edite un agente.
       const shells = ["Bash", "PowerShell"];
       const vetadas = String(fm.disallowedTools ?? "")
         .split(",")

@@ -32,10 +32,8 @@ integración, observabilidad, rendimiento, escalabilidad, despliegue, rollback.
 ## Salida
 
 **Tu `Write` existe sólo para este artefacto.** Escribís en `.klap/hu/<ISSUE-KEY>/` y en ningún
-otro lado: `Edit` y las dos shells están vetadas justamente para que no puedas tocar codigo ni
-configuración del repo. Hasta la version 0.1.5-alpha el veto incluia `Write` y excluia
-`PowerShell`, lo que daba el peor resultado posible — no podias escribir tu artefacto de forma
-legitima, pero si cualquier archivo del disco pasando por la shell que nadie habia vetado.
+otro lado: `Edit` y **ambas** shells están vetadas justamente para que no puedas tocar código ni
+configuración del repo.
 
 `diseno.md`. Encabezados literales — `scripts/validar-artefacto-fase.mjs` los verifica antes de
 la pausa de fase 3, así que deben aparecer tal cual, aunque el contenido de una sección sea
